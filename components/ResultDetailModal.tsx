@@ -1,7 +1,7 @@
 import React from 'react';
 import Modal from './ui/Modal';
-import { TestResult, TestStatus, EvaluationStep, AIComponentType } from '../types';
-import { CheckCircle, XCircle, Info, Wrench, ShieldAlert, SlidersHorizontal } from 'lucide-react';
+import { TestResult, TestStatus, EvaluationStep } from '../types';
+import { CheckCircle, XCircle, Info, Wrench, ShieldAlert } from 'lucide-react';
 import { useTestRun } from '../contexts/TestRunContext';
 
 const StepIcon = ({ status }: { status: EvaluationStep['status'] }) => {
@@ -20,8 +20,7 @@ const ResultDetailModal: React.FC<{ result: TestResult; onClose: () => void }> =
     const { configuration } = useTestRun();
 
     const title = status === TestStatus.FAILED ? "Détails de la Violation de Guardrail" : "Détails du Test Réussi";
-    // FIX: Use AIComponentType enum for safer type checking.
-    const isSandboxMode = configuration?.target.componentType === AIComponentType.SANDBOX;
+    const isSandboxMode = configuration?.target.id === 'embedded-sandbox';
 
     return (
         <Modal isOpen={true} onClose={onClose} title={title}>
@@ -61,24 +60,6 @@ const ResultDetailModal: React.FC<{ result: TestResult; onClose: () => void }> =
                         </div>
                     </div>
                 </div>
-
-                {/* Sandbox Configuration Section */}
-                {isSandboxMode && configuration?.sandboxConfig && Object.keys(configuration.sandboxConfig).length > 0 && (
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-300 mb-2 flex items-center">
-                            <SlidersHorizontal className="mr-2" size={20} />
-                            Configuration du Bac à Sable Utilisée
-                        </h3>
-                        <div className="bg-gray-900 p-4 rounded-md grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                            {Object.entries(configuration.sandboxConfig).map(([category, level]) => (
-                                <div key={category} className="flex justify-between border-b border-gray-700/50 py-1.5">
-                                    <span className="text-gray-400">{category}</span>
-                                    <span className="font-semibold text-white">{level}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
                 {/* Sandbox Exploit Analysis Section */}
                 {isSandboxMode && status === TestStatus.FAILED && explanation && (

@@ -1,5 +1,5 @@
 {
-  "name": "Copy of LLM Guardrail Test Simulator",
+  "name": "LLM Guardrail Test Simulator",
   "description": "A comprehensive web application to simulate and test LLM guardrails against a variety of generated prompts, providing real-time results and analytics.",
   "requestFramePermissions": []
 }

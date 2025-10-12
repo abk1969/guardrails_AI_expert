@@ -187,9 +187,14 @@ const Analytics: React.FC = () => {
                            <YAxis stroke="#9ca3af" domain={[0, 100]} unit="%" />
                            <Tooltip cursor={{fill: '#374151'}} contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}/>
                            <Bar dataKey="Taux d'échec" barSize={40}>
-                                <Cell fill="#0369a1" />
-                                <Cell fill="#f97316" />
-                                <Cell fill="#dc2626" />
+                                {analyticsData.complexityData.map((entry, index) => {
+                                    const colors: Record<PromptComplexity, string> = {
+                                        [PromptComplexity.SIMPLE]: '#3b82f6', // blue
+                                        [PromptComplexity.MOYEN]: '#f97316', // orange
+                                        [PromptComplexity.SOPHISTIQUE]: '#ef4444', // red
+                                    };
+                                    return <Cell key={`cell-${index}`} fill={colors[entry.name as PromptComplexity]} />;
+                                })}
                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>

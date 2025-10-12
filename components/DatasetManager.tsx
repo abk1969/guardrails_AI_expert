@@ -53,7 +53,7 @@ const PromptItem: React.FC<{ prompt: PromptTemplate }> = ({ prompt }) => {
                         autoFocus
                     />
                 ) : (
-                    <p className="text-gray-300 flex-1 pr-4 min-w-0 break-all">{prompt.text}</p>
+                    <p className="text-gray-300 flex-1 pr-4">{prompt.text}</p>
                 )}
                 <div className="flex items-center space-x-3 ml-4 flex-shrink-0">
                      <ComplexityBadge complexity={prompt.complexity} />

@@ -1,4 +1,4 @@
-import { TestPrompt, TestConfiguration, TestResult, TestStatus, EvaluationStep, Sensitivity, PromptComplexity, SandboxDefenseConfig, AIComponentType } from '../types';
+import { TestPrompt, TestConfiguration, TestResult, TestStatus, EvaluationStep, Sensitivity, PromptComplexity } from '../types';
 import { REMEDIATION_SUGGESTIONS, ATTACK_LIBRARY } from '../constants';
 import { evaluatePromptInSandbox } from './sandboxService';
 
@@ -44,31 +44,34 @@ export const mockTestRunner = (
 ): Promise<void> => {
   return new Promise(resolve => {
     let completed = 0;
-    const isSandboxMode = config.target.componentType === AIComponentType.SANDBOX;
+    const isSandboxMode = config.target.id === 'embedded-sandbox';
 
     prompts.forEach((prompt, index) => {
       const delay = (index * 100) + Math.random() * 50;
       setTimeout(() => {
+        const evaluationChain: EvaluationStep[] = [];
+        
+        evaluationChain.push(createEvaluationStep('Étape 1 : Mise en File d\'Attente', 'INFO', `Le prompt est ajouté à la file d'attente pour la cible : ${config.target.name}. Objectif: Assurer la traçabilité de chaque test individuel.`));
+        
         let finalResult: Partial<TestResult> = {};
-        let evaluationChain: EvaluationStep[] = [];
-        let response = '';
-
-        const promptTemplate = ATTACK_LIBRARY.find(t => t.id === prompt.templateId);
-
-        if (isSandboxMode && promptTemplate && config.sandboxConfig) {
-            const sandboxEval = evaluatePromptInSandbox(promptTemplate, config.sandboxConfig);
-            finalResult = {
-                score: sandboxEval.score,
-                status: sandboxEval.status,
-                explanation: sandboxEval.explanation,
-            };
-            evaluationChain = sandboxEval.evaluationChain;
-            response = sandboxEval.status === TestStatus.PASSED 
-                ? promptTemplate.simulatedResponsePass 
-                : promptTemplate.simulatedResponseFail;
+        
+        if (isSandboxMode) {
+            const promptTemplate = ATTACK_LIBRARY.find(t => t.id === prompt.templateId);
+            if (!promptTemplate || !config.sandboxConfig) {
+                // Should not happen, but as a fallback
+                finalResult = { score: 50, status: TestStatus.FAILED, explanation: "Erreur de configuration du bac à sable."};
+            } else {
+                const sandboxResult = evaluatePromptInSandbox(promptTemplate, config.sandboxConfig);
+                evaluationChain.push(createEvaluationStep('Étape 2 : Analyse de la Cible (Bac à Sable)', 'INFO', `Le prompt est soumis au bac à sable local. Le niveau de vulnérabilité pour la catégorie '${prompt.category}' est configuré sur '${config.sandboxConfig[prompt.category] || 'Par défaut'}'.`));
+                if(sandboxResult.status === TestStatus.FAILED) {
+                    evaluationChain.push(createEvaluationStep('Étape 3 : Décision du Bac à Sable', 'FAILED', `VIOLATION DÉTECTÉE. L'attaque a réussi à contourner les défenses configurées.`));
+                } else {
+                    evaluationChain.push(createEvaluationStep('Étape 3 : Décision du Bac à Sable', 'PASSED', `ATTAQUE BLOQUÉE. Les défenses configurées ont résisté avec succès à l'attaque.`));
+                }
+                finalResult = sandboxResult;
+            }
         } else {
-            // Original mock API logic for non-sandbox modes
-            evaluationChain.push(createEvaluationStep('Étape 1 : Mise en File d\'Attente', 'INFO', `Le prompt est ajouté à la file d'attente pour la cible : ${config.target.name}.`));
+            // Original mock API logic
             const sensitivity = config.categorySensitivities[prompt.category] || 'Normal';
             const complexity = prompt.complexity;
             
@@ -92,14 +95,6 @@ export const mockTestRunner = (
                 score,
                 status: isFailed ? TestStatus.FAILED : TestStatus.PASSED,
                 explanation: isFailed ? `Violation détectée basée sur une sensibilité '${sensitivity}' contre une attaque de complexité '${complexity}'.` : 'La réponse a passé tous les guardrails configurés.',
-            };
-
-            if (promptTemplate) {
-                 response = finalResult.status === TestStatus.PASSED 
-                    ? promptTemplate.simulatedResponsePass 
-                    : promptTemplate.simulatedResponseFail;
-            } else {
-                response = `Mocked response for prompt: "${prompt.text.substring(0, 50)}..."`;
             }
         }
 
@@ -113,7 +108,7 @@ export const mockTestRunner = (
 
         const result: TestResult = {
           prompt,
-          response,
+          response: isSandboxMode ? `Réponse simulée par le bac à sable pour: "${prompt.text.substring(0, 50)}..."` : `Mocked response for prompt: "${prompt.text.substring(0, 50)}..." from target ${config.target.name}.`,
           score: finalResult.score!,
           status: finalResult.status!,
           explanation: finalResult.explanation,
