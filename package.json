@@ -1,5 +1,5 @@
 {
-  "name": "copy-of-llm-guardrail-test-simulator",
+  "name": "llm-guardrail-test-simulator",
   "private": true,
   "version": "0.0.0",
   "type": "module",

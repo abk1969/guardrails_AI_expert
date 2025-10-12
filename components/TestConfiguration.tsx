@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
-import { GuardrailCategory, TestTarget, Sensitivity, PromptComplexity, DefenseLevel, SandboxDefenseConfig, AIComponentType } from '../types';
+import { GuardrailCategory, TestTarget, Sensitivity, PromptComplexity, VulnerabilityLevel, SandboxVulnerabilityConfig } from '../types';
 import { GUARDRAIL_CATEGORIES, INITIAL_TEST_TARGETS } from '../constants';
 import { useTestRun } from '../contexts/TestRunContext';
 import TestTargetConfigurationModal from './TestTargetConfigurationModal';
-import { Settings, PlusCircle, SlidersHorizontal, ListChecks, Check, ShieldAlert, ShieldCheck, Shield, Target } from 'lucide-react';
+import { Settings, PlusCircle, SlidersHorizontal, ListChecks, Pencil, Check, ShieldAlert, ShieldCheck, Shield } from 'lucide-react';
 
 const COMPLEXITY_OPTIONS: PromptComplexity[] = [PromptComplexity.SIMPLE, PromptComplexity.MOYEN, PromptComplexity.SOPHISTIQUE];
-const DEFENSE_LEVELS: {level: DefenseLevel, icon: React.ReactNode, label: string}[] = [
-    { level: 'Faible', icon: <ShieldAlert size={16} className="mr-2 text-red-400"/>, label: 'Défense Faible' },
-    { level: 'Moyen', icon: <Shield size={16} className="mr-2 text-yellow-400"/>, label: 'Défense Moyenne' },
-    { level: 'Robuste', icon: <ShieldCheck size={16} className="mr-2 text-green-400"/>, label: 'Défense Robuste' },
+const VULNERABILITY_LEVELS: {level: VulnerabilityLevel, icon: React.ReactNode, label: string}[] = [
+    { level: 'Simple', icon: <ShieldCheck size={16} className="mr-2 text-green-400"/>, label: 'Robuste (Vulnérabilités simples)' },
+    { level: 'Moyenne', icon: <Shield size={16} className="mr-2 text-yellow-400"/>, label: 'Moyen (Vulnérabilités moyennes)' },
+    { level: 'Complexe', icon: <ShieldAlert size={16} className="mr-2 text-red-400"/>, label: 'Faible (Vulnérabilités complexes)' },
 ];
 
 interface TestConfigurationProps {
@@ -30,18 +30,17 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTarget, setEditingTarget] = useState<TestTarget | null>(null);
-  const [sandboxConfig, setSandboxConfig] = useState<SandboxDefenseConfig>({});
+  const [sandboxConfig, setSandboxConfig] = useState<SandboxVulnerabilityConfig>({});
 
   const { startTest, isRunning } = useTestRun();
 
-  const selectedTarget = targets.find(t => t.id === selectedTargetId);
-  const isSandboxMode = selectedTarget?.componentType === AIComponentType.SANDBOX;
+  const isSandboxMode = selectedTargetId === 'embedded-sandbox';
 
   useEffect(() => {
     // Initialize sandbox config for selected categories
-    const initialConfig: SandboxDefenseConfig = {};
+    const initialConfig: SandboxVulnerabilityConfig = {};
     selectedCategories.forEach(cat => {
-      initialConfig[cat] = sandboxConfig[cat] || 'Moyen';
+      initialConfig[cat] = sandboxConfig[cat] || 'Moyenne';
     });
     setSandboxConfig(initialConfig);
   }, [selectedCategories]);
@@ -72,6 +71,7 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
   };
   
   const handleOpenModal = (target: TestTarget | null) => {
+    if (target?.id === 'embedded-sandbox') return; // Cannot edit sandbox
     setEditingTarget(target);
     setIsModalOpen(true);
   };
@@ -86,13 +86,13 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
         }
         return [...prev, target];
     });
-    if (!selectedTargetId || !targets.some(t => t.id === selectedTargetId)) {
+    if (!selectedTargetId) {
         setSelectedTargetId(target.id);
     }
   };
   
   const handleDeleteTarget = (targetId: string) => {
-    if (targetId === 'embedded-sandbox') return; // Cannot delete default sandbox
+    if (targetId === 'embedded-sandbox') return; // Cannot delete sandbox
     const newTargets = targets.filter(t => t.id !== targetId);
     setTargets(newTargets);
     if (selectedTargetId === targetId) {
@@ -102,6 +102,7 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const selectedTarget = targets.find(t => t.id === selectedTargetId);
     if (selectedCategories.length > 0 && selectedTarget && complexities.length > 0) {
       startTest({
         categories: selectedCategories,
@@ -198,7 +199,7 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
              </section>
 
             <section>
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center"><Target className="mr-3 text-cyan-500" />Système d'IA à Tester</h3>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center"><Pencil className="mr-3 text-cyan-500" />Système d'IA à Tester</h3>
                  <div className="flex items-center space-x-2">
                     <select
                         id="target"
@@ -209,7 +210,7 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
                     >
                         {targets.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
-                    <Button type="button" variant="secondary" onClick={() => handleOpenModal(selectedTarget || null)} disabled={!selectedTargetId || isSandboxMode} aria-label="Configurer la cible" className="p-2.5">
+                    <Button type="button" variant="secondary" onClick={() => handleOpenModal(targets.find(t => t.id === selectedTargetId) || null)} disabled={!selectedTargetId || isSandboxMode} aria-label="Configurer la cible" className="p-2.5">
                         <Settings size={20} />
                     </Button>
                     <Button type="button" variant="secondary" onClick={() => handleOpenModal(null)} aria-label="Nouvelle cible" className="p-2.5">
@@ -218,41 +219,31 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
                 </div>
                  {targets.length === 0 && <p className="text-sm text-yellow-400 mt-2">Aucune cible définie. Veuillez en créer une.</p>}
             </section>
-            
+
             {isSandboxMode && (
               <section>
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center"><ShieldAlert className="mr-3 text-cyan-500" />Configurer le Niveau de Défense du Bac à Sable</h3>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center"><ShieldAlert className="mr-3 text-cyan-500" />Configurer les Vulnérabilités du Bac à Sable</h3>
                 <div className="bg-gray-700/50 p-4 rounded-lg space-y-4">
                   {selectedCategories.length > 0 ? selectedCategories.map(cat => (
-                    <div key={cat} className="grid grid-cols-1 md:grid-cols-3 items-center gap-4">
+                    <div key={cat} className="grid grid-cols-3 items-center gap-4">
                       <label className="text-gray-300 col-span-1">{cat}</label>
                       <select
-                        value={sandboxConfig[cat] || 'Moyen'}
-                        onChange={(e) => setSandboxConfig(prev => ({ ...prev, [cat]: e.target.value as DefenseLevel }))}
-                        className="col-span-1 md:col-span-2 bg-gray-800 border-gray-600 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
+                        value={sandboxConfig[cat] || 'Moyenne'}
+                        onChange={(e) => setSandboxConfig(prev => ({ ...prev, [cat]: e.target.value as VulnerabilityLevel }))}
+                        className="col-span-2 bg-gray-800 border-gray-600 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
                       >
-                        {DEFENSE_LEVELS.map(opt => (
+                        {VULNERABILITY_LEVELS.map(opt => (
                           <option key={opt.level} value={opt.level}>{opt.label}</option>
                         ))}
                       </select>
                     </div>
                   )) : (
-                    <p className="text-gray-400 text-center">Veuillez d'abord sélectionner des catégories à tester pour configurer leurs niveaux de défense.</p>
+                    <p className="text-gray-400 text-center">Veuillez d'abord sélectionner des catégories à tester pour configurer leurs vulnérabilités.</p>
                   )}
                 </div>
               </section>
             )}
 
-            {selectedTarget && !isSandboxMode && (
-              <section>
-                <h3 className="text-lg font-semibold text-white mb-4">Détails de la Cible API</h3>
-                <div className="bg-gray-700/50 p-4 rounded-lg text-sm">
-                    <p className="text-gray-300"><strong className="text-white">Nom :</strong> {selectedTarget.name}</p>
-                    <p className="text-gray-300"><strong className="text-white">URL de l'Endpoint :</strong> <span className="font-mono">{selectedTarget.apiUrl}</span></p>
-                    <p className="text-xs text-gray-400 mt-3">Cliquez sur l'icône <Settings size={12} className="inline-block mx-1" /> pour modifier cette configuration.</p>
-                </div>
-              </section>
-            )}
           </div>
 
           <div className="mt-8 pt-6 border-t border-gray-700 flex justify-between items-center">
