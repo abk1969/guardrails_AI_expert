@@ -1,10 +1,10 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Card from './ui/Card';
-import ProgressBar from './ui/ProgressBar';
 import { useTestRun } from '../contexts/TestRunContext';
-import { TestStatus } from '../types';
+import { TestStatus, TestResult } from '../types';
 import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import ResultDetailModal from './ResultDetailModal';
 
 const StatusIcon = ({ status }: { status: TestStatus }) => {
   switch (status) {
@@ -30,38 +30,31 @@ const ScoreBadge = ({ score }: { score: number }) => {
 
 
 const RealTimeResults: React.FC = () => {
-    const { progress, results, isRunning, isFinished, configuration } = useTestRun();
+    const { results, configuration } = useTestRun();
+    const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
 
     const stats = useMemo(() => {
         const passed = results.filter(r => r.status === TestStatus.PASSED).length;
         const failed = results.filter(r => r.status === TestStatus.FAILED).length;
-        const pending = results.filter(r => r.status === TestStatus.PENDING).length;
         const total = results.length;
-        const overallScore = results.length > 0 ? Math.round(results.reduce((acc, r) => acc + r.score, 0) / results.filter(r => r.status !== TestStatus.PENDING).length) || 0 : 0;
+        const overallScore = results.length > 0 ? Math.round(results.reduce((acc, r) => acc + r.score, 0) / results.length) || 0 : 0;
 
-        return { passed, failed, pending, total, overallScore };
+        return { passed, failed, total, overallScore };
     }, [results]);
 
-    const visibleResults = useMemo(() => {
-        return results.filter(r => r.status !== TestStatus.PENDING).reverse();
+    const sortedResults = useMemo(() => {
+        return [...results].sort((a, b) => (a.status === 'FAILED' ? -1 : 1) - (b.status === 'FAILED' ? -1 : 1) || b.score - a.score);
     }, [results]);
 
     if (!configuration) return null;
 
     return (
+        <>
         <Card>
-            <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                    <h2 className="text-xl font-bold text-white">Résultats en Temps Réel</h2>
-                    <span className="text-gray-400 font-mono text-sm">{Math.round(progress)}%</span>
-                </div>
-                <ProgressBar value={progress} />
-            </div>
-
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 text-center">
                 <div className="bg-gray-700 p-4 rounded-lg">
-                    <p className="text-sm text-gray-400">Modèle</p>
-                    <p className="text-lg font-bold text-white">{configuration.model}</p>
+                    <p className="text-sm text-gray-400">Cible de Test</p>
+                    <p className="text-lg font-bold text-white truncate">{configuration.target.name}</p>
                 </div>
                 <div className="bg-gray-700 p-4 rounded-lg">
                     <p className="text-sm text-gray-400">Total Prompts</p>
@@ -77,18 +70,16 @@ const RealTimeResults: React.FC = () => {
                 </div>
                 <div className="bg-cyan-900/50 p-4 rounded-lg">
                     <p className="text-sm text-cyan-400">Score Global</p>
-                    <p className="text-lg font-bold text-white">{isFinished ? stats.overallScore : '-'}</p>
+                    <p className="text-lg font-bold text-white">{stats.overallScore}%</p>
                 </div>
             </div>
 
-            {isFinished && (
-                 <div className="bg-gray-700/50 border border-cyan-500 text-cyan-200 px-4 py-3 rounded-lg relative text-center mb-6" role="alert">
-                    <strong className="font-bold">Test Terminé!</strong>
-                    <span className="block sm:inline ml-2">{stats.failed} violations critiques détectées avec un score de conformité de {stats.overallScore}%.</span>
-                </div>
-            )}
+            <div className="bg-gray-700/50 border border-cyan-500 text-cyan-200 px-4 py-3 rounded-lg relative text-center mb-6" role="alert">
+                <strong className="font-bold">Rapport Final.</strong>
+                <span className="block sm:inline ml-2">{stats.failed} violations critiques détectées avec un score de conformité de {stats.overallScore}%. Cliquez sur une ligne pour voir les détails.</span>
+            </div>
             
-            <div className="max-h-96 overflow-y-auto bg-gray-900 rounded-lg p-2">
+            <div className="max-h-[60vh] overflow-y-auto bg-gray-900 rounded-lg p-2">
                 <table className="w-full text-sm text-left text-gray-400">
                     <thead className="text-xs text-gray-300 uppercase bg-gray-700 sticky top-0">
                         <tr>
@@ -99,8 +90,8 @@ const RealTimeResults: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {visibleResults.map(result => (
-                            <tr key={result.prompt.id} className="border-b border-gray-700 hover:bg-gray-800">
+                        {sortedResults.map(result => (
+                            <tr key={result.prompt.id} className="border-b border-gray-700 hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedResult(result)}>
                                 <td className="px-4 py-3"><StatusIcon status={result.status} /></td>
                                 <td className="px-4 py-3">{result.prompt.category}</td>
                                 <td className="px-4 py-3 font-mono text-gray-300 truncate max-w-md">{result.prompt.text}</td>
@@ -109,11 +100,12 @@ const RealTimeResults: React.FC = () => {
                         ))}
                     </tbody>
                 </table>
-                 {isRunning && visibleResults.length === 0 && (
-                     <div className="text-center py-8 text-gray-500">En attente des premiers résultats...</div>
-                 )}
             </div>
         </Card>
+        {selectedResult && (
+            <ResultDetailModal result={selectedResult} onClose={() => setSelectedResult(null)} />
+        )}
+        </>
     );
 };
 

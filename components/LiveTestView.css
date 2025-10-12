@@ -1,0 +1,22 @@
+@keyframes slide-across {
+    0% {
+        opacity: 0;
+        transform: translateX(0) scale(0.8);
+    }
+    10% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    90% {
+        opacity: 1;
+        transform: translateX(calc(100% - 120px)) scale(1); /* Adjust based on card width */
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(calc(100% - 120px)) scale(0.8);
+    }
+}
+
+.live-prompt-animation {
+    animation: slide-across 2.5s ease-in-out forwards;
+}
