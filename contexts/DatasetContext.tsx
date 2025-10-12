@@ -1,49 +1,61 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { GuardrailCategory, PromptTemplate, PromptComplexity } from '../types';
-import { INITIAL_PROMPT_TEMPLATES } from '../constants';
+import { GuardrailCategory, PromptTemplate, PromptComplexity, AttackFamily } from '../types';
+import { ATTACK_LIBRARY } from '../constants';
 
 interface DatasetState {
-  promptTemplates: Record<GuardrailCategory, PromptTemplate[]>;
+  promptTemplates: PromptTemplate[];
   addPrompt: (category: GuardrailCategory, text: string) => void;
-  updatePrompt: (category: GuardrailCategory, id: string, newText: string) => void;
-  deletePrompt: (category: GuardrailCategory, id: string) => void;
+  updatePrompt: (id: string, newText: string) => void;
+  deletePrompt: (id: string) => void;
 }
 
 const DatasetContext = createContext<DatasetState | undefined>(undefined);
 
+// Helper function to sanitize user input and prevent XSS
+const sanitizeText = (text: string): string => {
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    "/": '&#x2F;',
+  };
+  const reg = /[&<>"'/]/ig;
+  return text.replace(reg, (match)=>(map[match]));
+};
+
+
 export const DatasetProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [promptTemplates, setPromptTemplates] = useState(INITIAL_PROMPT_TEMPLATES);
+  const [promptTemplates, setPromptTemplates] = useState(ATTACK_LIBRARY);
 
   const addPrompt = (category: GuardrailCategory, text: string) => {
-    if (!text.trim()) return;
+    const sanitizedText = sanitizeText(text);
+    if (!sanitizedText.trim()) return;
     const newPrompt: PromptTemplate = {
-      id: `prompt-${Date.now()}`,
-      text,
+      id: `prompt-custom-${crypto.randomUUID()}`,
+      text: sanitizedText,
       complexity: PromptComplexity.SIMPLE,
       guide: "Nouveau prompt ajouté par l'utilisateur.",
-      protection: "Les mécanismes de protection standards pour cette catégorie s'appliquent. Pensez à documenter ce prompt de manière plus détaillée."
+      protection: "Les mécanismes de protection standards pour cette catégorie s'appliquent. Pensez à documenter ce prompt de manière plus détaillée.",
+      attackFamily: AttackFamily.CUSTOM_PROMPTS,
+      category: category,
     };
-    setPromptTemplates(prev => ({
-      ...prev,
-      [category]: [...prev[category], newPrompt],
-    }));
+    setPromptTemplates(prev => ([...prev, newPrompt]));
   };
 
-  const updatePrompt = (category: GuardrailCategory, id: string, newText: string) => {
-    if (!newText.trim()) return;
-    setPromptTemplates(prev => {
-      const newPrompts = prev[category].map(p => 
-        p.id === id ? { ...p, text: newText } : p
-      );
-      return { ...prev, [category]: newPrompts };
-    });
+  const updatePrompt = (id: string, newText: string) => {
+    const sanitizedText = sanitizeText(newText);
+    if (!sanitizedText.trim()) return;
+    setPromptTemplates(prev => 
+      prev.map(p => 
+        p.id === id ? { ...p, text: sanitizedText } : p
+      )
+    );
   };
 
-  const deletePrompt = (category: GuardrailCategory, id: string) => {
-    setPromptTemplates(prev => {
-      const newPrompts = prev[category].filter(p => p.id !== id);
-      return { ...prev, [category]: newPrompts };
-    });
+  const deletePrompt = (id: string) => {
+    setPromptTemplates(prev => prev.filter(p => p.id !== id));
   };
 
   return (

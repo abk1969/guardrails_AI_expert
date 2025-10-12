@@ -3,14 +3,16 @@ import Sidebar, { NavItem } from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Analytics from './components/Analytics';
 import DatasetManager from './components/DatasetManager';
+import AdvancedScenarios from './components/AdvancedScenarios'; // Import new component
 import { TestRunProvider } from './contexts/TestRunContext';
 import { DatasetProvider } from './contexts/DatasetContext';
-import { ShieldCheck, LayoutDashboard, BarChart3, Database } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical } from 'lucide-react'; // Import new icon
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} />, content: <Dashboard /> },
   { id: 'analytics', label: 'Analyses', icon: <BarChart3 size={20} />, content: <Analytics /> },
   { id: 'datasets', label: 'Jeux de données', icon: <Database size={20} />, content: <DatasetManager /> },
+  { id: 'advanced', label: 'Scénarios avancés', icon: <FlaskConical size={20} />, content: <AdvancedScenarios /> },
 ];
 
 const App: React.FC = () => {
