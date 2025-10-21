@@ -61,7 +61,8 @@ const WikiRedTeamerView: React.FC = () => {
                 {searchTerm ? (
                      <Card>
                         <h2 className="text-2xl font-bold text-white mb-4">Résultats de recherche pour "{searchTerm}"</h2>
-                        {WIKI_SECTIONS.map(section => React.cloneElement(section.content as React.ReactElement, { searchTerm }))}
+                        {/* FIX: Cast the cloned element's props to include `searchTerm` to resolve the TypeScript error, and add a `key` prop for list rendering. */}
+                        {WIKI_SECTIONS.map(section => React.cloneElement(section.content as React.ReactElement<{ searchTerm?: string }>, { key: section.id, searchTerm }))}
                     </Card>
                 ) : (
                     <div className="space-y-12">
