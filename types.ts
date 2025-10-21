@@ -382,3 +382,33 @@ export interface AIThirdPartyQuestion {
     response: string;
     rating: QuestionRating;
 }
+
+// Wiki Red Teamer Types
+export interface WikiChecklistItem {
+  id: string;
+  text: string;
+}
+
+export interface WikiChecklistSubSection {
+  title: string;
+  items: WikiChecklistItem[];
+}
+
+export interface WikiChecklistCategory {
+    title: string;
+    sections: WikiChecklistSubSection[];
+}
+
+export interface WikiTool {
+    name: string;
+    description: string;
+    reference: string;
+    licensing: string;
+}
+
+export interface WikiDataset {
+    name: string;
+    description: string;
+    reference: string;
+    licensing: string;
+}
