@@ -412,3 +412,38 @@ export interface WikiDataset {
     reference: string;
     licensing: string;
 }
+
+// AI Policy Types
+export type AIPolicyRuleStatus = 'Not Implemented' | 'In Progress' | 'Implemented' | 'Not Applicable';
+
+export interface AIPolicyRule {
+  id: string;
+  reference: string;
+  ruleText: string;
+  implementationDetails?: string;
+  status: AIPolicyRuleStatus;
+  notes: string;
+  associatedThreat?: string;
+  associatedRisk?: string;
+  implementationGuide?: string;
+  testingGuide?: string;
+}
+
+export type AIPolicyContentItem = 
+  | { type: 'paragraph'; content: string }
+  | { type: 'list'; items: string[] }
+  | { type: 'rule'; rule: AIPolicyRule }
+  | { type: 'table', headers: string[], rows: (string | number)[][] };
+
+export interface AIPolicySection {
+  id: string;
+  title: string;
+  content: AIPolicyContentItem[];
+}
+
+export interface AIPolicyChapter {
+  id: string;
+  title: string;
+  introduction?: string[];
+  sections: AIPolicySection[];
+}

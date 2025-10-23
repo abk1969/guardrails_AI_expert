@@ -1,4 +1,4 @@
-import { GuardrailCategory, PromptTemplate, PromptComplexity, TestTarget, AIComponentType, AttackFamily, UseCase, ThreatRating, ThreatProfile, AttackSurfaceVector, OrganizationalImpactConfig, NuclearDisasterScenario, ImpactLevelName, ScoringSettings, KnownVulnerability, KnownAIIncident, ResourceLink, ResourceLinkCategory, IncidentReadinessQuestion, ReadinessRating, RedTeamRating, RedTeamQuestion, RedTeamResult, VulnerabilityReference, BugCrowdScore, CompassScore, MitigationProfile, MitigationMapping, StrategyRoadmapItem, RoadmapStatus, DefenseMitigationReference, DefenseLayer, DefenseQuestion, DefenseCondition, KeyControlStrategy, OwaspReference, IncidentCategory, IncidentMonitoringReference, AIThirdPartyQuestion } from './types';
+import { GuardrailCategory, PromptTemplate, PromptComplexity, TestTarget, AIComponentType, AttackFamily, UseCase, ThreatRating, ThreatProfile, AttackSurfaceVector, OrganizationalImpactConfig, NuclearDisasterScenario, ImpactLevelName, ScoringSettings, KnownVulnerability, KnownAIIncident, ResourceLink, ResourceLinkCategory, IncidentReadinessQuestion, ReadinessRating, RedTeamRating, RedTeamQuestion, RedTeamResult, VulnerabilityReference, BugCrowdScore, CompassScore, MitigationProfile, MitigationMapping, StrategyRoadmapItem, RoadmapStatus, DefenseMitigationReference, DefenseLayer, DefenseQuestion, DefenseCondition, KeyControlStrategy, OwaspReference, IncidentCategory, IncidentMonitoringReference, AIThirdPartyQuestion, AIPolicyRuleStatus } from './types';
 
 export const GUARDRAIL_CATEGORIES: { name: GuardrailCategory; description: string }[] = [
   { name: GuardrailCategory.SECURITY_PRIVACY, description: "Contenu inapproprié, injection de prompt, sujets sensibles." },
@@ -1062,3 +1062,21 @@ export const INITIAL_AI_THIRD_PARTY_QUESTIONS: AIThirdPartyQuestion[] = [
     { id: 'tpq-50', category: 'Types of AI Services', question: 'What AI/ML capabilities are embedded in your product or services? Please specify use cases.', response: '', rating: '' },
     { id: 'tpq-51', category: 'Types of AI Services', question: 'Does the solution include a proprietary (owned by the company) GenAI model?', response: '', rating: '' },
 ];
+
+
+// AI Policy Constants
+export const AI_POLICY_STATUS_OPTIONS: AIPolicyRuleStatus[] = ['Not Implemented', 'In Progress', 'Implemented', 'Not Applicable'];
+
+export const AI_POLICY_STATUS_COLORS: Record<AIPolicyRuleStatus, string> = {
+    'Implemented': 'bg-green-500/30 text-green-200 border-green-500',
+    'In Progress': 'bg-blue-500/30 text-blue-200 border-blue-500',
+    'Not Implemented': 'bg-red-500/30 text-red-200 border-red-500',
+    'Not Applicable': 'bg-gray-500/30 text-gray-200 border-gray-500',
+};
+
+export const AI_POLICY_CHART_COLORS: Record<AIPolicyRuleStatus, string> = {
+    'Implemented': '#4ade80',
+    'In Progress': '#60a5fa',
+    'Not Implemented': '#f87171',
+    'Not Applicable': '#9ca3af',
+};
