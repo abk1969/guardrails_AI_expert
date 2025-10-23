@@ -16,6 +16,7 @@ import RedTeamResultsView from './components/RedTeamResultsView';
 import DefensesMitigationsView from './components/DefensesMitigationsView';
 import AIThirdPartyQuestionsView from './components/AIThirdPartyQuestionsView';
 import WikiRedTeamerView from './components/WikiRedTeamerView';
+import AIPolicyView from './components/AIPolicyView'; // New Import
 import { TestRunProvider } from './contexts/TestRunContext';
 import { DatasetProvider } from './contexts/DatasetContext';
 import { UseCaseProvider } from './contexts/UseCaseContext';
@@ -30,7 +31,8 @@ import { RedTeamResultsProvider } from './contexts/RedTeamResultsContext';
 import { DefensesMitigationsProvider } from './contexts/DefensesMitigationsContext';
 import { AIThirdPartyQuestionsProvider } from './contexts/AIThirdPartyQuestionsContext';
 import { WikiProvider } from './contexts/WikiContext';
-import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet, ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse, SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen } from 'lucide-react';
+import { AIPolicyProvider } from './contexts/AIPolicyContext'; // New Import
+import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet, ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse, SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked } from 'lucide-react'; // New Icon
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} />, content: <Dashboard /> },
@@ -47,6 +49,7 @@ const navItems: NavItem[] = [
   { id: 'defenses-mitigations', label: 'Référence: Défenses', icon: <BookLock size={20} />, content: <DefensesMitigationsView /> },
   { id: 'third-party-questions', label: 'Référence: Tiers IA', icon: <ClipboardList size={20} />, content: <AIThirdPartyQuestionsView /> },
   { id: 'wiki-red-teamer', label: 'Wiki Red Teamer', icon: <BookOpen size={20} />, content: <WikiRedTeamerView /> },
+  { id: 'ai-policy', label: 'Politique IA', icon: <BookMarked size={20} />, content: <AIPolicyView /> }, // New Nav Item
   { id: 'advanced', label: 'Scénarios avancés', icon: <FlaskConical size={20} />, content: <AdvancedScenarios /> },
   { id: 'settings', label: 'Paramètres', icon: <SlidersHorizontal size={20} />, content: <SettingsView /> },
 ];
@@ -57,54 +60,56 @@ const App: React.FC = () => {
   const activeContent = navItems.find(item => item.id === activeNav)?.content;
 
   return (
-    <WikiProvider>
-      <DatasetProvider>
-        <TestRunProvider>
-          <SettingsProvider>
-            <UseCaseProvider>
-              <ThreatProfileProvider>
-                <AttackSurfaceProvider>
-                  <KnownVulnerabilitiesProvider>
-                    <KnownIncidentsProvider>
-                      <IncidentReadinessProvider>
-                        <RedTeamProvider>
-                          <RedTeamResultsProvider>
-                            <DefensesMitigationsProvider>
-                              <AIThirdPartyQuestionsProvider>
-                                <div className="flex h-screen bg-gray-900 font-sans">
-                                  <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} navItems={navItems} />
-                                  <main className="flex-1 overflow-y-auto p-8">
-                                    <header className="flex items-center justify-between mb-8">
-                                      <h1 className="text-3xl font-bold text-white flex items-center">
-                                        <ShieldCheck className="mr-3 text-cyan-500" size={32} />
-                                        Simulateur de Test Guardrails LLM
-                                      </h1>
-                                    </header>
-                                    {activeContent}
-                                    <footer className="mt-8 pt-8 border-t border-gray-700 text-center text-xs text-gray-500">
-                                      <p>
-                                        Certains contenus de cette application sont basés sur le <a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">Projet OWASP Top 10 pour les Applications de Grands Modèles de Langage</a> et le projet <a href="https://owasp.org/www-project-agentic-ai-top-15/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">OWASP Agentic AI Top 15</a>, distribués sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">CC BY-SA 4.0</a>.
-                                      </p>
-                                      <p className="mt-2">
-                                        Copyright © 2025 Powered by Globacom3000 / Abbas BENTERKI. Tous droits réservés.
-                                      </p>
-                                    </footer>
-                                  </main>
-                                </div>
-                              </AIThirdPartyQuestionsProvider>
-                            </DefensesMitigationsProvider>
-                          </RedTeamResultsProvider>
-                        </RedTeamProvider>
-                      </IncidentReadinessProvider>
-                    </KnownIncidentsProvider>
-                  </KnownVulnerabilitiesProvider>
-                </AttackSurfaceProvider>
-              </ThreatProfileProvider>
-            </UseCaseProvider>
-          </SettingsProvider>
-        </TestRunProvider>
-      </DatasetProvider>
-    </WikiProvider>
+    <AIPolicyProvider>
+      <WikiProvider>
+        <DatasetProvider>
+          <TestRunProvider>
+            <SettingsProvider>
+              <UseCaseProvider>
+                <ThreatProfileProvider>
+                  <AttackSurfaceProvider>
+                    <KnownVulnerabilitiesProvider>
+                      <KnownIncidentsProvider>
+                        <IncidentReadinessProvider>
+                          <RedTeamProvider>
+                            <RedTeamResultsProvider>
+                              <DefensesMitigationsProvider>
+                                <AIThirdPartyQuestionsProvider>
+                                  <div className="flex h-screen bg-gray-900 font-sans">
+                                    <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} navItems={navItems} />
+                                    <main className="flex-1 overflow-y-auto p-8">
+                                      <header className="flex items-center justify-between mb-8">
+                                        <h1 className="text-3xl font-bold text-white flex items-center">
+                                          <ShieldCheck className="mr-3 text-cyan-500" size={32} />
+                                          Simulateur de Test Guardrails LLM
+                                        </h1>
+                                      </header>
+                                      {activeContent}
+                                      <footer className="mt-8 pt-8 border-t border-gray-700 text-center text-xs text-gray-500">
+                                        <p>
+                                          Certains contenus de cette application sont basés sur le <a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">Projet OWASP Top 10 pour les Applications de Grands Modèles de Langage</a> et le projet <a href="https://owasp.org/www-project-agentic-ai-top-15/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">OWASP Agentic AI Top 15</a>, distribués sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">CC BY-SA 4.0</a>.
+                                        </p>
+                                        <p className="mt-2">
+                                          Copyright © 2025 Powered by Globacom3000 / Abbas BENTERKI. Tous droits réservés.
+                                        </p>
+                                      </footer>
+                                    </main>
+                                  </div>
+                                </AIThirdPartyQuestionsProvider>
+                              </DefensesMitigationsProvider>
+                            </RedTeamResultsProvider>
+                          </RedTeamProvider>
+                        </IncidentReadinessProvider>
+                      </KnownIncidentsProvider>
+                    </KnownVulnerabilitiesProvider>
+                  </AttackSurfaceProvider>
+                </ThreatProfileProvider>
+              </UseCaseProvider>
+            </SettingsProvider>
+          </TestRunProvider>
+        </DatasetProvider>
+      </WikiProvider>
+    </AIPolicyProvider>
   );
 };
 
