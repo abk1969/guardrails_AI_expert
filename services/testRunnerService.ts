@@ -108,7 +108,7 @@ export const mockTestRunner = (
 
         const result: TestResult = {
           prompt,
-          response: isSandboxMode ? `Réponse simulée par le bac à sable pour: "${prompt.text.substring(0, 50)}..."` : `Mocked response for prompt: "${prompt.text.substring(0, 50)}..." from target ${config.target.name}.`,
+          response: isSandboxMode ? `Réponse simulée par le bac à sable pour: "${prompt.text.substring(0, 50)}..."` : `Réponse simulée pour le prompt: "${prompt.text.substring(0, 50)}..." de la cible ${config.target.name}.`,
           score: finalResult.score!,
           status: finalResult.status!,
           explanation: finalResult.explanation,

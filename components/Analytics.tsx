@@ -76,8 +76,6 @@ const Analytics: React.FC = () => {
             };
         });
 
-        // FIX: Replaced complex and buggy complexity lookup with direct usage of `r.prompt.complexity`.
-        // This correctly categorizes all prompts, including dynamically generated ones.
         const complexityData = Object.values(PromptComplexity).map(complexity => {
             const allComplexityResults = historicalRuns.flatMap(run => run.results.filter(r => r.prompt.complexity === complexity));
             const failed = allComplexityResults.filter(r => r.status === TestStatus.FAILED).length;

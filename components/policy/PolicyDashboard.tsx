@@ -26,7 +26,7 @@ export const PolicyDashboard: React.FC<PolicyDashboardProps> = ({ policyData }) 
             return acc;
         }, {} as Record<AIPolicyRuleStatus, number>);
 
-        const allStatuses: AIPolicyRuleStatus[] = ['Implemented', 'In Progress', 'Not Implemented', 'Not Applicable'];
+        const allStatuses: AIPolicyRuleStatus[] = ['Implémentée', 'En cours', 'Non implémentée', 'Non applicable'];
         allStatuses.forEach(status => {
             if (!statusCounts[status]) {
                 statusCounts[status] = 0;
@@ -41,13 +41,13 @@ export const PolicyDashboard: React.FC<PolicyDashboardProps> = ({ policyData }) 
     }, [policyData]);
 
     const ICONS: Record<AIPolicyRuleStatus, React.ReactNode> = {
-        'Implemented': <CheckCircle className="text-green-400" />,
-        'In Progress': <Clock className="text-blue-400" />,
-        'Not Implemented': <XCircle className="text-red-400" />,
-        'Not Applicable': <Slash className="text-gray-400" />,
+        'Implémentée': <CheckCircle className="text-green-400" />,
+        'En cours': <Clock className="text-blue-400" />,
+        'Non implémentée': <XCircle className="text-red-400" />,
+        'Non applicable': <Slash className="text-gray-400" />,
     };
 
-    const statusOrder: AIPolicyRuleStatus[] = ['Implemented', 'In Progress', 'Not Implemented', 'Not Applicable'];
+    const statusOrder: AIPolicyRuleStatus[] = ['Implémentée', 'En cours', 'Non implémentée', 'Non applicable'];
 
     return (
         <Card>

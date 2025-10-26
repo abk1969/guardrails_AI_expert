@@ -4,7 +4,6 @@ import { ATTACK_LIBRARY } from '../constants';
 import { PromptTemplate, PromptComplexity } from '../types';
 import { Bot, FileText, Users, Shield, Database, TestTubeDiagonal, ToyBrick, KeyRound } from 'lucide-react';
 
-// FIX: Use React.FC to properly type the functional component, aligning with project conventions.
 const ComplexityBadge: React.FC<{ complexity: PromptComplexity }> = ({ complexity }) => {
     const complexityStyles: Record<PromptComplexity, string> = {
         [PromptComplexity.SIMPLE]: 'bg-blue-500/20 text-blue-300 border-blue-400',
@@ -18,7 +17,6 @@ const ComplexityBadge: React.FC<{ complexity: PromptComplexity }> = ({ complexit
     );
 };
 
-// FIX: Use React.FC to properly type the functional component, which resolves an issue where the 'key' prop was being incorrectly flagged by TypeScript.
 const ScenarioItem: React.FC<{ prompt: PromptTemplate }> = ({ prompt }) => {
     return (
         <div className="bg-gray-700/50 rounded-lg p-4 transition-all duration-200 hover:bg-gray-700 hover:ring-1 hover:ring-cyan-500">
