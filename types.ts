@@ -470,3 +470,32 @@ export interface AIPolicyChapter {
   introduction?: string[];
   sections: AIPolicySection[];
 }
+
+// AI Risk Repository Types
+export interface CausalTaxonomyNode {
+  id: string;
+  name: string;
+  description: string;
+  children?: CausalTaxonomyNode[];
+}
+
+export interface DatabaseExplainerContent {
+  id: string;
+  title: string;
+  content: (
+    | { type: 'paragraph'; text: string }
+    | { type: 'list'; items: string[] }
+    | { type: 'warning'; text: string }
+    | { type: 'box'; title: string; text: string }
+    | { type: 'h3'; text: string }
+  )[];
+}
+
+export interface RiskDatabaseExample {
+  id: string;
+  category: string;
+  prompt: string;
+  nonViolating: string;
+  violating: string;
+  why: string;
+}

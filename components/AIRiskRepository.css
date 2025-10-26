@@ -1,0 +1,80 @@
+/* Styles for the Causal Taxonomy View */
+.taxonomy-node {
+    position: relative;
+    padding-left: 20px;
+}
+
+/* Vertical line connecting nodes */
+.taxonomy-node::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 29px; /* Aligns with the center of the chevron */
+    width: 1px;
+    height: 100%;
+    background-color: #3c424a; /* gray-700 */
+}
+
+/* First node doesn't need a line from above */
+.taxonomy-node:first-child::before {
+    top: 15px;
+    height: calc(100% - 15px);
+}
+
+/* Last node's line shouldn't extend past it */
+.taxonomy-node:last-child::before {
+   height: 15px;
+}
+
+
+.node-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    position: relative;
+}
+
+/* Horizontal line connecting to the vertical line */
+.node-header::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -11px; /* (20px padding / 2) + 1px */
+    width: 12px;
+    height: 1px;
+    background-color: #3c424a; /* gray-700 */
+}
+
+.node-header .chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s ease-in-out;
+    margin-right: 4px;
+    color: #9da5b4; /* gray-400 */
+}
+
+.node-header .chevron.expanded {
+    transform: rotate(90deg);
+}
+
+.node-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e5e7eb; /* gray-200 */
+}
+
+.node-content {
+    padding-left: 22px; /* Aligns with text, past the chevron */
+    padding-bottom: 10px;
+}
+
+.node-description {
+    font-size: 0.9rem;
+    color: #9da5b4; /* gray-400 */
+    margin-bottom: 12px;
+    border-left: 2px solid #22d3ee; /* cyan-500 */
+    padding-left: 12px;
+}
+
+.node-children {
+    margin-top: 10px;
+}
