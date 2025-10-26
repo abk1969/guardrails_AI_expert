@@ -17,6 +17,7 @@ import DefensesMitigationsView from './components/DefensesMitigationsView';
 import AIThirdPartyQuestionsView from './components/AIThirdPartyQuestionsView';
 import WikiRedTeamerView from './components/WikiRedTeamerView';
 import AIPolicyView from './components/AIPolicyView';
+import AIRiskRepositoryView from './components/AIRiskRepositoryView';
 import Chatbot from './components/chatbot/Chatbot';
 import ChatbotFab from './components/chatbot/ChatbotFab';
 import { TestRunProvider } from './contexts/TestRunContext';
@@ -34,7 +35,8 @@ import { DefensesMitigationsProvider } from './contexts/DefensesMitigationsConte
 import { AIThirdPartyQuestionsProvider } from './contexts/AIThirdPartyQuestionsContext';
 import { WikiProvider } from './contexts/WikiContext';
 import { AIPolicyProvider } from './contexts/AIPolicyContext';
-import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet, ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse, SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked, Lock, RefreshCw, MoreHorizontal } from 'lucide-react';
+import { AIRiskRepositoryProvider } from './contexts/AIRiskRepositoryContext';
+import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet, ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse, SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked, Lock, RefreshCw, MoreHorizontal, BookCopy } from 'lucide-react';
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} />, content: <Dashboard /> },
@@ -52,6 +54,7 @@ const navItems: NavItem[] = [
   { id: 'third-party-questions', label: 'Référence: Tiers IA', icon: <ClipboardList size={20} />, content: <AIThirdPartyQuestionsView /> },
   { id: 'wiki-red-teamer', label: 'Wiki Red Teamer', icon: <BookOpen size={20} />, content: <WikiRedTeamerView /> },
   { id: 'ai-policy', label: 'Politique IA', icon: <BookMarked size={20} />, content: <AIPolicyView /> },
+  { id: 'ai-risk-repository', label: 'Référentiel Risques IA', icon: <BookCopy size={20} />, content: <AIRiskRepositoryView /> },
   { id: 'advanced', label: 'Scénarios avancés', icon: <FlaskConical size={20} />, content: <AdvancedScenarios /> },
   { id: 'settings', label: 'Paramètres', icon: <SlidersHorizontal size={20} />, content: <SettingsView /> },
 ];
@@ -64,6 +67,7 @@ const App: React.FC = () => {
 
   return (
     <AIPolicyProvider>
+    <AIRiskRepositoryProvider>
       <WikiProvider>
         <DatasetProvider>
           <TestRunProvider>
@@ -130,6 +134,7 @@ const App: React.FC = () => {
           </TestRunProvider>
         </DatasetProvider>
       </WikiProvider>
+    </AIRiskRepositoryProvider>
     </AIPolicyProvider>
   );
 };
