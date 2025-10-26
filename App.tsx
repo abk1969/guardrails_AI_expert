@@ -16,7 +16,9 @@ import RedTeamResultsView from './components/RedTeamResultsView';
 import DefensesMitigationsView from './components/DefensesMitigationsView';
 import AIThirdPartyQuestionsView from './components/AIThirdPartyQuestionsView';
 import WikiRedTeamerView from './components/WikiRedTeamerView';
-import AIPolicyView from './components/AIPolicyView'; // New Import
+import AIPolicyView from './components/AIPolicyView';
+import Chatbot from './components/chatbot/Chatbot';
+import ChatbotFab from './components/chatbot/ChatbotFab';
 import { TestRunProvider } from './contexts/TestRunContext';
 import { DatasetProvider } from './contexts/DatasetContext';
 import { UseCaseProvider } from './contexts/UseCaseContext';
@@ -31,8 +33,8 @@ import { RedTeamResultsProvider } from './contexts/RedTeamResultsContext';
 import { DefensesMitigationsProvider } from './contexts/DefensesMitigationsContext';
 import { AIThirdPartyQuestionsProvider } from './contexts/AIThirdPartyQuestionsContext';
 import { WikiProvider } from './contexts/WikiContext';
-import { AIPolicyProvider } from './contexts/AIPolicyContext'; // New Import
-import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet, ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse, SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked } from 'lucide-react'; // New Icon
+import { AIPolicyProvider } from './contexts/AIPolicyContext';
+import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet, ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse, SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked, Lock, RefreshCw, MoreHorizontal } from 'lucide-react';
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} />, content: <Dashboard /> },
@@ -49,13 +51,14 @@ const navItems: NavItem[] = [
   { id: 'defenses-mitigations', label: 'Référence: Défenses', icon: <BookLock size={20} />, content: <DefensesMitigationsView /> },
   { id: 'third-party-questions', label: 'Référence: Tiers IA', icon: <ClipboardList size={20} />, content: <AIThirdPartyQuestionsView /> },
   { id: 'wiki-red-teamer', label: 'Wiki Red Teamer', icon: <BookOpen size={20} />, content: <WikiRedTeamerView /> },
-  { id: 'ai-policy', label: 'Politique IA', icon: <BookMarked size={20} />, content: <AIPolicyView /> }, // New Nav Item
+  { id: 'ai-policy', label: 'Politique IA', icon: <BookMarked size={20} />, content: <AIPolicyView /> },
   { id: 'advanced', label: 'Scénarios avancés', icon: <FlaskConical size={20} />, content: <AdvancedScenarios /> },
   { id: 'settings', label: 'Paramètres', icon: <SlidersHorizontal size={20} />, content: <SettingsView /> },
 ];
 
 const App: React.FC = () => {
   const [activeNav, setActiveNav] = useState<string>('dashboard');
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   const activeContent = navItems.find(item => item.id === activeNav)?.content;
 
@@ -75,26 +78,44 @@ const App: React.FC = () => {
                             <RedTeamResultsProvider>
                               <DefensesMitigationsProvider>
                                 <AIThirdPartyQuestionsProvider>
-                                  <div className="flex h-screen bg-gray-900 font-sans">
-                                    <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} navItems={navItems} />
-                                    <main className="flex-1 overflow-y-auto p-8">
-                                      <header className="flex items-center justify-between mb-8">
-                                        <h1 className="text-3xl font-bold text-white flex items-center">
-                                          <ShieldCheck className="mr-3 text-cyan-500" size={32} />
-                                          Simulateur de Test Guardrails LLM
-                                        </h1>
-                                      </header>
-                                      {activeContent}
-                                      <footer className="mt-8 pt-8 border-t border-gray-700 text-center text-xs text-gray-500">
-                                        <p>
-                                          Certains contenus de cette application sont basés sur le <a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">Projet OWASP Top 10 pour les Applications de Grands Modèles de Langage</a> et le projet <a href="https://owasp.org/www-project-agentic-ai-top-15/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">OWASP Agentic AI Top 15</a>, distribués sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">CC BY-SA 4.0</a>.
-                                        </p>
-                                        <p className="mt-2">
-                                          Copyright © 2025 Powered by Globacom3000 / Abbas BENTERKI. Tous droits réservés.
-                                        </p>
-                                      </footer>
-                                    </main>
+                                  <div className="flex flex-col h-screen bg-gray-900 font-sans text-gray-200">
+                                    <header className="flex-shrink-0 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6 py-2">
+                                        <h1 className="text-sm font-bold tracking-widest uppercase">AI RISK MANAGER</h1>
+                                        <div className="flex items-center space-x-4 text-gray-400">
+                                            <span className="text-xs">Device</span>
+                                            <RefreshCw size={16} className="cursor-pointer hover:text-white"/>
+                                            <MoreHorizontal size={16} className="cursor-pointer hover:text-white"/>
+                                        </div>
+                                    </header>
+                                    <div className="flex flex-1 overflow-hidden">
+                                        <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} navItems={navItems} />
+                                        <main className="flex-1 flex flex-col overflow-hidden">
+                                            <div className="p-8 pb-0 flex-shrink-0">
+                                                <header className="flex items-center justify-between mb-8">
+                                                    <h1 className="text-3xl font-bold text-white flex items-center">
+                                                    <ShieldCheck className="mr-3 text-cyan-500" size={32} />
+                                                    Simulateur de Test Guardrails LLM
+                                                    </h1>
+                                                </header>
+                                            </div>
+                                            <div className="flex-1 overflow-y-auto p-8 pt-0">
+                                                {activeContent}
+                                            </div>
+                                            <div className="px-8 pb-8 pt-0 mt-auto flex-shrink-0">
+                                                <footer className="mt-8 pt-8 border-t border-gray-700 text-center text-xs text-gray-500">
+                                                    <p>
+                                                    Certains contenus de cette application sont basés sur le <a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">Projet OWASP Top 10 pour les Applications de Grands Modèles de Langage</a> et le projet <a href="https://owasp.org/www-project-agentic-ai-top-15/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">OWASP Agentic AI Top 15</a>, distribués sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">CC BY-SA 4.0</a>.
+                                                    </p>
+                                                    <p className="mt-2">
+                                                    Copyright © 2025 Powered by Globacom3000 / Abbas BENTERKI. Tous droits réservés.
+                                                    </p>
+                                                </footer>
+                                            </div>
+                                        </main>
+                                    </div>
                                   </div>
+                                  {!isChatbotOpen && <ChatbotFab onClick={() => setIsChatbotOpen(true)} />}
+                                  {isChatbotOpen && <Chatbot onClose={() => setIsChatbotOpen(false)} />}
                                 </AIThirdPartyQuestionsProvider>
                               </DefensesMitigationsProvider>
                             </RedTeamResultsProvider>

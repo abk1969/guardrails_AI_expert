@@ -1065,18 +1065,18 @@ export const INITIAL_AI_THIRD_PARTY_QUESTIONS: AIThirdPartyQuestion[] = [
 
 
 // AI Policy Constants
-export const AI_POLICY_STATUS_OPTIONS: AIPolicyRuleStatus[] = ['Not Implemented', 'In Progress', 'Implemented', 'Not Applicable'];
+export const AI_POLICY_STATUS_OPTIONS: AIPolicyRuleStatus[] = ['Non implémentée', 'En cours', 'Implémentée', 'Non applicable'];
 
 export const AI_POLICY_STATUS_COLORS: Record<AIPolicyRuleStatus, string> = {
-    'Implemented': 'bg-green-500/30 text-green-200 border-green-500',
-    'In Progress': 'bg-blue-500/30 text-blue-200 border-blue-500',
-    'Not Implemented': 'bg-red-500/30 text-red-200 border-red-500',
-    'Not Applicable': 'bg-gray-500/30 text-gray-200 border-gray-500',
+    'Implémentée': 'bg-green-500/30 text-green-200 border-green-500',
+    'En cours': 'bg-blue-500/30 text-blue-200 border-blue-500',
+    'Non implémentée': 'bg-red-500/30 text-red-200 border-red-500',
+    'Non applicable': 'bg-gray-500/30 text-gray-200 border-gray-500',
 };
 
 export const AI_POLICY_CHART_COLORS: Record<AIPolicyRuleStatus, string> = {
-    'Implemented': '#4ade80',
-    'In Progress': '#60a5fa',
-    'Not Implemented': '#f87171',
-    'Not Applicable': '#9ca3af',
+    'Implémentée': '#4ade80',
+    'En cours': '#60a5fa',
+    'Non implémentée': '#f87171',
+    'Non applicable': '#9ca3af',
 };

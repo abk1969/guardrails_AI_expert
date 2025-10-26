@@ -32,7 +32,6 @@ export type Sensitivity = 'Tolérant' | 'Normal' | 'Strict';
 export interface PromptTemplate {
   id: string;
   text: string;
-  // FIX: Add missing category property to the PromptTemplate interface.
   category: GuardrailCategory;
   complexity: PromptComplexity;
   guide: string;
@@ -414,7 +413,30 @@ export interface WikiDataset {
 }
 
 // AI Policy Types
-export type AIPolicyRuleStatus = 'Not Implemented' | 'In Progress' | 'Implemented' | 'Not Applicable';
+export type AIPolicyRuleStatus = 'Non implémentée' | 'En cours' | 'Implémentée' | 'Non applicable';
+
+export interface RiskScenario {
+  title: string;
+  description: string;
+  threatActor: string;
+  attackVector: string;
+  mitigation: string;
+  impact: {
+    confidentiality?: string;
+    integrity?: string;
+    availability?: string;
+    strategic?: string;
+    financial?: string;
+    reputational?: string;
+    operational?: string;
+  };
+  mappings: {
+    owaspLlm?: string;
+    owaspAgentic?: string;
+    mitreAtlas?: string;
+    nistRmf?: string;
+  };
+}
 
 export interface AIPolicyRule {
   id: string;
@@ -427,6 +449,7 @@ export interface AIPolicyRule {
   associatedRisk?: string;
   implementationGuide?: string;
   testingGuide?: string;
+  riskScenarios?: RiskScenario[];
 }
 
 export type AIPolicyContentItem = 

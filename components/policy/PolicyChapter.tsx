@@ -64,7 +64,7 @@ const PolicyChapter: React.FC<{ chapter: AIPolicyChapter }> = ({ chapter }) => {
     const stats = useMemo(() => {
         const rules = chapter.sections.flatMap(s => s.content.filter(c => c.type === 'rule')) as { type: 'rule', rule: AIPolicyRule }[];
         const total = rules.length;
-        const implemented = rules.filter(r => r.rule.status === 'Implemented').length;
+        const implemented = rules.filter(r => r.rule.status === 'Implémentée').length;
         const progress = total > 0 ? (implemented / total) * 100 : 0;
         return { total, implemented, progress };
     }, [chapter]);

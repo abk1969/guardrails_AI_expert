@@ -3,7 +3,6 @@ import Card from './ui/Card';
 import Button from './ui/Button';
 import { useAIPolicy } from '../contexts/AIPolicyContext';
 import { AIPolicyChapter } from '../types';
-// FIX: Module '"file:///components/policy/PolicyDashboard"' has no default export.
 import { PolicyDashboard } from './policy/PolicyDashboard';
 import PolicyChapter from './policy/PolicyChapter';
 import { Search, Upload, Download } from 'lucide-react';

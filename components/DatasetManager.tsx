@@ -6,7 +6,6 @@ import { GuardrailCategory, PromptTemplate, PromptComplexity, AttackFamily } fro
 import { Pencil, Trash2, PlusCircle, Check, X, ChevronDown } from 'lucide-react';
 
 // A badge for complexity
-// FIX: Use React.FC to properly type the functional component, aligning with project conventions.
 const ComplexityBadge: React.FC<{ complexity: PromptComplexity }> = ({ complexity }) => {
     const complexityStyles: Record<PromptComplexity, string> = {
         [PromptComplexity.SIMPLE]: 'bg-blue-500/20 text-blue-300 border-blue-400',
@@ -21,7 +20,6 @@ const ComplexityBadge: React.FC<{ complexity: PromptComplexity }> = ({ complexit
 };
 
 // Component for a single prompt entry
-// FIX: Use React.FC to properly type the functional component, which resolves an issue where the 'key' prop was being incorrectly flagged by TypeScript.
 const PromptItem: React.FC<{ prompt: PromptTemplate }> = ({ prompt }) => {
     const { updatePrompt, deletePrompt } = useDataset();
     const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +84,6 @@ const PromptItem: React.FC<{ prompt: PromptTemplate }> = ({ prompt }) => {
     );
 };
 
-// FIX: Use React.FC to properly type the functional component, aligning with project conventions.
 const AddPromptForm: React.FC<{ family: AttackFamily }> = ({ family }) => {
     const { addPrompt } = useDataset();
     const [text, setText] = useState('');
