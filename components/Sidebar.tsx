@@ -17,12 +17,12 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, navItems }) => {
   return (
-    <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
-      <div className="flex items-center justify-center h-20 border-b border-gray-700">
+    <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col h-screen">
+      <div className="flex items-center justify-center h-20 border-b border-gray-700 flex-shrink-0">
         <ShieldCheck className="text-cyan-500" size={28} />
         <span className="ml-2 text-xl font-bold text-white">Guardrail Sim</span>
       </div>
-      <nav className="flex-1 px-4 py-6">
+      <nav className="flex-1 px-4 py-6 overflow-y-auto scrollbar-custom">
         {navItems.map((item) => (
           <a
             key={item.id}
@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeNav, setActiveNav, navItems }) 
           </a>
         ))}
       </nav>
-      <div className="px-4 py-6 border-t border-gray-700">
+      <div className="px-4 py-4 border-t border-gray-700 flex-shrink-0">
           <a href="#" className="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg">
             <LogOut size={20} />
             <span className="ml-4 font-medium">Déconnexion</span>

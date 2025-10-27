@@ -1,0 +1,54 @@
+/* Custom Scrollbar for Policy Sidebar */
+.policy-sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.policy-sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.policy-sidebar-scroll::-webkit-scrollbar-thumb {
+    background: #4b5563; /* gray-600 */
+    border-radius: 3px;
+}
+
+.policy-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: #6b7280; /* gray-500 */
+}
+
+/* Global Custom Scrollbar */
+.scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+    background: #1f2937; /* gray-800 */
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+    background: #4b5563; /* gray-600 */
+    border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #6b7280; /* gray-500 */
+}
+
+/* Smooth scrolling for the entire page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Ensure proper stacking context */
+.policy-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* Sticky sidebar */
+.policy-sidebar {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}

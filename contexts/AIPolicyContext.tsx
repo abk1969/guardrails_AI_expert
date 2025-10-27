@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { AIPolicyChapter, AIPolicyRule, AIPolicyRuleStatus } from '../types';
-import { INITIAL_AI_POLICY } from '../data/aiPolicyContent';
+import { CLUSIF_AI_POLICY } from '../data/aiPolicyContentNew';
 
 interface AIPolicyState {
   policyData: AIPolicyChapter[];
@@ -23,10 +23,10 @@ export const AIPolicyProvider: React.FC<{ children: ReactNode }> = ({ children }
           return parsed;
         }
       }
-      return INITIAL_AI_POLICY;
+      return CLUSIF_AI_POLICY;
     } catch (error) {
       console.error("Failed to load AI policy from localStorage", error);
-      return INITIAL_AI_POLICY;
+      return CLUSIF_AI_POLICY;
     }
   });
 

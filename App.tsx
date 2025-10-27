@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './components/policy/PolicyView.css';
 import Sidebar, { NavItem } from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Analytics from './components/Analytics';
@@ -16,9 +17,9 @@ import RedTeamResultsView from './components/RedTeamResultsView';
 import DefensesMitigationsView from './components/DefensesMitigationsView';
 import AIThirdPartyQuestionsView from './components/AIThirdPartyQuestionsView';
 import WikiRedTeamerView from './components/WikiRedTeamerView';
-import AIPolicyView from './components/AIPolicyView';
+import AIPolicyView from './components/AIPolicyViewComplete';
 import AIRiskRepositoryView from './components/AIRiskRepositoryView';
-import Chatbot from './components/chatbot/Chatbot';
+import ChatbotModern from './components/chatbot/ChatbotModern';
 import ChatbotFab from './components/chatbot/ChatbotFab';
 import { TestRunProvider } from './contexts/TestRunContext';
 import { DatasetProvider } from './contexts/DatasetContext';
@@ -36,6 +37,7 @@ import { AIThirdPartyQuestionsProvider } from './contexts/AIThirdPartyQuestionsC
 import { WikiProvider } from './contexts/WikiContext';
 import { AIPolicyProvider } from './contexts/AIPolicyContext';
 import { AIRiskRepositoryProvider } from './contexts/AIRiskRepositoryContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet, ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse, SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked, Lock, RefreshCw, MoreHorizontal, BookCopy } from 'lucide-react';
 
 const navItems: NavItem[] = [
@@ -66,9 +68,10 @@ const App: React.FC = () => {
   const activeContent = navItems.find(item => item.id === activeNav)?.content;
 
   return (
-    <AIPolicyProvider>
-    <AIRiskRepositoryProvider>
-      <WikiProvider>
+    <LanguageProvider>
+      <AIPolicyProvider>
+        <AIRiskRepositoryProvider>
+          <WikiProvider>
         <DatasetProvider>
           <TestRunProvider>
             <SettingsProvider>
@@ -119,7 +122,7 @@ const App: React.FC = () => {
                                     </div>
                                   </div>
                                   {!isChatbotOpen && <ChatbotFab onClick={() => setIsChatbotOpen(true)} />}
-                                  {isChatbotOpen && <Chatbot onClose={() => setIsChatbotOpen(false)} />}
+                                  {isChatbotOpen && <ChatbotModern onClose={() => setIsChatbotOpen(false)} />}
                                 </AIThirdPartyQuestionsProvider>
                               </DefensesMitigationsProvider>
                             </RedTeamResultsProvider>
@@ -133,9 +136,10 @@ const App: React.FC = () => {
             </SettingsProvider>
           </TestRunProvider>
         </DatasetProvider>
-      </WikiProvider>
-    </AIRiskRepositoryProvider>
-    </AIPolicyProvider>
+          </WikiProvider>
+        </AIRiskRepositoryProvider>
+      </AIPolicyProvider>
+    </LanguageProvider>
   );
 };
 
