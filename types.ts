@@ -413,7 +413,12 @@ export interface WikiDataset {
 }
 
 // AI Policy Types
-export type AIPolicyRuleStatus = 'Non implémentée' | 'En cours' | 'Implémentée' | 'Non applicable';
+export enum AIPolicyRuleStatus {
+  NOT_IMPLEMENTED = 'Non implémentée',
+  IN_PROGRESS = 'En cours',
+  IMPLEMENTED = 'Implémentée',
+  NOT_APPLICABLE = 'Non applicable'
+}
 
 export interface RiskScenario {
   title: string;
@@ -476,6 +481,8 @@ export interface CausalTaxonomyNode {
   id: string;
   name: string;
   description: string;
+  count?: number; // Number of risks in this category
+  percentage?: number; // Percentage of total risks
   children?: CausalTaxonomyNode[];
 }
 
@@ -498,4 +505,72 @@ export interface RiskDatabaseExample {
   nonViolating: string;
   violating: string;
   why: string;
+}
+
+// AI Risk Entry - Individual risk from the database
+export interface AIRiskEntry {
+  id: string; // e.g., "RISK-0001"
+  evId: string; // Evidence ID from source
+  title: string;
+  quickRef: string; // Quick reference (author/year)
+  description: string;
+
+  // Risk categorization
+  riskCategory: string;
+  riskSubcategory: string;
+
+  // Causal taxonomy
+  causal: {
+    entity: 'IA' | 'Humain' | 'Autre' | '4 - Not coded';
+    intentionality: 'Intentionnel' | 'Non intentionnel' | 'Autre' | '4 - Not coded';
+    timing: 'Pré-déploiement' | 'Post-déploiement' | 'Autre' | '4 - Not coded';
+  };
+
+  // Domain taxonomy
+  domain: {
+    category: string;
+    subcategory: string;
+  };
+
+  // Metadata
+  source: string;
+  paperId: string;
+  categoryLevel: string; // "Risk Category" or "Risk Sub-Category"
+  additionalEvidence: string;
+
+  // Search support
+  searchText: string; // Normalized text for full-text search
+}
+
+// AI Risk Database Metadata
+export interface AIRiskMetadata {
+  version: string;
+  lastUpdated: string;
+  extractedAt: string;
+  totalRisks: number;
+  language: string;
+  source: string;
+  license: string;
+}
+
+// AI Risk Statistics
+export interface AIRiskStatistics {
+  total: number;
+  byEntity: Record<string, number>;
+  byIntentionality: Record<string, number>;
+  byTiming: Record<string, number>;
+  byDomain: Record<string, number>;
+}
+
+// Included Resource from the AI Risk Repository
+export interface IncludedResource {
+  id: string;
+  title: string;
+  authors: string;
+  year: number;
+  type: string; // e.g., "Academic Paper", "Report", "Framework"
+  organization?: string;
+  url?: string;
+  description: string;
+  risksCount?: number; // Number of risks from this resource
 }

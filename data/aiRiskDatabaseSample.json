@@ -1,0 +1,274 @@
+{
+  "metadata": {
+    "version": "3.0",
+    "lastUpdated": "2025-03-26",
+    "extractedAt": "2025-10-26T10:04:35.977Z",
+    "totalRisks": 1350,
+    "language": "fr",
+    "source": "AI Risk Repository V3_26_03_2025.xlsx",
+    "license": "CC BY 4.0"
+  },
+  "statistics": {
+    "total": 1350,
+    "byEntity": {
+      "Humain": 483,
+      "IA": 525,
+      "Autre": 248,
+      "4 - Not coded": 94
+    },
+    "byIntentionality": {
+      "Non intentionnel": 455,
+      "Intentionnel": 414,
+      "Autre": 387,
+      "4 - Not coded": 94
+    },
+    "byTiming": {
+      "Autre": 320,
+      "Post-déploiement": 769,
+      "Pré-déploiement": 169,
+      "4 - Not coded": 92
+    },
+    "byDomain": {
+      "Socioéconomique et Environnemental": 241,
+      "7. AI System Safety, Failures, & Limitations": 332,
+      "Acteurs Malveillants et Utilisation Abusive": 191,
+      "Discrimination et Toxicité": 144,
+      "Vie Privée et Sécurité": 162,
+      "Désinformation": 63,
+      "Interaction Humain-Ordinateur": 78,
+      "Non classifié": 139
+    }
+  },
+  "sampleRisks": [
+    {
+      "id": "RISK-0001",
+      "evId": "01.01.00",
+      "title": "TASRA: a Taxonomy and Analysis of Societal-Scale Risks from AI",
+      "quickRef": "Critch2023",
+      "description": "Societal-scale harm can arise from AI built by a diffuse collection of creators, where no one is uniquely accountable for the technology's creation or use, as in a classic \"tragedy of the commons\".",
+      "riskCategory": "Type 1: Diffusion of responsibility",
+      "riskSubcategory": "",
+      "causal": {
+        "entity": "Humain",
+        "intentionality": "Non intentionnel",
+        "timing": "Autre"
+      },
+      "domain": {
+        "category": "Socioéconomique et Environnemental",
+        "subcategory": "6.5 > Governance failure"
+      },
+      "source": "Critch2023",
+      "paperId": "1",
+      "categoryLevel": "Risk Category",
+      "additionalEvidence": "\"Automated processes can cause societal harm even when no one in particular is primarily responsible for the creation or deployment of those processes (Zwetsloot and Dafoe, 2019), and perhaps even as a result of the absence of responsibility. The infamous “flash crash” of 2010 is an instance of this: numerous stock trading algorithms from a variety of companies interacted in a fashion that rapidly devalued the US stock market by over 1 trillion dollars in a matter of minutes. Fortunately, humans were able to intervene afterward and reverse the damage, but that might not always be possible as AI technology becomes more powerful and pervasive.\"",
+      "searchText": "tasra: a taxonomy and analysis of societal-scale risks from ai societal-scale harm can arise from ai built by a diffuse collection of creators, where no one is uniquely accountable for the technology's creation or use, as in a classic \"tragedy of the commons\". type 1: diffusion of responsibility"
+    },
+    {
+      "id": "RISK-0002",
+      "evId": "01.02.00",
+      "title": "TASRA: a Taxonomy and Analysis of Societal-Scale Risks from AI",
+      "quickRef": "Critch2023",
+      "description": "Harm can result from AI that was not expected to have a large impact at all, such as a lab leak, a surprisingly addictive open-source product, or an unexpected repurposing of a research prototype.",
+      "riskCategory": "Type 2: Bigger than expected",
+      "riskSubcategory": "",
+      "causal": {
+        "entity": "IA",
+        "intentionality": "Non intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "7. AI System Safety, Failures, & Limitations",
+        "subcategory": "7.3 > Lack of capability or robustness"
+      },
+      "source": "Critch2023",
+      "paperId": "1",
+      "categoryLevel": "Risk Category",
+      "additionalEvidence": "the scope of actions available to an AI technology can be greatly expanded when the technology is copied many times over, or modified relative to the likely intentions of its initial creators. However, impact on an unexpectedly large s cale can occur even if only one team is responsible for creating the technology",
+      "searchText": "tasra: a taxonomy and analysis of societal-scale risks from ai harm can result from ai that was not expected to have a large impact at all, such as a lab leak, a surprisingly addictive open-source product, or an unexpected repurposing of a research prototype. type 2: bigger than expected"
+    },
+    {
+      "id": "RISK-0003",
+      "evId": "01.03.00",
+      "title": "TASRA: a Taxonomy and Analysis of Societal-Scale Risks from AI",
+      "quickRef": "Critch2023",
+      "description": "AI intended to have a large societal impact can turn out harmful by mistake, such as a popular product that creates problems and partially solves them only for its users.",
+      "riskCategory": "Type 3: Worse than expected",
+      "riskSubcategory": "",
+      "causal": {
+        "entity": "IA",
+        "intentionality": "Non intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "7. AI System Safety, Failures, & Limitations",
+        "subcategory": "7.3 > Lack of capability or robustness"
+      },
+      "source": "Critch2023",
+      "paperId": "1",
+      "categoryLevel": "Risk Category",
+      "additionalEvidence": "Oftentimes, the whole point of producing a new AI technology is to produce a large (usually positive) impact on society. Therefore, a major category of societal-scale risk arises from large, well-intentioned interventions that go wrong.",
+      "searchText": "tasra: a taxonomy and analysis of societal-scale risks from ai ai intended to have a large societal impact can turn out harmful by mistake, such as a popular product that creates problems and partially solves them only for its users. type 3: worse than expected"
+    },
+    {
+      "id": "RISK-0004",
+      "evId": "01.04.00",
+      "title": "TASRA: a Taxonomy and Analysis of Societal-Scale Risks from AI",
+      "quickRef": "Critch2023",
+      "description": "As a side effect of a primary goal like profit or influence, AI creators can willfully allow it to cause widespread societal harms like pollution, resource depletion, mental illness, misinformation, or injustice.",
+      "riskCategory": "Type 4: Willful indifference",
+      "riskSubcategory": "",
+      "causal": {
+        "entity": "Humain",
+        "intentionality": "Non intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "Socioéconomique et Environnemental",
+        "subcategory": "6.4 > Competitive dynamics"
+      },
+      "source": "Critch2023",
+      "paperId": "1",
+      "categoryLevel": "Risk Category",
+      "additionalEvidence": "\"All of the potential harms in the previous sections are made more likely if the creators of AI technology are unconcerned about its moral consequences. Even if some employees of the company detect a risk of impacts that’s bigger than expected (Type 2) or worse than expected (Type 3), it may be quite difficult to institute a change if the company is already profiting greatly from its current strategy, unless there is some chance of exposure or intervention from outside the company to motivate a reform.\"",
+      "searchText": "tasra: a taxonomy and analysis of societal-scale risks from ai as a side effect of a primary goal like profit or influence, ai creators can willfully allow it to cause widespread societal harms like pollution, resource depletion, mental illness, misinformation, or injustice. type 4: willful indifference"
+    },
+    {
+      "id": "RISK-0005",
+      "evId": "01.05.00",
+      "title": "TASRA: a Taxonomy and Analysis of Societal-Scale Risks from AI",
+      "quickRef": "Critch2023",
+      "description": "One or more criminal entities could create AI to intentionally inflict harms, such as for terrorism or combating law enforcement.",
+      "riskCategory": "Type 5: Criminal weaponization",
+      "riskSubcategory": "",
+      "causal": {
+        "entity": "Humain",
+        "intentionality": "Intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "Acteurs Malveillants et Utilisation Abusive",
+        "subcategory": "4.2 > Cyberattacks, weapon development or use, and mass harm"
+      },
+      "source": "Critch2023",
+      "paperId": "1",
+      "categoryLevel": "Risk Category",
+      "additionalEvidence": "\"It’s not difficult to envision AI technology causing harm if it falls into the hands of people looking to cause trouble, so no stories will be provided in this section. It is enough to imagine an algorithm designed to pilot delivery drones that could be re-purposed to carry explosive charges, or an algorithm designed to deliver therapy that could have its goal altered to deliver psychological trauma. \"",
+      "searchText": "tasra: a taxonomy and analysis of societal-scale risks from ai one or more criminal entities could create ai to intentionally inflict harms, such as for terrorism or combating law enforcement. type 5: criminal weaponization"
+    },
+    {
+      "id": "RISK-0006",
+      "evId": "01.06.00",
+      "title": "TASRA: a Taxonomy and Analysis of Societal-Scale Risks from AI",
+      "quickRef": "Critch2023",
+      "description": "AI deployed by states in war, civil war, or law enforcement can easily yield societal-scale harm",
+      "riskCategory": "Type 6: State Weaponization",
+      "riskSubcategory": "",
+      "causal": {
+        "entity": "Humain",
+        "intentionality": "Intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "Acteurs Malveillants et Utilisation Abusive",
+        "subcategory": "4.2 > Cyberattacks, weapon development or use, and mass harm"
+      },
+      "source": "Critch2023",
+      "paperId": "1",
+      "categoryLevel": "Risk Category",
+      "additionalEvidence": "\"Tools and techniques addressing the previous section (weaponization by criminals) could also be used to prevent weaponization of AI technologies by states that do not have strong AI research labs of their own. But what about more capable states? The elephant in room here is that AI can be used in war. Some argue that, ideally, mechanical drones could be pitted against one another in casualty-free battles that allow nations to determine who would win a war of lethal force, without having to actually kill any human beings. If taken no further, this would be a major improvement over current warfare practices. However, these capabilities are not technologically far from allowing the mass-killing of human beings by weaponized drones. Escalation of such conflicts could lead to unprecedented violence and death, as well as widespread fear and oppression among populations that have been targeted by mass killings.\"",
+      "searchText": "tasra: a taxonomy and analysis of societal-scale risks from ai ai deployed by states in war, civil war, or law enforcement can easily yield societal-scale harm type 6: state weaponization"
+    },
+    {
+      "id": "RISK-0007",
+      "evId": "02.01.00",
+      "title": "Risk Taxonomy, Mitigation, and Assessment Benchmarks of Large Language Model Systems",
+      "quickRef": "Cui2024",
+      "description": "\"The LLM-generated content sometimes contains biased, toxic, and private information\"",
+      "riskCategory": "Harmful Content",
+      "riskSubcategory": "",
+      "causal": {
+        "entity": "IA",
+        "intentionality": "Non intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "Discrimination et Toxicité",
+        "subcategory": "1.2 > Exposure to toxic content"
+      },
+      "source": "Cui2024",
+      "paperId": "2",
+      "categoryLevel": "Risk Category",
+      "additionalEvidence": "",
+      "searchText": "risk taxonomy, mitigation, and assessment benchmarks of large language model systems \"the llm-generated content sometimes contains biased, toxic, and private information\" harmful content"
+    },
+    {
+      "id": "RISK-0008",
+      "evId": "02.01.01",
+      "title": "Risk Taxonomy, Mitigation, and Assessment Benchmarks of Large Language Model Systems",
+      "quickRef": "Cui2024",
+      "description": "\"The training datasets of LLMs may contain biased information that leads LLMs to generate outputs with social biases\"",
+      "riskCategory": "Harmful Content",
+      "riskSubcategory": "Bias",
+      "causal": {
+        "entity": "IA",
+        "intentionality": "Non intentionnel",
+        "timing": "Autre"
+      },
+      "domain": {
+        "category": "Discrimination et Toxicité",
+        "subcategory": "1.1 > Unfair discrimination and misrepresentation"
+      },
+      "source": "Cui2024",
+      "paperId": "2",
+      "categoryLevel": "Risk Sub-Category",
+      "additionalEvidence": "",
+      "searchText": "risk taxonomy, mitigation, and assessment benchmarks of large language model systems \"the training datasets of llms may contain biased information that leads llms to generate outputs with social biases\" harmful content"
+    },
+    {
+      "id": "RISK-0009",
+      "evId": "02.01.02",
+      "title": "Risk Taxonomy, Mitigation, and Assessment Benchmarks of Large Language Model Systems",
+      "quickRef": "Cui2024",
+      "description": "\"Toxicity means the generated content contains rude, disrespectful, and even illegal information\"",
+      "riskCategory": "Harmful Content",
+      "riskSubcategory": "Toxicity",
+      "causal": {
+        "entity": "IA",
+        "intentionality": "Non intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "Discrimination et Toxicité",
+        "subcategory": "1.2 > Exposure to toxic content"
+      },
+      "source": "Cui2024",
+      "paperId": "2",
+      "categoryLevel": "Risk Sub-Category",
+      "additionalEvidence": "",
+      "searchText": "risk taxonomy, mitigation, and assessment benchmarks of large language model systems \"toxicity means the generated content contains rude, disrespectful, and even illegal information\" harmful content"
+    },
+    {
+      "id": "RISK-0010",
+      "evId": "02.01.03",
+      "title": "Risk Taxonomy, Mitigation, and Assessment Benchmarks of Large Language Model Systems",
+      "quickRef": "Cui2024",
+      "description": "\"Privacy Leakage means the generated content includes sensitive personal information\"",
+      "riskCategory": "Harmful Content",
+      "riskSubcategory": "Privacy Leakage",
+      "causal": {
+        "entity": "IA",
+        "intentionality": "Non intentionnel",
+        "timing": "Post-déploiement"
+      },
+      "domain": {
+        "category": "Vie Privée et Sécurité",
+        "subcategory": "2.1 > Compromise of privacy by leaking or correctly inferring sensitive information"
+      },
+      "source": "Cui2024",
+      "paperId": "2",
+      "categoryLevel": "Risk Sub-Category",
+      "additionalEvidence": "",
+      "searchText": "risk taxonomy, mitigation, and assessment benchmarks of large language model systems \"privacy leakage means the generated content includes sensitive personal information\" harmful content"
+    }
+  ]
+}

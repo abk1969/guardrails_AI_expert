@@ -1,15 +1,18 @@
 /* Floating Action Button */
 .chatbot-fab {
-    position: fixed;
+    position: fixed !important;
     bottom: 2rem;
     right: 2rem;
-    z-index: 999;
+    z-index: 9999;
+    pointer-events: auto;
 }
 
 /* Main popup container */
 .chatbot-popup {
-    position: fixed;
-    z-index: 1000;
+    position: fixed !important;
+    bottom: 6rem;
+    right: 2rem;
+    z-index: 10000;
     display: flex;
     flex-direction: column;
     background-color: #272b30; /* gray-800 */
@@ -19,6 +22,8 @@
     overflow: hidden; /* Important for border-radius */
     min-width: 350px;
     min-height: 400px;
+    max-height: calc(100vh - 8rem);
+    pointer-events: auto;
 }
 
 /* Draggable header */
