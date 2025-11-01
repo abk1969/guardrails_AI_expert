@@ -1,0 +1,278 @@
+[
+  {
+    "__EMPTY": "Domain Factors statistics",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "This page is not mobile-friendly; please access on a computer if you can.",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "Description of sheet",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "See how risks are classified by the Domain Factors Taxonomy. The Domain Taxonomy of AI Risks adapted from Weidinger (2021) classifies risks into 7 AI risk domains: (1) Discrimination & Toxicity, (2) Privacy & Security, (3) Misinformation, (4) Malicious Actors & Misuse, (5) Human-Computer Interaction, (6) Socioeconomic & Environmental, and (7) AI System Safety, Failures, & Limitations.",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "How to use",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "This sheet shows the total percentage of papers and risks which relate to each of our domain factors. For more detail please see our report.",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "Domain / Subdomain",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Proportion of risks in AI risk database",
+    "Updated: March 2025": "Proportion of documents in AI risk database"
+  },
+  {
+    "__EMPTY": "1",
+    "__EMPTY_1": "Discrimination & Toxicity",
+    "__EMPTY_2": "14%",
+    "Updated: March 2025": "70%"
+  },
+  {
+    "__EMPTY": "1.1",
+    "__EMPTY_1": "Unfair discrimination and misrepresentation",
+    "__EMPTY_2": "5%",
+    "Updated: March 2025": "63%"
+  },
+  {
+    "__EMPTY": "1.2",
+    "__EMPTY_1": "Exposure to toxic content",
+    "__EMPTY_2": "8%",
+    "Updated: March 2025": "33%"
+  },
+  {
+    "__EMPTY": "1.3",
+    "__EMPTY_1": "Unequal performance across groups",
+    "__EMPTY_2": "1%",
+    "Updated: March 2025": "17%"
+  },
+  {
+    "__EMPTY": "2",
+    "__EMPTY_1": "Privacy & Security",
+    "__EMPTY_2": "12%",
+    "Updated: March 2025": "68%"
+  },
+  {
+    "__EMPTY": "2.1",
+    "__EMPTY_1": "Compromise of privacy by obtaining, leaking or correctly inferring sensitive information",
+    "__EMPTY_2": "5%",
+    "Updated: March 2025": "59%"
+  },
+  {
+    "__EMPTY": "2.2",
+    "__EMPTY_1": "AI system security vulnerabilities and attacks",
+    "__EMPTY_2": "7%",
+    "Updated: March 2025": "37%"
+  },
+  {
+    "__EMPTY": "3",
+    "__EMPTY_1": "Misinformation",
+    "__EMPTY_2": "4%",
+    "Updated: March 2025": "46%"
+  },
+  {
+    "__EMPTY": "3.1",
+    "__EMPTY_1": "False or misleading information",
+    "__EMPTY_2": "3%",
+    "Updated: March 2025": "37%"
+  },
+  {
+    "__EMPTY": "3.2",
+    "__EMPTY_1": "Pollution of information ecosystem and loss of consensus reality",
+    "__EMPTY_2": "1%",
+    "Updated: March 2025": "16%"
+  },
+  {
+    "__EMPTY": "4",
+    "__EMPTY_1": "Malicious actors & Misuse",
+    "__EMPTY_2": "16%",
+    "Updated: March 2025": "71%"
+  },
+  {
+    "__EMPTY": "4.1",
+    "__EMPTY_1": "Disinformation, surveillance, and influence at scale",
+    "__EMPTY_2": "6%",
+    "Updated: March 2025": "51%"
+  },
+  {
+    "__EMPTY": "4.2",
+    "__EMPTY_1": "Cyberattacks, weapon development or use, and mass harm",
+    "__EMPTY_2": "5%",
+    "Updated: March 2025": "57%"
+  },
+  {
+    "__EMPTY": "4.3",
+    "__EMPTY_1": "Fraud, scams, and targeted manipulation",
+    "__EMPTY_2": "5%",
+    "Updated: March 2025": "40%"
+  },
+  {
+    "__EMPTY": "5",
+    "__EMPTY_1": "Human-Computer Interaction",
+    "__EMPTY_2": "7%",
+    "Updated: March 2025": "49%"
+  },
+  {
+    "__EMPTY": "5.1",
+    "__EMPTY_1": "Overreliance and unsafe use",
+    "__EMPTY_2": "4%",
+    "Updated: March 2025": "32%"
+  },
+  {
+    "__EMPTY": "5.2",
+    "__EMPTY_1": "Loss of human agency and autonomy",
+    "__EMPTY_2": "3%",
+    "Updated: March 2025": "33%"
+  },
+  {
+    "__EMPTY": "6",
+    "__EMPTY_1": "Socioeconomic & Environmental",
+    "__EMPTY_2": "19%",
+    "Updated: March 2025": "76%"
+  },
+  {
+    "__EMPTY": "6.1",
+    "__EMPTY_1": "Power centralization and unfair distribution of benefits",
+    "__EMPTY_2": "4%",
+    "Updated: March 2025": "41%"
+  },
+  {
+    "__EMPTY": "6.2",
+    "__EMPTY_1": "Increased inequality and decline in employment quality",
+    "__EMPTY_2": "3%",
+    "Updated: March 2025": "41%"
+  },
+  {
+    "__EMPTY": "6.3",
+    "__EMPTY_1": "Economic and cultural devaluation of human effort",
+    "__EMPTY_2": "2%",
+    "Updated: March 2025": "35%"
+  },
+  {
+    "__EMPTY": "6.4",
+    "__EMPTY_1": "Competitive dynamics",
+    "__EMPTY_2": "1%",
+    "Updated: March 2025": "19%"
+  },
+  {
+    "__EMPTY": "6.5",
+    "__EMPTY_1": "Governance failure",
+    "__EMPTY_2": "4%",
+    "Updated: March 2025": "30%"
+  },
+  {
+    "__EMPTY": "6.6",
+    "__EMPTY_1": "Environmental harm",
+    "__EMPTY_2": "4%",
+    "Updated: March 2025": "38%"
+  },
+  {
+    "__EMPTY": "7",
+    "__EMPTY_1": "AI system safety, failures, & limitations",
+    "__EMPTY_2": "25%",
+    "Updated: March 2025": "75%"
+  },
+  {
+    "__EMPTY": "7.1",
+    "__EMPTY_1": "AI pursuing its own goals in conflict with human goals or values",
+    "__EMPTY_2": "7%",
+    "Updated: March 2025": "48%"
+  },
+  {
+    "__EMPTY": "7.2",
+    "__EMPTY_1": "AI possessing dangerous capabilities",
+    "__EMPTY_2": "4%",
+    "Updated: March 2025": "25%"
+  },
+  {
+    "__EMPTY": "7.3",
+    "__EMPTY_1": "Lack of capability or robustness",
+    "__EMPTY_2": "8%",
+    "Updated: March 2025": "56%"
+  },
+  {
+    "__EMPTY": "7.4",
+    "__EMPTY_1": "Lack of transparency or interpretability",
+    "__EMPTY_2": "3%",
+    "Updated: March 2025": "33%"
+  },
+  {
+    "__EMPTY": "7.5",
+    "__EMPTY_1": "AI welfare and rights",
+    "__EMPTY_2": "<1%",
+    "Updated: March 2025": "3%"
+  },
+  {
+    "__EMPTY": "7.6",
+    "__EMPTY_1": "Multi-agent risks ",
+    "__EMPTY_2": "3%",
+    "Updated: March 2025": "3%"
+  },
+  {
+    "__EMPTY": "More information",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "🌐 https://airisk.mit.edu/",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "For the column 'Proportion of documents in AI risk database', each cell refers to the proportion of included documents where that domain or subdomain of AI risk is mentioned. These do not sum to 100%.",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "Feedback/Contact us",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "💬 Use this form to offer feedback, and suggest resources or risks to add",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "📧 Email: pslat[at]mit.edu",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "📄 Cite as: Slattery, P., Saeri, A. K., Grundy, E. A. C., Graham, J., Noetel, M., Uuk, R., Dao, J., Pour, S., Casper, S., & Thompson, N. (2024). A systematic evidence review and common frame of reference for the risks from artificial intelligence. https://doi.org/10.48550/arXiv.2408.12622",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  },
+  {
+    "__EMPTY": "This work is licensed under CC BY 4.0",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "Updated: March 2025": ""
+  }
+]

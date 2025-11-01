@@ -26,11 +26,11 @@ const DefensesMitigationsContext = createContext<DefensesMitigationsState | unde
 const DEFENSES_STORAGE_KEY = 'llmGuardrailDefensesMitigations';
 
 export const DefensesMitigationsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [defenses, setDefenses] = useState<DefenseMitigationReference[]>([]);
-  const [keyControlsStrategies, setKeyControlsStrategies] = useState<KeyControlStrategy[]>([]);
-  const [keyDetectionMechanisms, setKeyDetectionMechanisms] = useState<KeyControlStrategy[]>([]);
-  const [owaspTopTen, setOwaspTopTen] = useState<OwaspReference[]>([]);
-  const [owaspAgenticTop15, setOwaspAgenticTop15] = useState<OwaspReference[]>([]);
+  const [defenses, setDefenses] = useState<DefenseMitigationReference[]>(INITIAL_DEFENSES_MITIGATIONS);
+  const [keyControlsStrategies, setKeyControlsStrategies] = useState<KeyControlStrategy[]>(INITIAL_KEY_CONTROLS_STRATEGIES);
+  const [keyDetectionMechanisms, setKeyDetectionMechanisms] = useState<KeyControlStrategy[]>(INITIAL_KEY_DETECTION_MECHANISMS);
+  const [owaspTopTen, setOwaspTopTen] = useState<OwaspReference[]>(INITIAL_OWASP_TOP_TEN_LLM);
+  const [owaspAgenticTop15, setOwaspAgenticTop15] = useState<OwaspReference[]>(INITIAL_OWASP_AGENTIC_TOP_15);
 
   useEffect(() => {
     try {

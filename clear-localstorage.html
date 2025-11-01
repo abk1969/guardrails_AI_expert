@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear AI RISK MANAGER LocalStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: #eaeaea;
+        }
+        h1 {
+            color: #00d4ff;
+        }
+        .button {
+            background-color: #00d4ff;
+            color: #1a1a2e;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background-color: #00a8cc;
+        }
+        .danger {
+            background-color: #ff4757;
+            color: white;
+        }
+        .danger:hover {
+            background-color: #d63031;
+        }
+        .success {
+            background-color: #2ecc71;
+        }
+        .info {
+            background-color: #2c2c54;
+            padding: 15px;
+            border-left: 4px solid #00d4ff;
+            margin: 20px 0;
+        }
+        .storage-item {
+            background-color: #2c2c54;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #2c2c54;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 AI RISK MANAGER - LocalStorage Manager</h1>
+
+    <div class="info">
+        <strong>⚠️ Instructions:</strong><br>
+        1. Ouvrez cet fichier dans votre navigateur<br>
+        2. Cliquez sur "Afficher les clés stockées" pour voir ce qui est en mémoire<br>
+        3. Cliquez sur "Vider TOUT le localStorage" pour réinitialiser les données<br>
+        4. Rechargez l'application sur <a href="http://localhost:5080" style="color: #00d4ff;">http://localhost:5080</a>
+    </div>
+
+    <div>
+        <button class="button" onclick="showStorageKeys()">📋 Afficher les clés stockées</button>
+        <button class="button danger" onclick="clearAllStorage()">🗑️ Vider TOUT le localStorage</button>
+        <button class="button danger" onclick="clearAIRiskStorage()">🎯 Vider uniquement les données AI RISK</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        function showStorageKeys() {
+            const output = document.getElementById('output');
+            const keys = Object.keys(localStorage);
+
+            if (keys.length === 0) {
+                output.innerHTML = '<p style="color: #2ecc71;">✅ Le localStorage est vide.</p>';
+                return;
+            }
+
+            let html = '<h3>📦 Clés actuellement stockées (' + keys.length + '):</h3>';
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                const size = new Blob([value]).size;
+                html += '<div class="storage-item">';
+                html += '<strong>' + key + '</strong> (' + size + ' bytes)<br>';
+                html += '<small>' + value.substring(0, 100) + (value.length > 100 ? '...' : '') + '</small>';
+                html += '</div>';
+            });
+
+            output.innerHTML = html;
+        }
+
+        function clearAllStorage() {
+            if (confirm('⚠️ ATTENTION: Cela va supprimer TOUTES les données stockées localement. Continuer?')) {
+                const keysCount = Object.keys(localStorage).length;
+                localStorage.clear();
+                const output = document.getElementById('output');
+                output.innerHTML = '<p style="color: #2ecc71; font-size: 18px;">✅ LocalStorage complètement vidé! (' + keysCount + ' clés supprimées)</p>' +
+                                  '<p>🔄 Rechargez maintenant l\'application sur <a href="http://localhost:5080" style="color: #00d4ff;">http://localhost:5080</a></p>';
+            }
+        }
+
+        function clearAIRiskStorage() {
+            if (confirm('Supprimer uniquement les données AI RISK MANAGER?')) {
+                const keys = Object.keys(localStorage);
+                const aiRiskKeys = keys.filter(key =>
+                    key.startsWith('llmGuardrail') ||
+                    key.startsWith('compass-') ||
+                    key.startsWith('aiPolicy') ||
+                    key.startsWith('aiRisk')
+                );
+
+                let deletedCount = 0;
+                aiRiskKeys.forEach(key => {
+                    localStorage.removeItem(key);
+                    deletedCount++;
+                });
+
+                const output = document.getElementById('output');
+                if (deletedCount > 0) {
+                    output.innerHTML = '<p style="color: #2ecc71; font-size: 18px;">✅ ' + deletedCount + ' clés AI RISK supprimées!</p>' +
+                                      '<p>🔄 Rechargez maintenant l\'application sur <a href="http://localhost:5080" style="color: #00d4ff;">http://localhost:5080</a></p>';
+                } else {
+                    output.innerHTML = '<p style="color: #ff4757;">❌ Aucune clé AI RISK trouvée.</p>';
+                }
+            }
+        }
+
+        // Afficher automatiquement les clés au chargement
+        window.onload = showStorageKeys;
+    </script>
+</body>
+</html>

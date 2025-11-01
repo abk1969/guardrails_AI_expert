@@ -1,0 +1,1231 @@
+[
+  {
+    "id": "COMPASS-UC-0001",
+    "vulnerabilities": [
+      "CVE-2024-10835",
+      "CVE-2024-9000",
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2024-10954",
+      "CVE-2024-10950",
+      "CVE-2025-2450"
+    ],
+    "incidents": [
+      "Chat GPT Inference Attack",
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      9,
+      10,
+      12,
+      14
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0002",
+    "vulnerabilities": [],
+    "incidents": [
+      "Deep Fake Fraud"
+    ],
+    "defenses": [],
+    "questions": [],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0003",
+    "vulnerabilities": [
+      "CVE-2024-10835",
+      "CVE-2024-10954",
+      "CVE-2024-10950"
+    ],
+    "incidents": [
+      "Financial Transaction Hijacking with M365 Copilot as an Insider. The attack abused the fact that Copilot ingests received emails into a retrieval augmented generation (RAG) database. The researchers sent an email that contained content designed to be retrieved by a user query as well as a prompt injection to manipulate the behavior of Copilot. The retrieval content targeted a user searching for banking information needed to complete a wire transfer, but contained the attacker's banking information instead."
+    ],
+    "defenses": [
+      0,
+      1,
+      4,
+      6
+    ],
+    "questions": [],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [
+      7,
+      44
+    ],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0004",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [],
+    "questions": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      12,
+      13
+    ],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0005",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      9,
+      10,
+      12,
+      14
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0006",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0007",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0008",
+    "vulnerabilities": [
+      "CVE-2024-10834"
+    ],
+    "incidents": [
+      "France welfare fraud detection algorithm accused of exacerbating inequality",
+      "Deep Fake Fraud",
+      "Detecting and Countering Malicious Uses of Claude: March 2025"
+    ],
+    "defenses": [],
+    "questions": [],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0009",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      9,
+      10,
+      12,
+      14
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0010",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [],
+    "questions": [],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [
+      19
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0011",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "France welfare fraud detection algorithm accused of exacerbating inequality",
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      9,
+      10,
+      12,
+      14
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0012",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0013",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0014",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0015",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      9,
+      10,
+      12
+    ],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0016",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      9,
+      10,
+      12,
+      14
+    ],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0017",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0018",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0019",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [],
+    "questions": [],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0020",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [],
+    "questions": [],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0021",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0022",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0023",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      9,
+      10,
+      12,
+      14
+    ],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0024",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0025",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [],
+    "questions": [],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [
+      41,
+      47,
+      48,
+      51,
+      52,
+      54
+    ],
+    "redTeamResults": [
+      19
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0026",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0027",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0028",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      4,
+      5
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [
+      19
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0029",
+    "vulnerabilities": [],
+    "incidents": [],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      9,
+      10,
+      12,
+      14
+    ],
+    "threatProfiles": [],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0030",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "redTeamSecurity": [
+      2,
+      3,
+      12,
+      13,
+      14,
+      15
+    ],
+    "redTeamResults": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "useCases": []
+  },
+  {
+    "id": "COMPASS-UC-0031",
+    "vulnerabilities": [
+      "CVE-2024-11301",
+      "CVE-2024-10273",
+      "CVE-2024-10109",
+      "CVE-2025-2450",
+      "CVE-2024-10940",
+      "CVE-2025-2867"
+    ],
+    "incidents": [
+      "McDonald sued for use of AI which collected voice print biometrics",
+      "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+      "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+      "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+      "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available."
+    ],
+    "defenses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "questions": [],
+    "threatProfiles": [
+      5,
+      30
+    ],
+    "attackSurfaces": [],
+    "incidentReadiness": [],
+    "redTeamSecurity": [],
+    "redTeamResults": [],
+    "useCases": []
+  }
+]

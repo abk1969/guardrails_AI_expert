@@ -1,0 +1,662 @@
+[
+  {
+    "__EMPTY": "Resources being considered",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "This page is not mobile-friendly; please access on a computer if you can.",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Description of sheet",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "A list of all documents which are being considered for inclusion in the database. \n\nOur inclusion criteria are reviews, articles, reports, and documents primarily focused on proposing new frameworks, taxonomies, or other structured classifications of risks from AI present across multiple locations and industry sectors. \n\nWe exclude: \nBook chapters, theses, commentaries, editorials, protocols\nReviews, articles, reports, and documents that:\nDiscuss impacts, outcomes, or other consequences of AI without specifying risks.\nFocus on risks from AI present in a single location or sector.\nOnly cite or discuss existing theories, frameworks, models, taxonomies, and other structured classifications.\nFocus on risks specific to a particular risk category (e.g., bias) or tool (e.g., DALL-E).\nFocus on sources of risk or the risk assessment process.\nNon-English articles, reports, and documents. \nForum posts, blog posts, slide decks, and social media posts\n\nProposed content is awaiting review. Approved content will be added to the next iteration of the database. Rejected content will not be added to the next iteration but may be added to future iterations if we update our decision.",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "How to use",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Please review this sheet before recommending new documents to include. ",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Summary of Decisions (by Version) ",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Repository Version ",
+    "__EMPTY_1": "Considered ",
+    "Updated: 26 March 2025": "Excluded ",
+    "__EMPTY_2": "Included ",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "V2 ",
+    "__EMPTY_1": "31",
+    "Updated: 26 March 2025": "18",
+    "__EMPTY_2": "13",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "V3",
+    "__EMPTY_1": "12",
+    "Updated: 26 March 2025": "3",
+    "__EMPTY_2": "9",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Version 3 (April 2025) - Resources Being Considered ",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Title",
+    "__EMPTY_1": "Authors",
+    "Updated: 26 March 2025": "Year",
+    "__EMPTY_2": "URL",
+    "__EMPTY_3": "Source",
+    "__EMPTY_4": "Suggested",
+    "__EMPTY_5": "To be Included",
+    "__EMPTY_6": "Reason"
+  },
+  {
+    "__EMPTY": "The AILuminate Assessment Standard",
+    "__EMPTY_1": "MLCommons ",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://drive.google.com/file/d/1jVYoSGJHtDo1zQLTzU7QXDkRMZIberdo/view",
+    "__EMPTY_3": "Alexander Saeri",
+    "__EMPTY_4": "01/03/2025",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Duplicate"
+  },
+  {
+    "__EMPTY": "A Collaborative, Human-Centred Taxonomy of AI, Algorithmic, and Automation Harms",
+    "__EMPTY_1": "Abercrombie, G.; Benbouzid, D.; Giudici, P.; Golpayegani, D.; Hernandez, J.; Noro, P.; Pandit, H.; Paraschou, E.; Pownall, C.; Prajapati, J.; Sayre, M. A.; Sengupta, U.; Suriyawongkul, A.; Thelot, R.; Vei, S.; Waltersdorfer, L. ",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://drive.google.com/file/d/1-kGdaYizobuwjDSgIYKh7H3dhNuP0QzI/view",
+    "__EMPTY_3": "Charlie Pownall",
+    "__EMPTY_4": "12/05/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Atlas of AI Risks: Enhancing Public Understanding of AI Risks",
+    "__EMPTY_1": "Bogucka, E., Šćepanović, S.; Quercia, D.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://social-dynamics.net/atlas/",
+    "__EMPTY_3": "Peter Slattery ",
+    "__EMPTY_4": "1/3/2025",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "NIST National Vulnerability Database ",
+    "__EMPTY_1": "NIST ",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://nvd.nist.gov/",
+    "__EMPTY_3": "Alexander Saeri",
+    "__EMPTY_4": "1/21/2025",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "AI Hazard Management: A Framework for the Systematic Management of Root Causes for AI Risks",
+    "__EMPTY_1": "Schnitzer, R., Hapfelmeier, A., Gaube, S., & Zillner, S. ",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://link.springer.com/chapter/10.1007/978-981-99-9836-4_27#Tab1",
+    "__EMPTY_3": "Jessica Graham ",
+    "__EMPTY_4": "1/31/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "International AI Safety Report ",
+    "__EMPTY_1": "Y. Bengio, S. Mindermann, D. Privitera, T. Besiroglu, R. Bommasani, S. Casper, Y. Choi, P. Fox, B. Garfinkel, D. Goldfarb, H. Heidari, A. Ho, S. Kapoor, L. Khalatbari, S. Longpre, S. Manning, V. Mavroudis, M. Mazeika, J. Michael, J. Newman, K. Y. Ng, C. T. Okolo, D. Raji, G. Sastry, E. Seger, T. Skeadas, T. South, E. Strubell, F. Tramèr, L. Velasco, N. Wheeler, D. Acemoglu, O. Adekanmbi, D. Dalrymple, T. G. Dietterich, P. Fung, P.-O. Gourinchas, F. Heintz, G. Hinton, N. Jennings, A. Krause, S. Leavy, P. Liang, T. Ludermir, V. Marda, H. Margetts, J. McDermid, J. Munga, A. Narayanan, A. Nelson, C. Neppel, A. Oh, G. Ramchurn, S. Russell, M. Schaake, B. Schölkopf, D. Song, A. Soto, L. Tiedrich, G. Varoquaux, E. W. Felten, A. Yao, Y.-Q. Zhang, O. Ajala, F. Albalawi, M. Alserkal, G. Avrin, C. Busch, A. C. P. de L. F. de Carvalho, B. Fox, A. S. Gill, A. H. Hatip, J. Heikkilä, C. Johnson, G. Jolly, Z. Katzir, S. M. Khan, H. Kitano, A. Krüger, K. M. Lee, D. V. Ligot, J. R. López Portillo, D., O. Molchanovskyi, A. Monti, N. Mwamanzi, M. Nemer, N. Oliver, R. Pezoa Rivera, B. Ravindran, H. Riza, C. Rugege, C. Seoighe, H. Sheikh, J. Sheehan, D. Wong, Y. Zeng",
+    "Updated: 26 March 2025": "2025",
+    "__EMPTY_2": "https://assets.publishing.service.gov.uk/media/679a0c48a77d250007d313ee/International_AI_Safety_Report_2025_accessible_f.pdf",
+    "__EMPTY_3": "Peter Slattery ",
+    "__EMPTY_4": "2/3/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "A Taxonomy of Systemic Risks from General-Purpose AI ",
+    "__EMPTY_1": "Uuk, R., Gutierrez, C.I., Guppy, D., Lauwaert, L., Kasirzadeh, A., Velasco, L., Slattery, P., Prunkl, C.",
+    "Updated: 26 March 2025": "2025",
+    "__EMPTY_2": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5030173",
+    "__EMPTY_3": "Peter Slattery ",
+    "__EMPTY_4": "2/19/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Risk Sources and Risk Management Measures in Support of Standards for General-Purpose AI Systems",
+    "__EMPTY_1": "Gipiškis, R., San Joaquin, A., Chin, Z.S., Regenfuß, A., Gil, A., Holtman, K.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://arxiv.org/abs/2410.23472",
+    "__EMPTY_3": "Peter Slattery ",
+    "__EMPTY_4": "2/19/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Multi-Agent Risks from Advanced AI ",
+    "__EMPTY_1": "Hammond, L., Chan, A., Clifton, J., Hoelscher-Obermaier, J., Khan, A., McLean, E., Smith, C., Barfuss, W., Foerster, J., Gavenčiak, T., Han, T. A., Hughes, E., Kovařík, V., Kulveit, J., Leibo, J. Z., Oesterheld, C., Schroeder de Witt, C., Shah, N., Wellman, M., Bova, P., Cimpeanu, T., Ezell, C., Feuillade-Montixi, Q., Franklin, M., Kran, E., Krawczuk, I., Lamparth, M., Lauffer, N., Meinke, A., Motwani, S., Reuel, A., Conitzer, V., Dennis, M., Gabriel, I., Gleave, A., Hadfield, G., Haghtalab, N., Kasirzadeh, A., Krier, S., Larson, K., Lehman, J., Parkes, D. C., Piliouras, G., Rahwan, I.",
+    "Updated: 26 March 2025": "2025",
+    "__EMPTY_2": "https://arxiv.org/abs/2502.14143",
+    "__EMPTY_3": "Alexander Saeri",
+    "__EMPTY_4": "2/21/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Mapping the Misuse of Generative AI ",
+    "__EMPTY_1": "Marchal, N. and Xu, R.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://deepmind.google/discover/blog/mapping-the-misuse-of-generative-ai/",
+    "__EMPTY_3": "Jessica Graham ",
+    "__EMPTY_4": "13/3/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "AILUMINATE: Introducing v1.0 of the AI Risk and Reliability Benchmark from MLCommons",
+    "__EMPTY_1": "Ghosh, S., Frase, H., Williams, A., Luger, S., Röttger, P., Barez, F., McGregor, S., Fricklas, K., Kumar, M., Feuillade–Montixi, Q., Bollacker, K., Friedrich, F., Tsang, R., Vidgen, B., Parrish, A., Knotz, C., Presani, E., Bennion, J., Ferrara Boston, M., Kuniavsky, M., Hutiri, W., Ezick, J., Ben Salem, M., Sahay, R., Goswami, S., Gohar, U., BenHuang, B., Sarin, S., Alhajjar, E., Chen, C., Eng, R., Manjusha, K., Mehta, V., Long, E., Emani, M., Vidra, N., Rukundo, B., Shahbazi, A., Chen, K., Ghosh, R., Thangarasa, V., Peigné, P., Singh, A., MaxBartolo, M., Krishna, S., Akhtar, M., Gold, R., Coleman, C., Oala, L., Tashev, V., Imperial, J., AmyRuss, A., Kunapuli, S., Miailhe, N., Delaunay, J., Radharapu, B., Shinde, R., Tuesday, T., Dutta, D., Grabb, D., Gangavarapu, A., Sahay, S., Gangavarapu, A., Schramowski, P., Singam, S., David, T., Han, X., Mammen, P., Prabhakar, T., Kovatchev, V., Ahmed, A., Manyeki, K., Madireddy, S., Khomh, F., Zhdanov, F., Baumann, J., Vasan, N., Yang, X., Mougn, C., Varghese, J., Chinoy, H., Jitendar, S., Maskey, M., Hardgrove, C., Li, T., Gupta, A., Joswin, E., Mai, Y., Kumar, S., CigdemPatlak, C., Lu, K., Alessi, V., Balija, S., Gu, C., Sullivan, R., Gealy, J., Lavrisa, M., Goel, J., Mattson, P., Liang, P., Vanschoren, J.",
+    "Updated: 26 March 2025": "2025",
+    "__EMPTY_2": "https://arxiv.org/pdf/2503.05731",
+    "__EMPTY_3": "Peter Slattery ",
+    "__EMPTY_4": "14/3/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "AI Risk Atlas ",
+    "__EMPTY_1": "IBM",
+    "Updated: 26 March 2025": "2025",
+    "__EMPTY_2": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas",
+    "__EMPTY_3": "Alexander Saeri",
+    "__EMPTY_4": "14/3/2025",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "UPDATE STATUS: COMPLETE (26/03/2025)",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Version 2 (January, 2025) - Resources Considered ",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Title",
+    "__EMPTY_1": "Authors",
+    "Updated: 26 March 2025": "Year",
+    "__EMPTY_2": "URL",
+    "__EMPTY_3": "Source",
+    "__EMPTY_4": "Suggested",
+    "__EMPTY_5": "To be Included",
+    "__EMPTY_6": "Reason"
+  },
+  {
+    "__EMPTY": "Classifying sources of AI x-risk",
+    "__EMPTY_1": "Clarke, S. ",
+    "Updated: 26 March 2025": "2022",
+    "__EMPTY_2": "https://forum.effectivealtruism.org/posts/e55QpEExmtkRjw9CD/classifying-sources-of-ai-x-risk",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Wrong document type "
+  },
+  {
+    "__EMPTY": "Distinguishing AI takeover scenarios",
+    "__EMPTY_1": "Clarke, S. and Martin, S.D.",
+    "Updated: 26 March 2025": "2021",
+    "__EMPTY_2": "https://www.alignmentforum.org/posts/qYzqDtoQaZ3eDDyxa/distinguishing-ai-takeover-scenarios#:~:text=We%20define%20AI%20takeover%20to,t%20desirable%20by%20human%20standards.",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Wrong document type "
+  },
+  {
+    "__EMPTY": "A Survey of the Potential Long-term Impacts of AI",
+    "__EMPTY_1": "Clarke, S. and Whittlestone, J. ",
+    "Updated: 26 March 2025": "2022",
+    "__EMPTY_2": "https://arxiv.org/abs/2206.11076",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "TASRA: a Taxonomy and Analysis of Societal-Scale Risks",
+    "__EMPTY_1": "Critch, A., Russell, S.",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://arxiv.org/abs/2306.06924",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Duplicate"
+  },
+  {
+    "__EMPTY": "AI Governance: A Research Agenda",
+    "__EMPTY_1": "Dafoe, A. ",
+    "Updated: 26 March 2025": "2018",
+    "__EMPTY_2": "https://cdn.governance.ai/GovAI-Research-Agenda.pdf",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "AI Governance Overview and Theoretical Lenses",
+    "__EMPTY_1": "Dafoe, A. ",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://academic.oup.com/edited-volume/41989/chapter-abstract/408516484?redirectedFrom=fulltext",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Wrong document type "
+  },
+  {
+    "__EMPTY": "The Ethics of Advanced AI Assistants",
+    "__EMPTY_1": "Gabriel, I., Manzini, A., Keeling, G., Hendricks, L.A., Rieser, V., Iqbal, H., Tomašev, N., Ktena, I., Kenton, Z., Rodriguez, M., El-Sayed, S., Brown, S., Akbulut, C., Trask, A., Hughes, E., Bergman, A.S., Shelby, R., Marchal, N., Griffin, C., Mateos-Garcia, J., Weidinger, L., Street, W., Lange, B., Ingerman, A., Lentz, A., Enger, R., Barakat, A., Krakovna, V., Siy, J.O., Kurth-Nelson, Z., McCroskery, A., Bolina, V., Law, H., Shanahan, M., Alberts, L., Balle, B., de Haas, S., Ibitoye, Y., Dafoe, A., Goldberg, B., Krier, S., Reese, A., Witherspoon, S., Hawkins, W., Rauh, M., Wallace, D., Franklin, M., Goldstein, J.A., Lehman, J., Klenk, M., Vallor, S., Biles, C., Morris, M.R., King, H., Agüera y Arcas, B., Isaac, W., Manyika, J.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://arxiv.org/abs/2404.16244",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Duplicate"
+  },
+  {
+    "__EMPTY": "Ten Hard Problems in Artificial Intelligence We Must Solve",
+    "__EMPTY_1": "Leech, G., Garfinkel, S., Yagudin, M., Briand, A., and Zhuralev, A.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://arxiv.org/pdf/2402.04464",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Artificial Intelligence Governance Under Change",
+    "__EMPTY_1": "Maas, M. ",
+    "Updated: 26 March 2025": "2021",
+    "__EMPTY_2": "https://www.researchgate.net/publication/351314988_Artificial_Intelligence_Governance_Under_Change_Foundations_Facets_Frameworks",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Wrong document type "
+  },
+  {
+    "__EMPTY": "Advanced AI governance: A Literature Review",
+    "__EMPTY_1": "Maas, M. ",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://deliverypdf.ssrn.com/delivery.php?ID=997085004006090124125126088098106125026064002040052074078088066090103093026103100092121022038118114014116086118090087004018021028020004053048009024127071084029093103002028001115090012015114031091120007126001086127092101110005066074115004067066114090116&EXT=pdf&INDEX=TRUE",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Governing General Purpose AI: A Comprehensive Map",
+    "__EMPTY_1": "Maham, P. and Küspert, S. ",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://www.stiftung-nv.de/sites/default/files/snv_governing_general_purpose_ai_pdf.pdf",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Evaluating Frontier Models for Dangerous Capabilities",
+    "__EMPTY_1": "Phuong, M., Aitchison, M., Catt, E., Cogan, S., Kaskasoli, A., Krakovna, V., Lindner, D., Rahtz, M., Assael, Y., Hodkinson, S., Howard, H., Lieberum, T., Kumar, R., Raad, M.A., Webson, A., Ho, L., Lin, S., Farquhar, S., Hutter, M., Deletang, G., Ruoss, A., El-Sayed, S., Brown, S., Dragan, A., Shah, R., Dafoe, A., Shevlane, T.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://arxiv.org/pdf/2403.13793",
+    "__EMPTY_3": "Matthjis Maas ",
+    "__EMPTY_4": "5/13/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "AGI Safety Literature Review ",
+    "__EMPTY_1": "Everitt, T., Lea, G., and Hutter, M. ",
+    "Updated: 26 March 2025": "2018",
+    "__EMPTY_2": "https://arxiv.org/abs/1805.01109",
+    "__EMPTY_3": "Alexander Saeri",
+    "__EMPTY_4": "5/27/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "International Scientific Report on the Safety of Advanced AI",
+    "__EMPTY_1": "Yohsua, Bengio, et al.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://www.gov.uk/government/publications/international-scientific-report-on-the-safety-of-advanced-ai",
+    "__EMPTY_3": "Stephen Casper",
+    "__EMPTY_4": "6/16/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "AI Risk Categorization Decoded (AIR 2024): From Government Regulations to Corporate Policies",
+    "__EMPTY_1": "Yi Zeng, Kevin Klyman, Andy Zhou, Yu Yang, Minzhou Pan, Ruoxi Jia, Dawn Song, Percy Liang and Bo Li",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://arxiv.org/html/2406.17864v1",
+    "__EMPTY_3": "Michael Aird/Matthjis Maas ",
+    "__EMPTY_4": "6/30/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Future Risks of Frontier AI",
+    "__EMPTY_1": "Uk Government Office For Science",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://assets.publishing.service.gov.uk/media/653bc393d10f3500139a6ac5/future-risks-of-frontier-ai-annex-a.pdf",
+    "__EMPTY_3": "Shahar Avin",
+    "__EMPTY_4": "7/2/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Safety by Design for Generative AI: Preventing Child Sexual Abuse",
+    "__EMPTY_1": "AWS AI, Civitai, Hugging Face, Inflection, Metaphysic, Stability AI, Teleperformance",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://info.thorn.org/hubfs/thorn-safety-by-design-for-generative-AI.pdf",
+    "__EMPTY_3": "No name provided ",
+    "__EMPTY_4": "8/14/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - not cross-cutting "
+  },
+  {
+    "__EMPTY": "Generative ML and CSAM: Implications and Mitigations ",
+    "__EMPTY_1": "Thiel, D., Stoebel, M. and Portnoff, R. ",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://stacks.stanford.edu/file/druid:jv206yg3793/20230624-sio-cg-csam-report.pdf",
+    "__EMPTY_3": "No name provided ",
+    "__EMPTY_4": "8/14/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "Artificial Intelligence Alignment, Accountability, and Interpretability Commons Repository",
+    "__EMPTY_1": "NA ",
+    "Updated: 26 March 2025": "n.d. ",
+    "__EMPTY_2": "https://www.aiaaic.org/aiaaic-repository",
+    "__EMPTY_3": "No name provided ",
+    "__EMPTY_4": "8/14/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "Machine Learning Risk and Control Framework ",
+    "__EMPTY_1": "Blumenthal, R., Erdmann, N., Heitmann, M., Lemettinen, A., and Stockton, B. ",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://ispe.org/pharmaceutical-engineering/january-february-2024/machine-learning-risk-and-control-framework",
+    "__EMPTY_3": "Brandi M. Stockton ",
+    "__EMPTY_4": "8/14/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "Saihub Harms Register ",
+    "__EMPTY_1": "Lily Innovation ",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://saihub.info",
+    "__EMPTY_3": "Maury Shenk",
+    "__EMPTY_4": "8/14/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "MITRE ATLAS ",
+    "__EMPTY_1": "MITRE ",
+    "Updated: 26 March 2025": "2021-2024 ",
+    "__EMPTY_2": "https://atlas.mitre.org/",
+    "__EMPTY_3": "Christina Liaghati",
+    "__EMPTY_4": "8/15/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "AI Risk Database ",
+    "__EMPTY_1": "NA ",
+    "Updated: 26 March 2025": "NA ",
+    "__EMPTY_2": "https://airisk.io/",
+    "__EMPTY_3": "Christina Liaghati",
+    "__EMPTY_4": "8/15/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "AI Incident Database ",
+    "__EMPTY_1": "NA ",
+    "Updated: 26 March 2025": "NA ",
+    "__EMPTY_2": "incidentdatabase.ai",
+    "__EMPTY_3": "No name provided ",
+    "__EMPTY_4": "8/15/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile",
+    "__EMPTY_1": "National Institute of Standards and Technology",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+    "__EMPTY_3": "Audrey Kittock ",
+    "__EMPTY_4": "8/15/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Regulating under Uncertainty: Governance Options for Generative AI",
+    "__EMPTY_1": "Florence G'sell ",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4918704",
+    "__EMPTY_3": "Peter Slattery",
+    "__EMPTY_4": "8/28/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Responsible AI Question Bank: A Comprehensive Tool for AI Risk Assessment ",
+    "__EMPTY_1": "Lee, S. U., Perera, H., Liu, Y., Xia, B., Lu, Q., & Zhu, L.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://arxiv.org/abs/2408.11820",
+    "__EMPTY_3": "Peter Slattery",
+    "__EMPTY_4": "8/28/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "GenAI against humanity: nefarious applications of generative artificial intelligence and large language models",
+    "__EMPTY_1": "Ferrera, E. ",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://link.springer.com/article/10.1007/s42001-024-00250-1",
+    "__EMPTY_3": "Emilio Ferrara",
+    "__EMPTY_4": "8/29/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Framework Convention on Global AI Challenges ",
+    "__EMPTY_1": "Lee, S. U., Perera, H., Liu, Y., Xia, B., Lu, Q., & Zhu, L.",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://www.cigionline.org/static/documents/AI-challenges.pdf",
+    "__EMPTY_3": "Bruce Tsai",
+    "__EMPTY_4": "8/30/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "Implementing the UK’s AI Regulatory Principles  ",
+    "__EMPTY_1": "Department for Science, Innovation and Technology",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://assets.publishing.service.gov.uk/media/65c0b6bd63a23d0013c821a0/implementing_the_uk_ai_regulatory_principles_guidance_for_regulators.pdf'",
+    "__EMPTY_3": "Josh Philliban ",
+    "__EMPTY_4": "8/19/2024",
+    "__EMPTY_5": "No",
+    "__EMPTY_6": "Excl - Not an organised framework"
+  },
+  {
+    "__EMPTY": "AI Safety Governance Framework",
+    "__EMPTY_1": "National Technical Committee 260 on Cybersecurity of SAC 2024.9",
+    "Updated: 26 March 2025": "2024",
+    "__EMPTY_2": "https://www.tc260.org.cn/upload/2024-09-09/1725849192841090989.pdf",
+    "__EMPTY_3": "Peter Slattery ",
+    "__EMPTY_4": "9/19/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "Harm to Nonhuman Animals from AI: A Systematic Account and Framework ",
+    "__EMPTY_1": "Coghlan, S., Parker, C. ",
+    "Updated: 26 March 2025": "2023",
+    "__EMPTY_2": "https://link.springer.com/article/10.1007/s13347-023-00627-6",
+    "__EMPTY_3": "Zachary Brown ",
+    "__EMPTY_4": "9/30/2024",
+    "__EMPTY_5": "Yes",
+    "__EMPTY_6": "Incl"
+  },
+  {
+    "__EMPTY": "UPDATE STATUS: COMPLETE (08/01/2025) ",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "More information",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "🌐 https://airisk.mit.edu/",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "Feedback/Contact us",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "💬 Use this form to offer feedback, and suggest resources or risks to add",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "📧 Email: pslat[at]mit.edu",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  },
+  {
+    "__EMPTY": "📄 Cite as: Slattery, P., Saeri, A. K., Grundy, E. A. C., Graham, J., Noetel, M., Uuk, R., Dao, J., Pour, S., Casper, S., & Thompson, N. (2024). A systematic evidence review and common frame of reference for the risks from artificial intelligence. http://doi.org/10.13140/RG.2.2.28850.00968",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": "",
+    "__EMPTY_4": "",
+    "__EMPTY_5": "",
+    "__EMPTY_6": ""
+  }
+]

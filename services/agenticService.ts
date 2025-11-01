@@ -1,23 +1,10 @@
-import { GoogleGenAI } from "@google/genai";
-
 // ⚠️ SÉCURITÉ: La clé API ne doit JAMAIS être exposée côté client!
-// Les appels Gemini doivent passer par le backend.
-// Ce code est conservé pour compatibilité temporaire uniquement.
+// Tous les appels Gemini passent maintenant par le backend de manière sécurisée.
+// ✅ Ce service utilise uniquement l'API backend sécurisée.
 
-// Pour le chat, utiliser l'endpoint backend sécurisé
 const BACKEND_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
 
-// Instance Gemini UNIQUEMENT si clé fournie (mode développement temporaire)
-let ai: GoogleGenAI | null = null;
-try {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (apiKey) {
-        ai = new GoogleGenAI({ apiKey });
-        console.warn('⚠️ ATTENTION: Clé API Gemini détectée côté client. Ceci est un risque de sécurité!');
-    }
-} catch (error) {
-    console.log('Mode backend-only activé (recommandé pour sécurité)');
-}
+console.log('✅ agenticService.ts configuré en mode backend sécurisé');
 
 /**
  * This function acts as the "MCP Server".
@@ -62,19 +49,29 @@ ${JSON.stringify(simplifiedContext, null, 2)}
 `;
 
     try {
-        // ✅ Option 1: Utiliser la clé API locale si disponible (RECOMMANDÉ pour développement)
-        if (ai) {
-            console.log('💡 Utilisation de la clé API Gemini locale (mode développement)');
-            try {
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents,
-                });
-                return response.text;
-            } catch (apiError) {
-                console.warn('⚠️ Erreur API Gemini:', apiError);
-                // Fallback si erreur API
+        // ✅ Option 1: Appeler le backend sécurisé (RECOMMANDÉ)
+        console.log('🔒 Appel du backend sécurisé pour génération IA...');
+        try {
+            const response = await fetch(`${BACKEND_API_URL}/gemini/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: contents,
+                    context: simplifiedContext,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                return data.response;
+            } else {
+                console.warn('⚠️ Backend non disponible, mode fallback activé');
             }
+        } catch (backendError) {
+            console.warn('⚠️ Erreur backend:', backendError);
+            // Fallback si backend non disponible
         }
 
         // ✅ Option 2 (Fallback): Générer réponse intelligente à partir du contexte applicatif

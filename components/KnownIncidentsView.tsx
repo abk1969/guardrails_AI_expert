@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
+import { useNavigation } from '../contexts/NavigationContext';
 import { useKnownIncidents } from '../contexts/KnownIncidentsContext';
 import { KnownAIIncident, ResourceLink, ResourceLinkCategory } from '../types';
 import { RESOURCE_LINK_CATEGORIES } from '../constants';
-import { PlusCircle, Trash2, Edit, Save, X, Link as LinkIcon } from 'lucide-react';
+import { PlusCircle, Trash2, Edit, Save, X, Link as LinkIcon, ArrowLeft, Compass, Download } from 'lucide-react';
+import { exportToPDF } from '../utils/pdfExport';
 
 // Editable Row for Incidents Table
-const IncidentRow: React.FC<{ incident: KnownAIIncident }> = ({ incident }) => {
+const IncidentRow: React.FC<{ incident: KnownAIIncident; isHighlighted?: boolean }> = ({ incident, isHighlighted = false }) => {
     const { updateIncident, deleteIncident } = useKnownIncidents();
     const [isEditing, setIsEditing] = useState(false);
     const [editState, setEditState] = useState(incident);
@@ -120,6 +122,35 @@ const ResourceLinkItem: React.FC<{ link: ResourceLink }> = ({ link }) => {
 
 const KnownIncidentsView: React.FC = () => {
     const { incidents, resourceLinks, addIncident, addResourceLink } = useKnownIncidents();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
+
+    // Sort incidents to prioritize highlighted ones
+    const sortedIncidents = useMemo(() => {
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            return [...incidents].sort((a, b) => {
+                const aHighlighted = filterParams.highlightIds!.includes(a.incident);
+                const bHighlighted = filterParams.highlightIds!.includes(b.incident);
+                return aHighlighted === bHighlighted ? 0 : aHighlighted ? -1 : 1;
+            });
+        }
+        return incidents;
+    }, [incidents, filterParams]);
+
+    // Auto-scroll to first highlighted item
+    useEffect(() => {
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            setTimeout(() => {
+                const firstHighlighted = document.querySelector('[data-highlighted="true"]');
+                if (firstHighlighted) {
+                    firstHighlighted.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }
+            }, 300);
+        }
+    }, [filterParams]);
 
     return (
         <div className="space-y-6">
@@ -129,7 +160,60 @@ const KnownIncidentsView: React.FC = () => {
                     Utilisez l'onglet "Orient Incident" pour rechercher les incidents IA et les coûts d'impact si disponibles. Mettez à jour le tableau existant d'exemples d'incidents/impacts avec des informations objectives pertinentes en utilisant les liens vers les rapports, les bases de données d'incidents, les informations légales et réglementaires.
                 </p>
             </header>
-            
+
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={clearNavigation}
+                                className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                                <Compass className="w-5 h-5" />
+                                <span>Retour à OWASP COMPASS</span>
+                            </button>
+                            <div className="h-6 w-px bg-cyan-600" />
+                            <div className="text-sm text-gray-300">
+                                <span className="font-semibold text-cyan-400">{filterParams.highlightIds.length}</span>{' '}
+                                incident(s) lié(s) au cas d'usage : <span className="font-semibold">{sourceTitle}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => {
+                                    const highlightedIncidents = incidents.filter(i =>
+                                        filterParams?.highlightIds?.includes(i.incident)
+                                    );
+                                    exportToPDF({
+                                        title: 'Incidents IA Liés',
+                                        sourceUseCase: sourceTitle || undefined,
+                                        items: highlightedIncidents,
+                                        columns: [
+                                            { key: 'incident', label: 'Incident' },
+                                            { key: 'vulnerability', label: 'Vulnérabilité' },
+                                            { key: 'impact', label: 'Impact' },
+                                            { key: 'referenceUrl', label: 'Référence' }
+                                        ]
+                                    });
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded transition-colors text-sm"
+                            >
+                                <Download size={16} />
+                                Exporter (HTML)
+                            </button>
+                            <button
+                                onClick={clearNavigation}
+                                className="text-gray-500 hover:text-gray-300 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                </Card>
+            )}
+
             <Card>
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-white">Incidents IA Connus</h3>

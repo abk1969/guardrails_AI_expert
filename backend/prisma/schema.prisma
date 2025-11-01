@@ -1,0 +1,520 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================================
+// ORGANIZATIONS & USERS
+// ==============================================
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  domain    String?
+
+  // Settings
+  settings  Json     @default("{}")
+
+  // Subscriptions & Limits
+  plan      Plan     @default(FREE)
+  maxUsers  Int      @default(5)
+  maxTestsPerMonth Int @default(100)
+
+  // Relationships
+  users     User[]
+  testRuns  TestRun[]
+  testTargets TestTarget[]
+  aiPolicies AIPolicy[]
+  useCases  UseCase[]
+  threatProfiles ThreatProfile[]
+  knownVulnerabilities KnownVulnerability[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([slug])
+  @@index([deletedAt])
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  passwordHash   String
+  firstName      String?
+  lastName       String?
+  avatar         String?
+
+  // Role & Permissions
+  role           Role     @default(TESTER)
+  permissions    String[] @default([])
+
+  // Organization
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Status
+  isActive       Boolean  @default(true)
+  emailVerified  Boolean  @default(false)
+  lastLoginAt    DateTime?
+
+  // Relationships
+  testRuns       TestRun[]
+  refreshTokens  RefreshToken[]
+  auditLogs      AuditLog[]
+
+  // Timestamps
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([role])
+  @@index([deletedAt])
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  SECURITY_OFFICER
+  TESTER
+  ANALYST
+  VIEWER
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// ==============================================
+// TEST EXECUTION
+// ==============================================
+
+model TestTarget {
+  id                    String          @id @default(uuid())
+  name                  String
+  description           String?         @db.Text
+  componentType         AIComponentType
+
+  // API Configuration (encrypted)
+  apiUrl                String
+  apiMethod             String          @default("POST")
+  apiHeaders            String          @db.Text // Encrypted JSON
+  apiBodyTemplate       String          @db.Text // JSON with {{prompt}} placeholder
+  responseExtractionPath String
+
+  // Organization
+  organizationId        String
+  organization          Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Usage
+  testRuns              TestRun[]
+
+  // Timestamps
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  deletedAt             DateTime?
+
+  @@index([organizationId])
+  @@index([componentType])
+  @@index([deletedAt])
+}
+
+enum AIComponentType {
+  FOUNDATION_MODEL
+  RAG_SYSTEM
+  AGENT
+  AGENTIC_AI
+  AGENTIC_RAG
+  MCP_ARCHITECTURE
+  CUSTOM
+}
+
+model TestRun {
+  id              String         @id @default(uuid())
+
+  // Configuration
+  configuration   Json           // TestConfiguration serialized
+
+  // Execution
+  status          TestRunStatus  @default(PENDING)
+  progress        Float          @default(0)
+  totalTests      Int
+  passedTests     Int            @default(0)
+  failedTests     Int            @default(0)
+  blockedTests    Int            @default(0)
+
+  // Relationships
+  createdById     String
+  createdBy       User           @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  targetId        String
+  target          TestTarget     @relation(fields: [targetId], references: [id])
+  results         TestResult[]
+
+  // Metadata
+  metadata        Json           @default("{}")
+
+  // Timestamps
+  startedAt       DateTime       @default(now())
+  completedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  @@index([createdById, status])
+  @@index([organizationId, startedAt])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+enum TestRunStatus {
+  PENDING
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model TestResult {
+  id              String       @id @default(uuid())
+
+  // Test Details
+  testRunId       String
+  testRun         TestRun      @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+
+  // Prompt
+  promptId        String
+  promptText      String       @db.Text
+  promptCategory  String
+  promptComplexity String
+
+  // Response
+  response        String?      @db.Text
+  responseTime    Int?         // milliseconds
+
+  // Evaluation
+  status          TestStatus
+  score           Float
+  explanation     String?      @db.Text
+  evaluationChain Json         // EvaluationStep[]
+  remediation     String?      @db.Text
+
+  // Metadata
+  metadata        Json?
+
+  // Timestamps
+  createdAt       DateTime     @default(now())
+
+  @@index([testRunId, status])
+  @@index([status])
+  @@index([promptCategory])
+}
+
+enum TestStatus {
+  PENDING
+  RUNNING
+  PASSED
+  FAILED
+  SKIPPED
+  ERROR
+}
+
+model PromptTemplate {
+  id          String            @id @default(uuid())
+  text        String            @db.Text
+  category    GuardrailCategory
+  complexity  PromptComplexity
+  attackFamily String
+  attackTags  String[]          @default([])
+  guide       String            @db.Text
+  protection  String            @db.Text
+
+  // Status
+  isActive    Boolean           @default(true)
+
+  // Timestamps
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([category])
+  @@index([complexity])
+  @@index([attackFamily])
+}
+
+enum GuardrailCategory {
+  SECURITY_PRIVACY
+  RELEVANCE_RESPONSE
+  LINGUISTIC_QUALITY
+  CONTENT_VALIDATION
+  LOGICAL_VALIDATION
+}
+
+enum PromptComplexity {
+  SIMPLE
+  MOYEN
+  SOPHISTIQUE
+}
+
+// ==============================================
+// RISK MANAGEMENT
+// ==============================================
+
+model UseCase {
+  id              String   @id @default(uuid())
+  useCase         String   @db.Text
+  impact          Int      // 1-5
+  likelihood      Int      // 1-5
+  riskScore       Int      // calculated
+  recommendation  String   @db.Text
+  associatedThreat String?
+  mapping         String?
+
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([riskScore])
+}
+
+model ThreatProfile {
+  id            String        @id @default(uuid())
+  profile       String
+  threat        String        @db.Text
+  note          String?       @db.Text
+  initialRating ThreatRating?
+  defenses      String?       @db.Text
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([organizationId])
+  @@index([initialRating])
+}
+
+enum ThreatRating {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  NOT_SIGNIFICANT
+  MINIMAL
+}
+
+model KnownVulnerability {
+  id                    String                @id @default(uuid())
+  organizationTool      String
+  cveIdentifier         String
+  associatedCwes        String?
+  descriptionSummary    String                @db.Text
+  originalSeverity      VulnerabilitySeverity?
+  fivePointScore        Float?
+  owaspLlmCategory      String?
+  owaspCategoryName     String?
+  owaspAgenticTop15     String?
+  owaspAgenticTop15ThreatName String?
+
+  organizationId        String
+  organization          Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([organizationId])
+  @@index([originalSeverity])
+  @@index([cveIdentifier])
+}
+
+enum VulnerabilitySeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// ==============================================
+// AI POLICY MANAGEMENT
+// ==============================================
+
+model AIPolicy {
+  id                    String            @id @default(uuid())
+  reference             String
+  ruleText              String            @db.Text
+  implementationDetails String?           @db.Text
+  status                PolicyRuleStatus  @default(NOT_IMPLEMENTED)
+  notes                 String?           @db.Text
+  associatedThreat      String?
+  associatedRisk        String?
+  implementationGuide   String?           @db.Text
+  testingGuide          String?           @db.Text
+  riskScenarios         Json?             // RiskScenario[]
+
+  organizationId        String?
+  organization          Organization?     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([reference])
+}
+
+enum PolicyRuleStatus {
+  NOT_IMPLEMENTED
+  IN_PROGRESS
+  IMPLEMENTED
+  NOT_APPLICABLE
+}
+
+// ==============================================
+// AUDIT & COMPLIANCE
+// ==============================================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+
+  // Actor
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Action
+  action      String
+  resource    String
+  resourceId  String?
+  method      String?
+  endpoint    String?
+
+  // Context
+  payload     Json?
+  response    Json?
+  status      String   // SUCCESS, FAILURE
+  statusCode  Int?
+  errorMessage String? @db.Text
+
+  // Request Info
+  ipAddress   String?
+  userAgent   String?
+
+  // Timestamps
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([timestamp])
+  @@index([status])
+}
+
+model EventStore {
+  id           String   @id @default(uuid())
+  aggregateId  String
+  aggregateType String
+  eventType    String
+  payload      Json
+  version      Int
+  userId       String?
+
+  timestamp    DateTime @default(now())
+
+  @@index([aggregateId, version])
+  @@index([aggregateType])
+  @@index([eventType])
+  @@index([timestamp])
+}
+
+// ==============================================
+// NOTIFICATIONS
+// ==============================================
+
+model Notification {
+  id         String            @id @default(uuid())
+  userId     String
+  type       NotificationType
+  title      String
+  message    String            @db.Text
+  data       Json?
+  read       Boolean           @default(false)
+  readAt     DateTime?
+  createdAt  DateTime          @default(now())
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  TEST_COMPLETED
+  TEST_FAILED
+  VULNERABILITY_DETECTED
+  POLICY_UPDATED
+  SYSTEM_ALERT
+}
+
+// ==============================================
+// SETTINGS & CONFIGURATION
+// ==============================================
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  category  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  enabled     Boolean  @default(false)
+
+  // Targeting
+  userIds     String[] @default([])
+  orgIds      String[] @default([])
+  percentage  Int      @default(0) // 0-100
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+}

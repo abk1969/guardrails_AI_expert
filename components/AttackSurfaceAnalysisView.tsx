@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import Card from './ui/Card';
 import { useAttackSurface } from '../contexts/AttackSurfaceContext';
 import { useSettings } from '../contexts/SettingsContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { ImpactLevelName } from '../types';
+import { ArrowLeft, Compass, X } from 'lucide-react';
 
 const ratingColors: Record<number, string> = {
     5: 'bg-red-700', 4: 'bg-orange-600', 3: 'bg-yellow-500', 2: 'bg-green-600', 1: 'bg-teal-600'
-}
+};
 
 const InfoCard: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
     <Card className={className}>
@@ -16,23 +18,24 @@ const InfoCard: React.FC<{ title: string; children: React.ReactNode; className?:
 );
 
 const AttackSurfaceAnalysisView: React.FC = () => {
-    const { 
-        attackVectors, 
-        impactConfig, 
+    const {
+        attackVectors,
+        impactConfig,
         nuclearScenarios,
         updateAttackVector,
         updateImpactConfig,
         updateNuclearScenario
     } = useAttackSurface();
-    
+
     const { settings } = useSettings();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
 
     const formatCurrency = (value: string) => {
         const number = parseFloat(value.replace(/,/g, '.'));
         if (isNaN(number)) return value;
         return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(number);
     };
-    
+
     const riskLevelColors: Record<number, string> = {
         5: 'bg-red-500 text-white',
         4: 'bg-orange-500 text-white',
@@ -41,8 +44,69 @@ const AttackSurfaceAnalysisView: React.FC = () => {
         1: 'bg-teal-500 text-white',
     };
 
+    // Sort attack vectors to show highlighted ones first
+    const sortedAttackVectors = useMemo(() => {
+        if (!filterParams?.highlightIds) return attackVectors;
+
+        return [...attackVectors].sort((a, b) => {
+            const aIndex = attackVectors.indexOf(a);
+            const bIndex = attackVectors.indexOf(b);
+            const aHighlighted = filterParams.highlightIds!.includes(String(aIndex));
+            const bHighlighted = filterParams.highlightIds!.includes(String(bIndex));
+            return aHighlighted === bHighlighted ? 0 : aHighlighted ? -1 : 1;
+        });
+    }, [attackVectors, filterParams]);
+
+    // Auto-scroll to first highlighted item
+    useEffect(() => {
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            // Wait for DOM to render
+            setTimeout(() => {
+                const firstHighlighted = document.querySelector('[data-highlighted="true"]');
+                if (firstHighlighted) {
+                    firstHighlighted.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }
+            }, 300);
+        }
+    }, [filterParams]);
+
     return (
         <div className="space-y-6">
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={clearNavigation}
+                            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <Compass className="w-5 h-5" />
+                            <span className="font-medium">Retour à OWASP COMPASS</span>
+                        </button>
+                        <button
+                            onClick={clearNavigation}
+                            className="p-1 hover:bg-cyan-900/30 rounded transition-colors"
+                            aria-label="Fermer"
+                        >
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
+                    {sourceTitle && (
+                        <div className="mt-2 text-sm text-gray-300">
+                            Navigation depuis: <span className="font-semibold text-cyan-300">{sourceTitle}</span>
+                        </div>
+                    )}
+                    <div className="mt-1 text-xs text-gray-400">
+                        {filterParams.highlightIds.length} surface(s) d'attaque liée(s)
+                    </div>
+                </Card>
+            )}
+
             <header>
                 <h2 className="text-2xl font-bold text-white">Analyse de la Surface d'Attaque</h2>
                 <p className="text-gray-400 mt-1">Évaluez le risque des menaces en modélisant l'impact organisationnel et la probabilité.</p>
@@ -54,7 +118,7 @@ const AttackSurfaceAnalysisView: React.FC = () => {
                     <p><strong>Étape 2:</strong> Spécifiez 3 scénarios de "Désastre Nucléaire IA" pour définir les pires cas de figure.</p>
                     <p><strong>Étape 3:</strong> Utilisez les vecteurs d'attaque listés pour évaluer le niveau de risque-menace pour votre cas d'usage spécifique.</p>
                 </InfoCard>
-                 <InfoCard title="Heat Map" className="flex items-center justify-center">
+                <InfoCard title="Heat Map" className="flex items-center justify-center">
                     <table className="border-collapse text-center text-xs font-bold">
                         <tbody>
                             {settings.impactScores.map(({ score: impactScore }) => (
@@ -78,7 +142,7 @@ const AttackSurfaceAnalysisView: React.FC = () => {
                             </tr>
                         </tbody>
                     </table>
-                 </InfoCard>
+                </InfoCard>
                 <InfoCard title="Référence de Maturité des Défenses">
                     <ul className="space-y-1.5">
                         <li className="flex items-center"><span className="w-4 h-4 rounded-full bg-red-700 mr-2 border border-red-500"></span> 5 - Zéro / Rare / Menace Critique</li>
@@ -91,7 +155,7 @@ const AttackSurfaceAnalysisView: React.FC = () => {
             </div>
 
             <Card className="p-0">
-                 <div className="overflow-x-auto">
+                <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-gray-400">
                         <thead className="text-xs text-gray-300 uppercase bg-gray-700">
                             <tr>
@@ -101,8 +165,15 @@ const AttackSurfaceAnalysisView: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {attackVectors.map(vector => (
-                                <tr key={vector.id} className="border-b border-gray-700">
+                            {sortedAttackVectors.map((vector) => {
+                                const originalIndex = attackVectors.indexOf(vector);
+                                const isHighlighted = filterParams?.highlightIds?.includes(String(originalIndex)) || false;
+                                return (
+                                <tr data-highlighted={isHighlighted} key={vector.id} className={`border-b border-gray-700 transition-all ${
+                                    isHighlighted
+                                        ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
+                                        : ''
+                                }`}>
                                     <td className="px-4 py-2 font-medium text-white">{vector.threat}</td>
                                     <td className="px-4 py-2">
                                         <textarea 
@@ -122,7 +193,8 @@ const AttackSurfaceAnalysisView: React.FC = () => {
                                         </select>
                                     </td>
                                 </tr>
-                            ))}
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -133,15 +205,15 @@ const AttackSurfaceAnalysisView: React.FC = () => {
                     <h3 className="text-lg font-bold text-white p-4">Impact Organisationnel</h3>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-gray-400">
-                             <thead className="text-xs text-gray-300 uppercase bg-gray-700">
+                            <thead className="text-xs text-gray-300 uppercase bg-gray-700">
                                 <tr>
                                     <th scope="col" className="px-4 py-2">Niveau d'Impact</th>
                                     <th scope="col" className="px-4 py-2">Description (depuis Paramètres)</th>
                                     <th scope="col" className="px-4 py-2">Seuil Bas</th>
                                     <th scope="col" className="px-4 py-2">Seuil Haut</th>
                                 </tr>
-                             </thead>
-                             <tbody>
+                            </thead>
+                            <tbody>
                                 {impactConfig.map(config => {
                                     const setting = settings.impactScores.find(s => s.score === config.rating);
                                     return (
@@ -170,21 +242,21 @@ const AttackSurfaceAnalysisView: React.FC = () => {
                                         </tr>
                                     );
                                 })}
-                             </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </Card>
-                 <Card className="p-0">
+                <Card className="p-0">
                     <h3 className="text-lg font-bold text-white p-4">Niveau de Probabilité</h3>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-gray-400">
-                             <thead className="text-xs text-gray-300 uppercase bg-gray-700">
+                            <thead className="text-xs text-gray-300 uppercase bg-gray-700">
                                 <tr>
                                     <th scope="col" className="px-4 py-2">Niveau de Probabilité</th>
                                     <th scope="col" className="px-4 py-2">Description (depuis Paramètres)</th>
                                 </tr>
-                             </thead>
-                             <tbody>
+                            </thead>
+                            <tbody>
                                 {settings.likelihoodScores.sort((a,b) => b.score - a.score).map(level => (
                                     <tr key={level.level} className={`border-b border-gray-700 ${ratingColors[level.score]} text-white`}>
                                         <td className="px-4 py-2 font-bold flex items-center">
@@ -194,7 +266,7 @@ const AttackSurfaceAnalysisView: React.FC = () => {
                                         <td className="px-4 py-2 text-xs italic">{level.description}</td>
                                     </tr>
                                 ))}
-                             </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </Card>

@@ -16,8 +16,8 @@ const RedTeamContext = createContext<RedTeamState | undefined>(undefined);
 const RED_TEAM_STORAGE_KEY = 'llmGuardrailRedTeamReview';
 
 export const RedTeamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [questions, setQuestions] = useState<RedTeamQuestion[]>([]);
-  const [businessObjective, setBusinessObjective] = useState<string>('');
+  const [questions, setQuestions] = useState<RedTeamQuestion[]>(INITIAL_RED_TEAM_QUESTIONS);
+  const [businessObjective, setBusinessObjective] = useState<string>(INITIAL_BUSINESS_OBJECTIVE);
 
   useEffect(() => {
     try {

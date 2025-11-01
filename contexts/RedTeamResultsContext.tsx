@@ -23,10 +23,10 @@ const RedTeamResultsContext = createContext<RedTeamResultsState | undefined>(und
 const RESULTS_STORAGE_KEY = 'llmGuardrailRedTeamResults';
 
 export const RedTeamResultsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [results, setResults] = useState<RedTeamResult[]>([]);
+  const [results, setResults] = useState<RedTeamResult[]>(INITIAL_RED_TEAM_RESULTS);
   const [mitigationProfiles] = useState<MitigationProfile[]>(INITIAL_MITIGATION_PROFILES);
-  const [mitigationMappings, setMitigationMappings] = useState<MitigationMapping[]>([]);
-  const [strategyRoadmap, setStrategyRoadmap] = useState<StrategyRoadmapItem[]>([]);
+  const [mitigationMappings, setMitigationMappings] = useState<MitigationMapping[]>(INITIAL_MITIGATION_MAPPINGS);
+  const [strategyRoadmap, setStrategyRoadmap] = useState<StrategyRoadmapItem[]>(INITIAL_STRATEGY_ROADMAP);
 
   useEffect(() => {
     try {

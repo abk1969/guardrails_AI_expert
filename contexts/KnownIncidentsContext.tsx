@@ -18,8 +18,8 @@ const KnownIncidentsContext = createContext<KnownIncidentsState | undefined>(und
 const INCIDENTS_STORAGE_KEY = 'llmGuardrailKnownIncidents';
 
 export const KnownIncidentsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [incidents, setIncidents] = useState<KnownAIIncident[]>([]);
-  const [resourceLinks, setResourceLinks] = useState<ResourceLink[]>([]);
+  const [incidents, setIncidents] = useState<KnownAIIncident[]>(INITIAL_KNOWN_INCIDENTS);
+  const [resourceLinks, setResourceLinks] = useState<ResourceLink[]>(INITIAL_RESOURCE_LINKS);
 
   useEffect(() => {
     try {

@@ -1,0 +1,31 @@
+{
+  "name": "ai-risk-guardrails-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive guardrails red team testing suite for AI Risk Manager",
+  "private": true,
+  "scripts": {
+    "test": "node ../promptfoo/dist/src/main.js eval",
+    "test:quick": "node ../promptfoo/dist/src/main.js eval --filter-first-n 5 --max-concurrency 2",
+    "test:full": "node ../promptfoo/dist/src/main.js eval -c promptfooconfig.yaml",
+    "test:specific": "node ../promptfoo/dist/src/main.js eval -c configs/specific-risks.yaml",
+    "view": "node ../promptfoo/dist/src/main.js view",
+    "view:port": "node ../promptfoo/dist/src/main.js view --port 15500",
+    "init": "node ../promptfoo/dist/src/main.js init",
+    "clean": "rm -rf results/ .promptfoo/ .promptfoo-cache/",
+    "help": "node ../promptfoo/dist/src/main.js --help"
+  },
+  "keywords": [
+    "ai",
+    "security",
+    "red-team",
+    "guardrails",
+    "llm",
+    "testing",
+    "owasp"
+  ],
+  "author": "AI Risk Manager Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
