@@ -5,6 +5,7 @@ import { ATTACK_LIBRARY } from '../constants';
 interface DatasetState {
   promptTemplates: PromptTemplate[];
   addPrompt: (category: GuardrailCategory, text: string) => void;
+  addPromptBatch: (prompts: PromptTemplate[]) => void;
   updatePrompt: (id: string, newText: string) => void;
   deletePrompt: (id: string) => void;
 }
@@ -44,11 +45,21 @@ export const DatasetProvider: React.FC<{ children: ReactNode }> = ({ children })
     setPromptTemplates(prev => ([...prev, newPrompt]));
   };
 
+  const addPromptBatch = (prompts: PromptTemplate[]) => {
+    if (!prompts || prompts.length === 0) return;
+    // Sanitize all texts in the batch
+    const sanitizedPrompts = prompts.map(p => ({
+      ...p,
+      text: sanitizeText(p.text)
+    }));
+    setPromptTemplates(prev => ([...prev, ...sanitizedPrompts]));
+  };
+
   const updatePrompt = (id: string, newText: string) => {
     const sanitizedText = sanitizeText(newText);
     if (!sanitizedText.trim()) return;
-    setPromptTemplates(prev => 
-      prev.map(p => 
+    setPromptTemplates(prev =>
+      prev.map(p =>
         p.id === id ? { ...p, text: sanitizedText } : p
       )
     );
@@ -59,7 +70,7 @@ export const DatasetProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   return (
-    <DatasetContext.Provider value={{ promptTemplates, addPrompt, updatePrompt, deletePrompt }}>
+    <DatasetContext.Provider value={{ promptTemplates, addPrompt, addPromptBatch, updatePrompt, deletePrompt }}>
       {children}
     </DatasetContext.Provider>
   );

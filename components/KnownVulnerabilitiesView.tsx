@@ -1,9 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import { useKnownVulnerabilities } from '../contexts/KnownVulnerabilitiesContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { KnownVulnerability, VulnerabilitySeverity } from '../types';
-import { PlusCircle, Trash2, Edit, Save, X, Search } from 'lucide-react';
+import { PlusCircle, Trash2, Edit, Save, X, Search, ArrowLeft, Compass, Download } from 'lucide-react';
+import { exportToPDF } from '../utils/pdfExport';
 
 const SEVERITY_OPTIONS: VulnerabilitySeverity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', ''];
 const SEVERITY_COLORS: Record<VulnerabilitySeverity, string> = {
@@ -35,7 +37,7 @@ const EditableCell: React.FC<{ value: string | number; onChange: (value: string)
     );
 };
 
-const VulnerabilityRow: React.FC<{ vulnerability: KnownVulnerability }> = ({ vulnerability }) => {
+const VulnerabilityRow: React.FC<{ vulnerability: KnownVulnerability; isHighlighted?: boolean }> = ({ vulnerability, isHighlighted = false }) => {
     const { updateVulnerability, deleteVulnerability } = useKnownVulnerabilities();
     const [isEditing, setIsEditing] = useState(false);
     const [editState, setEditState] = useState(vulnerability);
@@ -66,7 +68,11 @@ const VulnerabilityRow: React.FC<{ vulnerability: KnownVulnerability }> = ({ vul
         : `https://www.google.com/search?q=${encodeURIComponent(vulnerability.cveIdentifier)}`;
 
     return (
-        <tr className="border-b border-gray-700 hover:bg-gray-800/50">
+        <tr data-highlighted={isHighlighted} className={`border-b border-gray-700 hover:bg-gray-800/50 transition-all ${
+            isHighlighted
+                ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
+                : ''
+        }`}>
             {Object.keys(editState).filter(key => key !== 'id').map((key) => {
                 const fieldKey = key as keyof Omit<KnownVulnerability, 'id'>;
                 if (!isEditing) {
@@ -125,6 +131,7 @@ const VulnerabilityRow: React.FC<{ vulnerability: KnownVulnerability }> = ({ vul
 
 const KnownVulnerabilitiesView: React.FC = () => {
     const { vulnerabilities, addVulnerability } = useKnownVulnerabilities();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
     const [filters, setFilters] = useState({ tool: '', severity: '' as VulnerabilitySeverity, category: '' });
 
     const handleAddNew = () => {
@@ -143,15 +150,43 @@ const KnownVulnerabilitiesView: React.FC = () => {
     };
 
     const filteredVulnerabilities = useMemo(() => {
-        return vulnerabilities.filter(v => {
+        let filtered = vulnerabilities.filter(v => {
             const toolMatch = v.organizationTool.toLowerCase().includes(filters.tool.toLowerCase());
             const severityMatch = filters.severity ? v.originalSeverity === filters.severity : true;
             const categoryMatch = filters.category ? v.owaspLlmCategory.toLowerCase().includes(filters.category.toLowerCase()) : true;
             return toolMatch && severityMatch && categoryMatch;
         });
-    }, [vulnerabilities, filters]);
+
+        // If navigated from COMPASS, prioritize highlighted vulnerabilities
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            filtered = filtered.sort((a, b) => {
+                const aHighlighted = filterParams.highlightIds!.includes(a.cveIdentifier);
+                const bHighlighted = filterParams.highlightIds!.includes(b.cveIdentifier);
+                return aHighlighted === bHighlighted ? 0 : aHighlighted ? -1 : 1;
+            });
+        }
+
+        return filtered;
+    }, [vulnerabilities, filters, filterParams]);
 
     const owaspCategories = useMemo(() => [...new Set(vulnerabilities.map(v => v.owaspLlmCategory).filter(Boolean))], [vulnerabilities]);
+
+    // Auto-scroll to first highlighted item
+    useEffect(() => {
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            // Wait for DOM to render
+            setTimeout(() => {
+                const firstHighlighted = document.querySelector('[data-highlighted="true"]');
+                if (firstHighlighted) {
+                    firstHighlighted.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }
+            }, 300);
+        }
+    }, [filterParams]);
 
     return (
         <div className="space-y-6">
@@ -164,6 +199,61 @@ const KnownVulnerabilitiesView: React.FC = () => {
                     Utilisez la recherche par mots-clés sur <a href="https://cve.org" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">CVE.org</a> pour identifier des vulnérabilités supplémentaires ou spécifiques. Mots-clés exemples : Large Language Model, LLM, language model, prompt injection, prompt leakage.
                 </p>
             </header>
+
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={clearNavigation}
+                                className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                                <Compass className="w-5 h-5" />
+                                <span>Retour à OWASP COMPASS</span>
+                            </button>
+                            <div className="h-6 w-px bg-cyan-600" />
+                            <div className="text-sm text-gray-300">
+                                <span className="font-semibold text-cyan-400">{filterParams.highlightIds.length}</span>{' '}
+                                vulnérabilité(s) liée(s) au cas d'usage : <span className="font-semibold">{sourceTitle}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => {
+                                    const highlightedVulns = vulnerabilities.filter(v =>
+                                        filterParams?.highlightIds?.includes(v.cveIdentifier)
+                                    );
+                                    exportToPDF({
+                                        title: 'Vulnérabilités IA Liées',
+                                        sourceUseCase: sourceTitle || undefined,
+                                        items: highlightedVulns,
+                                        columns: [
+                                            { key: 'organizationTool', label: 'Outil/Org' },
+                                            { key: 'cveIdentifier', label: 'CVE ID' },
+                                            { key: 'descriptionSummary', label: 'Description' },
+                                            { key: 'originalSeverity', label: 'Sévérité' },
+                                            { key: 'owaspLlmCategory', label: 'Catégorie OWASP' },
+                                            { key: 'owaspCategoryName', label: 'Nom Catégorie' }
+                                        ]
+                                    });
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded transition-colors text-sm"
+                            >
+                                <Download size={16} />
+                                Exporter (HTML)
+                            </button>
+                            <button
+                                onClick={clearNavigation}
+                                className="text-gray-500 hover:text-gray-300 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                </Card>
+            )}
 
             <Card className="p-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
@@ -227,7 +317,11 @@ const KnownVulnerabilitiesView: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-700">
                             {filteredVulnerabilities.map(v => (
-                                <VulnerabilityRow key={v.id} vulnerability={v} />
+                                <VulnerabilityRow
+                                    key={v.id}
+                                    vulnerability={v}
+                                    isHighlighted={filterParams?.highlightIds?.includes(v.cveIdentifier) || false}
+                                />
                             ))}
                         </tbody>
                     </table>

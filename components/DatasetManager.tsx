@@ -3,7 +3,8 @@ import Card from './ui/Card';
 import { useDataset } from '../contexts/DatasetContext';
 import { ATTACK_FAMILIES, GUARDRAIL_CATEGORIES } from '../constants';
 import { GuardrailCategory, PromptTemplate, PromptComplexity, AttackFamily } from '../types';
-import { Pencil, Trash2, PlusCircle, Check, X, ChevronDown } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, Check, X, ChevronDown, Download } from 'lucide-react';
+import { datasetImportService } from '../services/datasetImportService';
 
 // A badge for complexity
 const ComplexityBadge: React.FC<{ complexity: PromptComplexity }> = ({ complexity }) => {
@@ -97,7 +98,7 @@ const AddPromptForm: React.FC<{ family: AttackFamily }> = ({ family }) => {
             setText('');
         }
     };
-    
+
     return (
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
             <input
@@ -122,6 +123,123 @@ const AddPromptForm: React.FC<{ family: AttackFamily }> = ({ family }) => {
     );
 }
 
+// Component for importing datasets
+const DatasetImportButtons: React.FC = () => {
+    const { addPromptBatch } = useDataset();
+    const [loadingBeavertails, setLoadingBeavertails] = useState(false);
+    const [loadingHarmBench, setLoadingHarmBench] = useState(false);
+    const [loadingPliny, setLoadingPliny] = useState(false);
+
+    const handleImportBeaverTails = async () => {
+        setLoadingBeavertails(true);
+        try {
+            const prompts = await datasetImportService.importBeaverTails(100);
+            addPromptBatch(prompts);
+            alert(`✅ ${prompts.length} prompts BeaverTails importés avec succès!`);
+        } catch (error) {
+            console.error('Erreur import BeaverTails:', error);
+            alert(`❌ Erreur lors de l'import BeaverTails: ${error.message || error}`);
+        } finally {
+            setLoadingBeavertails(false);
+        }
+    };
+
+    const handleImportHarmBench = async () => {
+        setLoadingHarmBench(true);
+        try {
+            const prompts = await datasetImportService.importHarmBench(50);
+            addPromptBatch(prompts);
+            alert(`✅ ${prompts.length} prompts HarmBench importés avec succès!`);
+        } catch (error) {
+            console.error('Erreur import HarmBench:', error);
+            alert(`❌ Erreur lors de l'import HarmBench: ${error.message || error}`);
+        } finally {
+            setLoadingHarmBench(false);
+        }
+    };
+
+    const handleImportPliny = async () => {
+        setLoadingPliny(true);
+        try {
+            const prompts = await datasetImportService.importPliny(30);
+            addPromptBatch(prompts);
+            alert(`✅ ${prompts.length} prompts Pliny importés avec succès!`);
+        } catch (error) {
+            console.error('Erreur import Pliny:', error);
+            alert(`❌ Erreur lors de l'import Pliny: ${error.message || error}`);
+        } finally {
+            setLoadingPliny(false);
+        }
+    };
+
+    return (
+        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                <Download size={20} className="mr-2 text-cyan-500" />
+                Importer des Datasets Externes
+            </h3>
+            <p className="text-sm text-gray-400 mb-4">
+                Enrichissez votre bibliothèque avec des datasets académiques de qualité (BeaverTails 330K+, HarmBench, Pliny).
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <button
+                    onClick={handleImportBeaverTails}
+                    disabled={loadingBeavertails}
+                    className="flex items-center justify-center px-4 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md transition-colors font-medium"
+                >
+                    {loadingBeavertails ? (
+                        <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                            Importation...
+                        </>
+                    ) : (
+                        <>
+                            <Download size={18} className="mr-2" />
+                            BeaverTails (100)
+                        </>
+                    )}
+                </button>
+
+                <button
+                    onClick={handleImportHarmBench}
+                    disabled={loadingHarmBench}
+                    className="flex items-center justify-center px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md transition-colors font-medium"
+                >
+                    {loadingHarmBench ? (
+                        <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                            Importation...
+                        </>
+                    ) : (
+                        <>
+                            <Download size={18} className="mr-2" />
+                            HarmBench (50)
+                        </>
+                    )}
+                </button>
+
+                <button
+                    onClick={handleImportPliny}
+                    disabled={loadingPliny}
+                    className="flex items-center justify-center px-4 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md transition-colors font-medium"
+                >
+                    {loadingPliny ? (
+                        <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                            Importation...
+                        </>
+                    ) : (
+                        <>
+                            <Download size={18} className="mr-2" />
+                            Pliny (30)
+                        </>
+                    )}
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const DatasetManager: React.FC = () => {
     const { promptTemplates } = useDataset();
 
@@ -142,6 +260,9 @@ const DatasetManager: React.FC = () => {
                 <h2 className="text-2xl font-bold text-white">Bibliothèque d'Attaques de Test</h2>
                 <p className="text-gray-400 mt-1">Visualisez, modifiez et enrichissez les scénarios d'attaque basés sur les taxonomies de sécurité standards.</p>
             </header>
+
+            <DatasetImportButtons />
+
             {ATTACK_FAMILIES.map(familyInfo => {
                  const promptsForFamily = promptsByFamily[familyInfo.name] || [];
                  if (promptsForFamily.length === 0 && familyInfo.name !== AttackFamily.CUSTOM_PROMPTS) return null;

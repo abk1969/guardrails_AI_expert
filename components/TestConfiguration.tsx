@@ -4,8 +4,10 @@ import Button from './ui/Button';
 import { GuardrailCategory, TestTarget, Sensitivity, PromptComplexity, VulnerabilityLevel, SandboxVulnerabilityConfig } from '../types';
 import { GUARDRAIL_CATEGORIES, INITIAL_TEST_TARGETS } from '../constants';
 import { useTestRun } from '../contexts/TestRunContext';
+import { useApplicationProfile } from '../contexts/ApplicationProfileContext';
 import TestTargetConfigurationModal from './TestTargetConfigurationModal';
-import { Settings, PlusCircle, SlidersHorizontal, ListChecks, Pencil, Check, ShieldAlert, ShieldCheck, Shield } from 'lucide-react';
+import AdvancedTestConfiguration from './AdvancedTestConfiguration';
+import { Settings, PlusCircle, SlidersHorizontal, ListChecks, Pencil, Check, ShieldAlert, ShieldCheck, Shield, Sliders, Info, X } from 'lucide-react';
 
 const COMPLEXITY_OPTIONS: PromptComplexity[] = [PromptComplexity.SIMPLE, PromptComplexity.MOYEN, PromptComplexity.SOPHISTIQUE];
 const VULNERABILITY_LEVELS: {level: VulnerabilityLevel, icon: React.ReactNode, label: string}[] = [
@@ -27,14 +29,23 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
   const [volume, setVolume] = useState<number>(100);
   const [targets, setTargets] = useState<TestTarget[]>(INITIAL_TEST_TARGETS);
   const [selectedTargetId, setSelectedTargetId] = useState<string>(targets.length > 0 ? targets[0].id : '');
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTarget, setEditingTarget] = useState<TestTarget | null>(null);
   const [sandboxConfig, setSandboxConfig] = useState<SandboxVulnerabilityConfig>({});
 
-  const { startTest, isRunning } = useTestRun();
+  // Advanced Configuration
+  const [isAdvancedConfigOpen, setIsAdvancedConfigOpen] = useState(false);
+  const [customPlugins, setCustomPlugins] = useState<string[]>([]);
+
+  const { startTest, isRunning, testMode, setTestMode } = useTestRun();
+  const { selectedApplicationId, getApplication, setSelectedApplicationId } = useApplicationProfile();
 
   const isSandboxMode = selectedTargetId === 'embedded-sandbox';
+
+  // Récupérer l'application sélectionnée si elle existe
+  const selectedApp = selectedApplicationId ? getApplication(selectedApplicationId) : null;
+  const [showAppBanner, setShowAppBanner] = useState(!!selectedApp);
 
   useEffect(() => {
     // Initialize sandbox config for selected categories
@@ -44,6 +55,32 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
     });
     setSandboxConfig(initialConfig);
   }, [selectedCategories]);
+
+  // Auto-créer une cible de test quand une application est sélectionnée
+  useEffect(() => {
+    if (selectedApp && !targets.find(t => t.id === `app-${selectedApp.id}`)) {
+      const newTarget: TestTarget = {
+        id: `app-${selectedApp.id}`,
+        name: selectedApp.name,
+        endpoint: selectedApp.endpoint.url,
+        method: selectedApp.endpoint.method || 'POST',
+        headers: selectedApp.authentication?.credentials
+          ? {
+              'Authorization': selectedApp.authentication.type === 'bearer-token'
+                ? `Bearer ${selectedApp.authentication.credentials.token}`
+                : selectedApp.authentication.type === 'api-key'
+                ? selectedApp.authentication.credentials.apiKey || ''
+                : ''
+            }
+          : {},
+        description: `Application: ${selectedApp.description || 'Aucune description'}`
+      };
+
+      setTargets(prev => [...prev, newTarget]);
+      setSelectedTargetId(newTarget.id);
+      setShowAppBanner(true);
+    }
+  }, [selectedApp]);
 
 
   const handleCategoryChange = (category: GuardrailCategory) => {
@@ -111,6 +148,7 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
         categorySensitivities,
         complexities,
         sandboxConfig: isSandboxMode ? sandboxConfig : undefined,
+        customPlugins: customPlugins.length > 0 ? customPlugins : undefined,
       });
     }
   };
@@ -131,12 +169,64 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
     </div>
   );
 
+  const handleCloseBanner = () => {
+    setShowAppBanner(false);
+    setSelectedApplicationId(null);
+  };
+
   return (
     <>
       <Card>
         <form onSubmit={handleSubmit}>
           <h2 className="text-xl font-bold text-white mb-6">Configurer un Nouveau Test</h2>
-          
+
+          {/* Bannière Application Sélectionnée */}
+          {showAppBanner && selectedApp && (
+            <div className="mb-6 p-4 bg-cyan-900/20 border border-cyan-500/30 rounded-lg">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3 flex-1">
+                  <Info size={20} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h3 className="text-white font-bold mb-1">
+                      Test configuré pour : {selectedApp.name}
+                    </h3>
+                    <p className="text-sm text-gray-300 mb-2">
+                      {selectedApp.description || 'Aucune description'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-gray-400">Architecture :</span>{' '}
+                        <span className="text-white">{selectedApp.architecture}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Mode :</span>{' '}
+                        <span className="text-white">{selectedApp.testMode === 'blackbox' ? 'Blackbox' : 'Whitebox'}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">URL :</span>{' '}
+                        <span className="text-white font-mono text-xs truncate">{selectedApp.endpoint.url}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Rate Limit :</span>{' '}
+                        <span className="text-white">{selectedApp.safetyConfig.maxRequestsPerMinute || 10} req/min</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-cyan-400 mt-2">
+                      ✅ Une cible de test a été créée automatiquement avec ces paramètres
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseBanner}
+                  className="text-gray-400 hover:text-white ml-2"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-8">
             <section>
                 <div className="flex justify-between items-center mb-4">
@@ -198,6 +288,104 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
                 </div>
              </section>
 
+            {/* 🆕 MODE D'EXÉCUTION */}
+            <section>
+                <h3 className="text-lg font-semibold text-white mb-4">Mode d'Exécution</h3>
+                <div className="space-y-4">
+                  <label className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg border-2 border-gray-700 hover:border-gray-600 transition-colors">
+                    <input
+                      type="radio"
+                      name="testMode"
+                      value="simulation"
+                      checked={testMode === 'simulation'}
+                      onChange={() => setTestMode('simulation')}
+                      className="mt-1 form-radio text-cyan-500 focus:ring-cyan-500"
+                    />
+                    <div className="flex-1">
+                      <div className="text-white font-medium">Simulation (Rapide)</div>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Tests simulés sans appels API réels. Résultats probabilistes basés sur des heuristiques.
+                        Idéal pour développement et tests UI.
+                      </p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg border-2 border-gray-700 hover:border-gray-600 transition-colors">
+                    <input
+                      type="radio"
+                      name="testMode"
+                      value="real"
+                      checked={testMode === 'real'}
+                      onChange={() => setTestMode('real')}
+                      className="mt-1 form-radio text-cyan-500 focus:ring-cyan-500"
+                    />
+                    <div className="flex-1">
+                      <div className="text-white font-medium">Tests Réels avec Promptfoo 🚀</div>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Exécution via Promptfoo avec vrais appels LLM (Gemini, GPT-4o). Résultats authentiques.
+                        Requiert une clé API configurée dans <code className="text-cyan-400">.env</code>.
+                      </p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg border-2 border-gray-700 hover:border-gray-600 transition-colors">
+                    <input
+                      type="radio"
+                      name="testMode"
+                      value="backend"
+                      checked={testMode === 'backend'}
+                      onChange={() => setTestMode('backend')}
+                      className="mt-1 form-radio text-cyan-500 focus:ring-cyan-500"
+                    />
+                    <div className="flex-1">
+                      <div className="text-white font-medium">Backend API avec Temps Réel 🌐</div>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Exécution via backend NestJS avec persistance PostgreSQL, authentification multi-utilisateurs et mises à jour WebSocket en temps réel.
+                        Requiert backend démarré sur <code className="text-cyan-400">http://localhost:3000</code>.
+                      </p>
+                    </div>
+                  </label>
+
+                  {testMode === 'real' && (
+                    <>
+                      <div className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4">
+                        <p className="text-yellow-300 text-sm font-medium mb-2">
+                          ⚠️ Attention: Tests réels
+                        </p>
+                        <ul className="text-yellow-300 text-sm space-y-1 list-disc list-inside">
+                          <li>Consommation de crédits API ({volume} tests × 2 providers ≈ {volume * 2} appels)</li>
+                          <li>Durée estimée: ~{Math.ceil(volume / 10)} minutes</li>
+                          <li>Configuration: <code className="text-xs bg-yellow-900/30 px-1 py-0.5 rounded">guardrail/solution_promptfoo/ai-risk-guardrails-tests/.env</code></li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-purple-500/10 border border-purple-500/50 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="text-purple-300 text-sm font-medium mb-1">
+                              🎛️ Configuration Avancée des Plugins
+                            </p>
+                            <p className="text-purple-300 text-xs">
+                              {customPlugins.length > 0
+                                ? `${customPlugins.length} plugin(s) personnalisés sélectionnés`
+                                : 'Utilisation du mapping automatique catégorie → plugins'}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsAdvancedConfigOpen(true)}
+                            className="flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-md transition-colors text-sm font-medium"
+                          >
+                            <Sliders size={16} className="mr-2" />
+                            Configurer
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+            </section>
+
             <section>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center"><Pencil className="mr-3 text-cyan-500" />Système d'IA à Tester</h3>
                  <div className="flex items-center space-x-2">
@@ -248,7 +436,7 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
 
           <div className="mt-8 pt-6 border-t border-gray-700 flex justify-between items-center">
             <Button type="submit" disabled={isSubmitDisabled} isLoading={isRunning} className="px-6 py-2.5">
-              Lancer le Test
+              {testMode === 'real' ? '🚀 Lancer Tests Réels' : testMode === 'backend' ? '🌐 Lancer Tests Backend' : 'Lancer le Test'}
             </Button>
             <Button type="button" variant="secondary" onClick={onCancel}>
               Annuler
@@ -264,6 +452,13 @@ const TestConfiguration: React.FC<TestConfigurationProps> = ({ onCancel }) => {
             onDelete={handleDeleteTarget}
           />
       )}
+
+      <AdvancedTestConfiguration
+        isOpen={isAdvancedConfigOpen}
+        onClose={() => setIsAdvancedConfigOpen(false)}
+        selectedPlugins={customPlugins}
+        onPluginsChange={setCustomPlugins}
+      />
     </>
   );
 };

@@ -1,18 +1,21 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import { useThreatProfile } from '../contexts/ThreatProfileContext';
 import { ThreatProfile, ThreatRating } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { useNavigation } from '../contexts/NavigationContext';
+import { PlusCircle, Trash2, ArrowLeft, Compass, X } from 'lucide-react';
 
 interface ThreatRowProps {
     threat: ThreatProfile;
     onUpdate: (id: string, updatedData: Partial<ThreatProfile>) => void;
     onDelete: (id: string) => void;
+    isHighlighted?: boolean;
+    threatIndex?: number;
 }
 
-const ThreatRow: React.FC<ThreatRowProps> = ({ threat, onUpdate, onDelete }) => {
+const ThreatRow: React.FC<ThreatRowProps> = ({ threat, onUpdate, onDelete, isHighlighted = false, threatIndex }) => {
     const { settings } = useSettings();
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         onUpdate(threat.id, { [e.target.name]: e.target.value });
@@ -23,7 +26,11 @@ const ThreatRow: React.FC<ThreatRowProps> = ({ threat, onUpdate, onDelete }) => 
     }, [threat.initialRating, settings.riskLevels]);
 
     return (
-        <tr className="border-b border-gray-700 hover:bg-gray-800/50">
+        <tr data-highlighted={isHighlighted} className={`border-b border-gray-700 hover:bg-gray-800/50 transition-all ${
+            isHighlighted
+                ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
+                : ''
+        }`}>
             <td className="px-2 py-2">
                 <textarea
                     name="threat"
@@ -80,13 +87,28 @@ const ThreatRow: React.FC<ThreatRowProps> = ({ threat, onUpdate, onDelete }) => 
 
 const ThreatProfileView: React.FC = () => {
     const { threatProfiles, addThreatProfile, updateThreatProfile, deleteThreatProfile } = useThreatProfile();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
 
+    // Sort and group profiles with highlighted items first
     const groupedProfiles = useMemo(() => {
-        return threatProfiles.reduce((acc, current) => {
+        let profiles = [...threatProfiles];
+
+        // Sort to prioritize highlighted threats
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            profiles = profiles.sort((a, b) => {
+                const aIndex = threatProfiles.indexOf(a);
+                const bIndex = threatProfiles.indexOf(b);
+                const aHighlighted = filterParams.highlightIds!.includes(String(aIndex));
+                const bHighlighted = filterParams.highlightIds!.includes(String(bIndex));
+                return aHighlighted === bHighlighted ? 0 : aHighlighted ? -1 : 1;
+            });
+        }
+
+        return profiles.reduce((acc, current) => {
             (acc[current.profile] = acc[current.profile] || []).push(current);
             return acc;
         }, {} as Record<string, ThreatProfile[]>);
-    }, [threatProfiles]);
+    }, [threatProfiles, filterParams]);
 
     const profileOrder = ['Profile 1: External Adversary', 'Profile 2: Model Deployer', 'Profile 3: Model Provider'];
     const sortedProfileKeys = Object.keys(groupedProfiles).sort((a, b) => {
@@ -103,8 +125,56 @@ const ThreatProfileView: React.FC = () => {
         }
     };
 
+    // Auto-scroll to first highlighted item
+    useEffect(() => {
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            // Wait for DOM to render
+            setTimeout(() => {
+                const firstHighlighted = document.querySelector('[data-highlighted="true"]');
+                if (firstHighlighted) {
+                    firstHighlighted.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }
+            }, 300);
+        }
+    }, [filterParams]);
+
     return (
         <div className="space-y-6">
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={clearNavigation}
+                            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <Compass className="w-5 h-5" />
+                            <span className="font-medium">Retour à OWASP COMPASS</span>
+                        </button>
+                        <button
+                            onClick={clearNavigation}
+                            className="p-1 hover:bg-cyan-900/30 rounded transition-colors"
+                            aria-label="Fermer"
+                        >
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
+                    {sourceTitle && (
+                        <div className="mt-2 text-sm text-gray-300">
+                            Navigation depuis: <span className="font-semibold text-cyan-300">{sourceTitle}</span>
+                        </div>
+                    )}
+                    <div className="mt-1 text-xs text-gray-400">
+                        {filterParams.highlightIds.length} profil(s) de menace lié(s)
+                    </div>
+                </Card>
+            )}
+
             <header>
                 <h2 className="text-2xl font-bold text-white">Profil de Menace Objective</h2>
                 <p className="text-gray-400 mt-1">Identifiez et évaluez les menaces pour votre organisation en fonction des différents profils d'acteurs.</p>
@@ -129,14 +199,20 @@ const ThreatProfileView: React.FC = () => {
                                         {profileName}
                                     </td>
                                 </tr>
-                                {groupedProfiles[profileName].map(threat => (
-                                    <ThreatRow
-                                        key={threat.id}
-                                        threat={threat}
-                                        onUpdate={updateThreatProfile}
-                                        onDelete={handleDelete}
-                                    />
-                                ))}
+                                {groupedProfiles[profileName].map(threat => {
+                                    const threatIndex = threatProfiles.indexOf(threat);
+                                    const isHighlighted = filterParams?.highlightIds?.includes(String(threatIndex)) || false;
+                                    return (
+                                        <ThreatRow
+                                            key={threat.id}
+                                            threat={threat}
+                                            onUpdate={updateThreatProfile}
+                                            onDelete={handleDelete}
+                                            isHighlighted={isHighlighted}
+                                            threatIndex={threatIndex}
+                                        />
+                                    );
+                                })}
                                 <tr>
                                     <td colSpan={5} className="px-4 py-2">
                                         <Button onClick={() => addThreatProfile(profileName)} variant="secondary" className="text-xs py-1 px-2">

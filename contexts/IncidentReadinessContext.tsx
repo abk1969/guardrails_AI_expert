@@ -22,9 +22,9 @@ const IncidentReadinessContext = createContext<IncidentReadinessState | undefine
 const READINESS_STORAGE_KEY = 'llmGuardrailIncidentReadiness';
 
 export const IncidentReadinessProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [questions, setQuestions] = useState<IncidentReadinessQuestion[]>([]);
-  const [incidentCategories, setIncidentCategories] = useState<IncidentCategory[]>([]);
-  const [incidentMonitoringReferences, setIncidentMonitoringReferences] = useState<IncidentMonitoringReference[]>([]);
+  const [questions, setQuestions] = useState<IncidentReadinessQuestion[]>(INITIAL_READINESS_QUESTIONS);
+  const [incidentCategories, setIncidentCategories] = useState<IncidentCategory[]>(INITIAL_INCIDENT_CATEGORIES);
+  const [incidentMonitoringReferences, setIncidentMonitoringReferences] = useState<IncidentMonitoringReference[]>(INITIAL_INCIDENT_MONITORING_REFERENCES);
 
 
   useEffect(() => {

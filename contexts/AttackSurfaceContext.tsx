@@ -16,9 +16,9 @@ const AttackSurfaceContext = createContext<AttackSurfaceState | undefined>(undef
 const ATTACK_SURFACE_STORAGE_KEY = 'llmGuardrailAttackSurface';
 
 export const AttackSurfaceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [attackVectors, setAttackVectors] = useState<AttackSurfaceVector[]>([]);
-  const [impactConfig, setImpactConfig] = useState<OrganizationalImpactConfig[]>([]);
-  const [nuclearScenarios, setNuclearScenarios] = useState<NuclearDisasterScenario[]>([]);
+  const [attackVectors, setAttackVectors] = useState<AttackSurfaceVector[]>(INITIAL_ATTACK_SURFACE_VECTORS);
+  const [impactConfig, setImpactConfig] = useState<OrganizationalImpactConfig[]>(INITIAL_ORGANIZATIONAL_IMPACT_CONFIG);
+  const [nuclearScenarios, setNuclearScenarios] = useState<NuclearDisasterScenario[]>(INITIAL_NUCLEAR_DISASTER_SCENARIOS);
 
   useEffect(() => {
     try {

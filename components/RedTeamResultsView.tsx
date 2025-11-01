@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import { useRedTeamResults } from '../contexts/RedTeamResultsContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { RedTeamResult, CompassRating, MitigationMapping, StrategyRoadmapItem, RoadmapStatus } from '../types';
 import { VULNERABILITY_REFERENCES, BUG_CROWD_SCORES, COMPASS_SCORES, CVSS_CALCULATOR_LINK } from '../constants';
-import { PlusCircle, Trash2, Link as LinkIcon, HelpCircle } from 'lucide-react';
+import { PlusCircle, Trash2, Link as LinkIcon, HelpCircle, ArrowLeft, Compass, X } from 'lucide-react';
 import Tooltip from './ui/Tooltip';
 
 const getRatingFromScore = (score: number | ''): { rating: CompassRating | ''; color: string } => {
@@ -18,13 +19,13 @@ const getRatingFromScore = (score: number | ''): { rating: CompassRating | ''; c
     return { rating: 'None', color: COMPASS_SCORES[4].color };
 };
 
-const ResultRow: React.FC<{ result: RedTeamResult }> = ({ result }) => {
+const ResultRow: React.FC<{ result: RedTeamResult; isHighlighted?: boolean }> = ({ result, isHighlighted = false }) => {
     const { updateResult, deleteResult } = useRedTeamResults();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         let updatedValue: string | number = value;
-        
+
         const updates: Partial<RedTeamResult> = { [name]: updatedValue };
 
         if (name === 'score') {
@@ -38,7 +39,7 @@ const ResultRow: React.FC<{ result: RedTeamResult }> = ({ result }) => {
         }
         updateResult(result.id, updates);
     };
-    
+
     const handleDelete = () => {
         if (window.confirm("Êtes-vous sûr de vouloir supprimer cette ligne ?")) {
             deleteResult(result.id);
@@ -48,7 +49,11 @@ const ResultRow: React.FC<{ result: RedTeamResult }> = ({ result }) => {
     const ratingInfo = getRatingFromScore(result.score);
 
     return (
-        <tr className="border-b border-gray-700 hover:bg-gray-800/50 align-top">
+        <tr className={`border-b border-gray-700 hover:bg-gray-800/50 align-top transition-all ${
+            isHighlighted
+                ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
+                : ''
+        }`}>
             <td className="px-2 py-1"><textarea name="name" value={result.name} onChange={handleChange} rows={2} className="w-full bg-gray-700/50 p-1 rounded-md focus:bg-gray-700"/></td>
             <td className="px-2 py-1"><textarea name="description" value={result.description} onChange={handleChange} rows={2} className="w-full bg-gray-700/50 p-1 rounded-md focus:bg-gray-700"/></td>
             <td className="px-2 py-1"><textarea name="vulnerability" value={result.vulnerability} onChange={handleChange} rows={2} className="w-full bg-gray-700/50 p-1 rounded-md focus:bg-gray-700"/></td>
@@ -136,7 +141,8 @@ const StrategyRow: React.FC<{ item: StrategyRoadmapItem }> = ({ item }) => {
 
 const RedTeamResultsView: React.FC = () => {
     const { results, addResult, mitigationProfiles, mitigationMappings, addMitigationMapping, strategyRoadmap, addStrategyItem } = useRedTeamResults();
-    
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
+
     const groupedStrategyItems = useMemo(() => {
         return strategyRoadmap.reduce((acc, item) => {
             (acc[item.category] = acc[item.category] || []).push(item);
@@ -164,6 +170,36 @@ const RedTeamResultsView: React.FC = () => {
 
     return (
         <div className="space-y-8">
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={clearNavigation}
+                            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <Compass className="w-5 h-5" />
+                            <span className="font-medium">Retour à OWASP COMPASS</span>
+                        </button>
+                        <button
+                            onClick={clearNavigation}
+                            className="p-1 hover:bg-cyan-900/30 rounded transition-colors"
+                            aria-label="Fermer"
+                        >
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
+                    {sourceTitle && (
+                        <div className="mt-2 text-sm text-gray-300">
+                            Navigation depuis: <span className="font-semibold text-cyan-300">{sourceTitle}</span>
+                        </div>
+                    )}
+                    <div className="mt-1 text-xs text-gray-400">
+                        {filterParams.highlightIds.length} résultat(s) Red Team lié(s)
+                    </div>
+                </Card>
+            )}
             <header>
                 <h2 className="text-2xl font-bold text-white">3e Orient: AI Red Team Results : AI Vulnerability Severity & Scoring</h2>
                 <p className="text-gray-400 mt-1">
@@ -187,7 +223,10 @@ const RedTeamResultsView: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {results.map(res => <ResultRow key={res.id} result={res} />)}
+                            {results.map((res, index) => {
+                                const isHighlighted = filterParams?.highlightIds?.includes(String(index)) || false;
+                                return <ResultRow key={res.id} result={res} isHighlighted={isHighlighted} />;
+                            })}
                         </tbody>
                     </table>
                 </div>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clearing Storage...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #1a1a2e;
+            color: #eaeaea;
+            margin: 0;
+        }
+        .message {
+            text-align: center;
+            padding: 40px;
+            background: #2c2c54;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        h1 { color: #00d4ff; margin-bottom: 20px; }
+        .success { color: #2ecc71; font-size: 48px; }
+        .info { margin: 20px 0; }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #00d4ff;
+            color: #1a1a2e;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        a:hover { background: #00a8cc; }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h1>🔧 Clearing AI RISK MANAGER Storage...</h1>
+        <div id="status">⏳ Processing...</div>
+    </div>
+
+    <script>
+        // Auto-execute clearing
+        setTimeout(() => {
+            try {
+                const keys = Object.keys(localStorage);
+                const aiRiskKeys = keys.filter(key =>
+                    key.startsWith('llmGuardrail') ||
+                    key.startsWith('compass-') ||
+                    key.startsWith('aiPolicy') ||
+                    key.startsWith('aiRisk')
+                );
+
+                let deletedCount = 0;
+                aiRiskKeys.forEach(key => {
+                    console.log('Deleting:', key);
+                    localStorage.removeItem(key);
+                    deletedCount++;
+                });
+
+                document.getElementById('status').innerHTML =
+                    '<div class="success">✅</div>' +
+                    '<div class="info"><strong>' + deletedCount + ' keys deleted successfully!</strong></div>' +
+                    '<p>Storage has been cleared. The application will reload with fresh data.</p>' +
+                    '<a href="http://localhost:5080">🔄 Return to Application</a>';
+
+                // Auto-redirect after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:5080';
+                }, 3000);
+            } catch (error) {
+                document.getElementById('status').innerHTML =
+                    '<div style="color: #ff4757;">❌ Error: ' + error.message + '</div>' +
+                    '<p>Please open this file directly in your browser.</p>';
+            }
+        }, 500);
+    </script>
+</body>
+</html>

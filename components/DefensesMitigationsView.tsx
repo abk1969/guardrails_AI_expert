@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
+import { useNavigation } from '../contexts/NavigationContext';
 import { useDefensesMitigations } from '../contexts/DefensesMitigationsContext';
 import { DefenseMitigationReference, KeyControlStrategy, OwaspReference } from '../types';
 import { DEFENSE_LAYERS, DEFENSE_QUESTIONS, DEFENSE_CONDITIONS, DEFENSE_OBJECTS_IN_SCOPE } from '../constants';
-import { PlusCircle, Trash2, Edit, Save, X, Link as LinkIcon, Search } from 'lucide-react';
+import { PlusCircle, Trash2, Edit, Save, X, Link as LinkIcon, Search, ArrowLeft, Compass, Download } from 'lucide-react';
+import { exportToPDF } from '../utils/pdfExport';
 
 // Reusable component for OWASP tables
 const OwaspTable: React.FC<{
@@ -78,8 +80,11 @@ const renderLinks = (text: string) => {
 
 const DefenseRow: React.FC<{ defense: DefenseMitigationReference }> = ({ defense }) => {
     const { updateDefense, deleteDefense } = useDefensesMitigations();
+    const { filterParams } = useNavigation();
     const [isEditing, setIsEditing] = useState(false);
     const [editState, setEditState] = useState(defense);
+
+    const isHighlighted = filterParams?.highlightIds?.includes(String(defense.id)) || false;
 
     const handleSave = () => {
         updateDefense(defense.id, editState);
@@ -156,13 +161,14 @@ const DefenseRow: React.FC<{ defense: DefenseMitigationReference }> = ({ defense
 
 
 const DefensesMitigationsView: React.FC = () => {
-    const { 
+    const {
         defenses, addDefense,
         keyControlsStrategies, updateKeyControlStrategy,
         keyDetectionMechanisms, updateKeyDetectionMechanism,
         owaspTopTen, addOwaspTopTenRow, updateOwaspTopTenRow, deleteOwaspTopTenRow,
         owaspAgenticTop15, addOwaspAgentic15Row, updateOwaspAgentic15Row, deleteOwaspAgentic15Row
     } = useDefensesMitigations();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredData = useMemo(() => {

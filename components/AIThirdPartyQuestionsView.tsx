@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import { useAIThirdPartyQuestions } from '../contexts/AIThirdPartyQuestionsContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { AIThirdPartyQuestion, QuestionRating } from '../types';
-import { PlusCircle, Trash2, Search, ChevronDown, Upload, Download, PieChart, CheckSquare, MessageSquare } from 'lucide-react';
+import { PlusCircle, Trash2, Search, ChevronDown, Upload, Download, PieChart, CheckSquare, MessageSquare, ArrowLeft, Compass, X } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip } from 'recharts';
 
 
@@ -27,8 +28,8 @@ const CHART_COLORS: Record<QuestionRating, string> = {
 };
 
 
-const QuestionRow: React.FC<{ question: AIThirdPartyQuestion, onUpdate: (id: string, data: Partial<AIThirdPartyQuestion>) => void, onDelete: (id: string) => void }> = ({ question, onUpdate, onDelete }) => {
-    
+const QuestionRow: React.FC<{ question: AIThirdPartyQuestion, questionIndex: number, isHighlighted: boolean, onUpdate: (id: string, data: Partial<AIThirdPartyQuestion>) => void, onDelete: (id: string) => void }> = ({ question, questionIndex, isHighlighted, onUpdate, onDelete }) => {
+
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         onUpdate(question.id, { [e.target.name]: e.target.value });
     };
@@ -38,7 +39,11 @@ const QuestionRow: React.FC<{ question: AIThirdPartyQuestion, onUpdate: (id: str
     }
 
     return (
-        <div className="bg-gray-800/60 p-4 rounded-lg border border-gray-700 space-y-3">
+        <div data-highlighted={isHighlighted} className={`p-4 rounded-lg border space-y-3 transition-all ${
+            isHighlighted
+                ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
+                : 'bg-gray-800/60 border-gray-700'
+        }`}>
             <div className="flex justify-between items-start">
                 <textarea 
                     name="question"
@@ -73,7 +78,7 @@ const QuestionRow: React.FC<{ question: AIThirdPartyQuestion, onUpdate: (id: str
     );
 };
 
-const CategorySection: React.FC<{ category: string, questions: AIThirdPartyQuestion[], onAdd: (category: string) => void, onUpdate: (id: string, data: Partial<AIThirdPartyQuestion>) => void, onDelete: (id: string) => void }> = ({ category, questions, onAdd, onUpdate, onDelete }) => {
+const CategorySection: React.FC<{ category: string, questions: AIThirdPartyQuestion[], allQuestions: AIThirdPartyQuestion[], filterParams: any, onAdd: (category: string) => void, onUpdate: (id: string, data: Partial<AIThirdPartyQuestion>) => void, onDelete: (id: string) => void }> = ({ category, questions, allQuestions, filterParams, onAdd, onUpdate, onDelete }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
     return (
@@ -87,7 +92,11 @@ const CategorySection: React.FC<{ category: string, questions: AIThirdPartyQuest
             </button>
             {isExpanded && (
                 <div className="p-4 space-y-4">
-                    {questions.map(q => <QuestionRow key={q.id} question={q} onUpdate={onUpdate} onDelete={onDelete} />)}
+                    {questions.map(q => {
+                        const questionIndex = allQuestions.indexOf(q);
+                        const isHighlighted = filterParams?.highlightIds?.includes(String(questionIndex)) || false;
+                        return <QuestionRow key={q.id} question={q} questionIndex={questionIndex} isHighlighted={isHighlighted} onUpdate={onUpdate} onDelete={onDelete} />;
+                    })}
                     <div className="pt-2">
                         <Button onClick={() => onAdd(category)} variant="secondary" className="text-xs py-1 px-2">
                             <PlusCircle size={14} className="mr-2" />
@@ -102,18 +111,33 @@ const CategorySection: React.FC<{ category: string, questions: AIThirdPartyQuest
 
 const AIThirdPartyQuestionsView: React.FC = () => {
     const { questions, updateQuestion, addQuestion, deleteQuestion, importQuestions } = useAIThirdPartyQuestions();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
     const [searchTerm, setSearchTerm] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const filteredQuestions = useMemo(() => {
-        if (!searchTerm) return questions;
-        const lowercasedFilter = searchTerm.toLowerCase();
-        return questions.filter(q => 
-            q.category.toLowerCase().includes(lowercasedFilter) ||
-            q.question.toLowerCase().includes(lowercasedFilter) ||
-            q.response.toLowerCase().includes(lowercasedFilter)
-        );
-    }, [questions, searchTerm]);
+        let filtered = searchTerm
+            ? questions.filter(q => {
+                const lowercasedFilter = searchTerm.toLowerCase();
+                return q.category.toLowerCase().includes(lowercasedFilter) ||
+                    q.question.toLowerCase().includes(lowercasedFilter) ||
+                    q.response.toLowerCase().includes(lowercasedFilter);
+            })
+            : questions;
+
+        // Sort to prioritize highlighted questions
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            filtered = [...filtered].sort((a, b) => {
+                const aIndex = questions.indexOf(a);
+                const bIndex = questions.indexOf(b);
+                const aHighlighted = filterParams.highlightIds!.includes(String(aIndex));
+                const bHighlighted = filterParams.highlightIds!.includes(String(bIndex));
+                return aHighlighted === bHighlighted ? 0 : aHighlighted ? -1 : 1;
+            });
+        }
+
+        return filtered;
+    }, [questions, searchTerm, filterParams]);
 
     const groupedQuestions = useMemo(() => {
         return filteredQuestions.reduce((acc, q) => {
@@ -139,7 +163,24 @@ const AIThirdPartyQuestionsView: React.FC = () => {
 
         return { total, answered, rated, chartData };
     }, [questions]);
-    
+
+    // Auto-scroll to first highlighted item
+    useEffect(() => {
+        if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
+            // Wait for DOM to render
+            setTimeout(() => {
+                const firstHighlighted = document.querySelector('[data-highlighted="true"]');
+                if (firstHighlighted) {
+                    firstHighlighted.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }
+            }, 300);
+        }
+    }, [filterParams]);
+
     const handleExport = () => {
         const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(questions, null, 2))}`;
         const link = document.createElement("a");
@@ -185,6 +226,35 @@ const AIThirdPartyQuestionsView: React.FC = () => {
                     Ces questions devraient être ajoutées au questionnaire TPRM (Third-Party Risk Management) pour l'assurance IA dans les services et fournisseurs tiers.
                 </p>
             </header>
+
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={clearNavigation}
+                                className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                                <Compass className="w-5 h-5" />
+                                <span>Retour à OWASP COMPASS</span>
+                            </button>
+                            <div className="h-6 w-px bg-cyan-600" />
+                            <div className="text-sm text-gray-300">
+                                <span className="font-semibold text-cyan-400">{filterParams.highlightIds.length}</span>{' '}
+                                question(s) liée(s) au cas d'usage : <span className="font-semibold">{sourceTitle}</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={clearNavigation}
+                            className="text-gray-500 hover:text-gray-300 transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                </Card>
+            )}
 
              <Card>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -246,10 +316,12 @@ const AIThirdPartyQuestionsView: React.FC = () => {
 
             <div className="space-y-6">
                 {Object.entries(groupedQuestions).map(([category, qs]) => (
-                    <CategorySection 
-                        key={category} 
-                        category={category} 
+                    <CategorySection
+                        key={category}
+                        category={category}
                         questions={qs}
+                        allQuestions={questions}
+                        filterParams={filterParams}
                         onUpdate={updateQuestion}
                         onDelete={deleteQuestion}
                         onAdd={addQuestion}

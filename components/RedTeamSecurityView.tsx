@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import { useRedTeam } from '../contexts/RedTeamContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { RedTeamQuestion, RedTeamRating } from '../types';
 import { RED_TEAM_RATINGS } from '../constants';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, ArrowLeft, Compass, X } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 
-const QuestionRow: React.FC<{ question: RedTeamQuestion }> = ({ question }) => {
+const QuestionRow: React.FC<{ question: RedTeamQuestion; isHighlighted?: boolean }> = ({ question, isHighlighted = false }) => {
     const { updateQuestion, deleteQuestion } = useRedTeam();
     const { settings } = useSettings();
 
@@ -29,7 +30,11 @@ const QuestionRow: React.FC<{ question: RedTeamQuestion }> = ({ question }) => {
     }, [question.initialRating, settings.riskLevels]);
 
     return (
-        <tr className="border-b border-gray-700 hover:bg-gray-800/50 align-top">
+        <tr className={`border-b border-gray-700 hover:bg-gray-800/50 align-top transition-all ${
+            isHighlighted
+                ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
+                : ''
+        }`}>
             <td className="px-2 py-2 w-2/5">
                  <textarea
                     name="question"
@@ -75,6 +80,7 @@ const QuestionRow: React.FC<{ question: RedTeamQuestion }> = ({ question }) => {
 
 const RedTeamSecurityView: React.FC = () => {
     const { questions, businessObjective, updateBusinessObjective, addQuestion } = useRedTeam();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
 
     const groupedQuestions = useMemo(() => {
         return questions.reduce((acc, current) => {
@@ -82,7 +88,7 @@ const RedTeamSecurityView: React.FC = () => {
             return acc;
         }, {} as Record<string, RedTeamQuestion[]>);
     }, [questions]);
-    
+
     const categoryOrder = [
         'General Questions',
         'Legal & Compliance',
@@ -100,6 +106,37 @@ const RedTeamSecurityView: React.FC = () => {
 
     return (
         <div className="space-y-6">
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={clearNavigation}
+                            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <Compass className="w-5 h-5" />
+                            <span className="font-medium">Retour à OWASP COMPASS</span>
+                        </button>
+                        <button
+                            onClick={clearNavigation}
+                            className="p-1 hover:bg-cyan-900/30 rounded transition-colors"
+                            aria-label="Fermer"
+                        >
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
+                    {sourceTitle && (
+                        <div className="mt-2 text-sm text-gray-300">
+                            Navigation depuis: <span className="font-semibold text-cyan-300">{sourceTitle}</span>
+                        </div>
+                    )}
+                    <div className="mt-1 text-xs text-gray-400">
+                        {filterParams.highlightIds.length} question(s) Red Team liée(s)
+                    </div>
+                </Card>
+            )}
+
             <header>
                 <h2 className="text-2xl font-bold text-white">Questionnaire de Revue de Sécurité Red Team</h2>
                 <p className="text-gray-400 mt-1">
@@ -132,7 +169,11 @@ const RedTeamSecurityView: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {groupedQuestions[categoryName].map(q => <QuestionRow key={q.id} question={q} />)}
+                                {groupedQuestions[categoryName].map(q => {
+                                    const questionIndex = questions.indexOf(q);
+                                    const isHighlighted = filterParams?.highlightIds?.includes(String(questionIndex)) || false;
+                                    return <QuestionRow key={q.id} question={q} isHighlighted={isHighlighted} />;
+                                })}
                             </tbody>
                         </table>
                     </div>

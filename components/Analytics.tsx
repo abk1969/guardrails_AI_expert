@@ -4,7 +4,7 @@ import Card from './ui/Card';
 import { useTestRun } from '../contexts/TestRunContext';
 import { GuardrailCategory, PromptComplexity, TestResult, TestStatus } from '../types';
 import { GUARDRAIL_CATEGORIES } from '../constants';
-import { ArrowUp, ArrowDown, AlertTriangle, TrendingDown, ChevronsRight } from 'lucide-react';
+import { ArrowUp, ArrowDown, AlertTriangle, TrendingDown, ChevronsRight, ExternalLink, Eye } from 'lucide-react';
 import ResultDetailModal from './ResultDetailModal';
 
 const renderScoreTrend = (change: number) => {
@@ -21,6 +21,7 @@ const renderScoreTrend = (change: number) => {
 const Analytics: React.FC = () => {
     const { historicalRuns } = useTestRun();
     const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
+    const [showPromptfooUI, setShowPromptfooUI] = useState(false);
 
     const analyticsData = useMemo(() => {
         if (!historicalRuns || historicalRuns.length === 0) return null;
@@ -219,6 +220,71 @@ const Analytics: React.FC = () => {
                          <p className="text-gray-400 text-center py-4">Félicitations ! Aucun échec critique n'a été enregistré dans les tests récents.</p>
                     )}
                 </div>
+            </Card>
+
+            {/* Promptfoo UI Integration */}
+            <Card>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white flex items-center">
+                        <Eye className="text-cyan-500 mr-3" />
+                        Interface Promptfoo Avancée
+                    </h3>
+                    <button
+                        onClick={() => setShowPromptfooUI(!showPromptfooUI)}
+                        className="flex items-center px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md transition-colors font-medium"
+                    >
+                        {showPromptfooUI ? 'Masquer' : 'Afficher'} l'interface
+                    </button>
+                </div>
+
+                {showPromptfooUI ? (
+                    <div className="space-y-4">
+                        <div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">
+                            <p className="text-blue-300 text-sm font-medium mb-2">
+                                📌 Instructions pour démarrer l'interface Promptfoo
+                            </p>
+                            <ol className="text-blue-300 text-sm space-y-1 list-decimal list-inside">
+                                <li>Ouvrez un terminal dans <code className="text-xs bg-blue-900/30 px-1 py-0.5 rounded">guardrail/solution_promptfoo/ai-risk-guardrails-tests/</code></li>
+                                <li>Lancez: <code className="text-xs bg-blue-900/30 px-1 py-0.5 rounded">npx promptfoo@latest view</code></li>
+                                <li>L'interface sera disponible sur <code className="text-xs bg-blue-900/30 px-1 py-0.5 rounded">http://localhost:15500</code></li>
+                                <li>Une fois démarrée, l'iframe ci-dessous se chargera automatiquement</li>
+                            </ol>
+                            <div className="mt-3 flex items-center space-x-2">
+                                <a
+                                    href="http://localhost:15500"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center text-cyan-400 hover:text-cyan-300 text-sm font-medium"
+                                >
+                                    <ExternalLink size={16} className="mr-1" />
+                                    Ouvrir dans un nouvel onglet
+                                </a>
+                            </div>
+                        </div>
+
+                        <div className="border border-gray-700 rounded-lg overflow-hidden bg-white">
+                            <iframe
+                                src="http://localhost:15500"
+                                className="w-full"
+                                style={{ height: '700px', border: 'none' }}
+                                title="Promptfoo UI"
+                                sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                            />
+                        </div>
+
+                        <div className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-3">
+                            <p className="text-yellow-300 text-xs">
+                                ⚠️ <strong>Note:</strong> Si l'iframe affiche une erreur, assurez-vous que le serveur Promptfoo est bien démarré.
+                                L'interface native offre des fonctionnalités avancées : comparaisons de modèles, historique détaillé, export de rapports, etc.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-gray-400 text-center py-8">
+                        Cliquez sur "Afficher l'interface" pour accéder à l'interface de visualisation avancée de Promptfoo.
+                        Cette interface permet d'explorer en détail les résultats des tests réels.
+                    </p>
+                )}
             </Card>
 
             {selectedResult && (

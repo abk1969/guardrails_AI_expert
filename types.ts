@@ -73,6 +73,7 @@ export interface TestConfiguration {
   categorySensitivities: Record<GuardrailCategory, Sensitivity>;
   complexities: PromptComplexity[];
   sandboxConfig?: SandboxVulnerabilityConfig;
+  customPlugins?: string[]; // Liste des plugins Promptfoo personnalisés (optionnel)
 }
 
 export interface TestPrompt {
@@ -573,4 +574,315 @@ export interface IncludedResource {
   url?: string;
   description: string;
   risksCount?: number; // Number of risks from this resource
+}
+
+// ============================================================
+// OWASP COMPASS (Threat Defense Framework) - Types
+// ============================================================
+
+// Bilingual text support
+export interface BilingualText {
+  fr: string;
+  en: string;
+}
+
+// Risk level based on risk score
+export type RiskLevel = 'critical' | 'high' | 'moderate' | 'low';
+
+// OODA Loop phases
+export enum OODAPhase {
+  OBSERVE = 'observe',
+  ORIENT = 'orient',
+  DECIDE = 'decide',
+  ACT = 'act'
+}
+
+// COMPASS Use Case (from "Notes Uses Cases" sheet)
+export interface CompassUseCase {
+  id: string;
+  title: BilingualText;
+  description: BilingualText;
+
+  // Risk scoring (1-5 scale)
+  impact: 1 | 2 | 3 | 4 | 5;
+  likelihood: 1 | 2 | 3 | 4 | 5;
+  riskScore: number; // impact × likelihood
+  riskLevel: RiskLevel; // calculated from riskScore
+
+  // Recommendations and threat info
+  recommendation: BilingualText;
+  associatedThreat: BilingualText;
+
+  // MITRE ATT&CK / ATLAS mapping
+  attackMapping: {
+    mitre?: string; // e.g., "T1566.001"
+    atlas?: string; // e.g., "T1647"
+    description?: BilingualText;
+  };
+
+  // Cross-module relationships
+  relatedSheets: {
+    vulnerabilities: string[]; // IDs from "3a Orient Known AI Vulnerabilit"
+    incidents: string[]; // IDs from "3b Orient Known AI Incidents"
+    defenses: string[]; // IDs from "6a Reference Defenses & Mitigat"
+    questions: string[]; // IDs from "6c Reference Third Party Questi"
+    threatProfiles: string[]; // IDs from "2a Observe Objective Threat Pr"
+    attackSurfaces: string[]; // IDs from "2b Observe Attack Surface Analy"
+    incidentReadiness: string[]; // IDs from "3c Orient AI Incident Response"
+    redTeamSecurity: string[]; // IDs from "3d Orient Red Team Security Rev"
+    redTeamResults: string[]; // IDs from "3e Orient AI Red Team Results"
+    useCases: string[]; // IDs from "1 Observe Business Context & Us"
+  };
+
+  // OODA phase association
+  oodaPhase: OODAPhase;
+
+  // Metadata
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// OWASP Sheet (represents one tab from the Excel file)
+export interface OWASPSheet {
+  id: string;
+  name: string;
+  title: BilingualText;
+  description: BilingualText;
+  oodaPhase: OODAPhase | null; // null for reference sheets
+  icon?: string; // Lucide icon name
+  color?: string; // Tailwind color class
+  order: number; // Display order
+}
+
+// OODA Progress tracking
+export interface OODAProgress {
+  observe: {
+    completed: boolean;
+    profileDefined: boolean;
+    attackSurfaceAnalyzed: boolean;
+  };
+  orient: {
+    completed: boolean;
+    vulnerabilitiesReviewed: boolean;
+    incidentsReviewed: boolean;
+    redTeamCompleted: boolean;
+  };
+  decide: {
+    completed: boolean;
+    prioritizationDone: boolean;
+    mitigationsPrioritized: boolean;
+  };
+  act: {
+    completed: boolean;
+    strategyDefined: boolean;
+    roadmapCreated: boolean;
+  };
+}
+
+// Threat Profile (from "2a Observe Objective Threat Pr")
+export interface CompassThreatProfile {
+  id: string;
+  name: BilingualText;
+  description: BilingualText;
+  systemType: string; // e.g., "Internal chatbot", "Public API"
+  aiComponents: AIComponentType[];
+  riskAppetite: 'low' | 'medium' | 'high';
+  criticalAssets: string[];
+  complianceRequirements: string[];
+}
+
+// Attack Surface Analysis (from "2b Observe Attack Surface Analy")
+export interface AttackSurface {
+  id: string;
+  component: BilingualText;
+  exposureLevel: 'public' | 'internal' | 'restricted';
+  attackVectors: BilingualText[];
+  existingControls: BilingualText[];
+  gaps: BilingualText[];
+  priority: 'critical' | 'high' | 'medium' | 'low';
+}
+
+// Known Vulnerability (from "3a Orient Known AI Vulnerabilit")
+export interface CompassKnownVulnerability {
+  id: string;
+  title: BilingualText;
+  description: BilingualText;
+  cveId?: string;
+  owaspCategory: string; // OWASP LLM Top 10 or Agentic Top 15
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  affectedComponents: string[];
+  exploitAvailable: boolean;
+  mitigations: BilingualText[];
+  references: string[];
+}
+
+// Known Incident (from "3b Orient Known AI Incidents")
+export interface KnownIncident {
+  id: string;
+  title: BilingualText;
+  date: string;
+  organization?: string;
+  description: BilingualText;
+  impact: BilingualText;
+  rootCause: BilingualText;
+  lessonsLearned: BilingualText;
+  relatedVulnerabilities: string[]; // IDs of KnownVulnerability
+  publicReport?: string; // URL
+}
+
+// Defense/Mitigation (from "6a Reference Defenses & Mitigat")
+export interface DefenseMitigation {
+  id: string;
+  name: BilingualText;
+  description: BilingualText;
+  category: string; // e.g., "Input Validation", "Output Filtering"
+  effectiveness: 'high' | 'medium' | 'low';
+  implementationComplexity: 'high' | 'medium' | 'low';
+  cost: 'high' | 'medium' | 'low';
+  applicableThreats: string[]; // IDs of CompassUseCase
+  implementationGuidance: BilingualText;
+  tools?: string[];
+  references?: string[];
+}
+
+// Third Party Question (from "6c Reference Third Party Questi")
+export interface ThirdPartyQuestion {
+  id: string;
+  category: BilingualText;
+  question: BilingualText;
+  rationale: BilingualText;
+  expectedAnswers: BilingualText[];
+  redFlags: BilingualText[];
+  relatedThreats: string[]; // IDs of CompassUseCase
+}
+
+// ============================================================================
+// APPLICATION PROFILE MANAGEMENT
+// Pour gérer le profil des applications à tester (multiarchitectures)
+// ============================================================================
+
+export type ApplicationArchitecture =
+  | 'llm-chatbot'
+  | 'rag'
+  | 'agentic-rag'
+  | 'text-to-speech'
+  | 'text-to-video'
+  | 'video-to-text'
+  | 'speech-to-text'
+  | 'complex-pipeline'
+  | 'code-generation'
+  | 'other';
+
+export type TestMode = 'blackbox' | 'whitebox';
+
+export type AuthenticationType =
+  | 'none'
+  | 'api-key'
+  | 'bearer-token'
+  | 'oauth'
+  | 'basic-auth'
+  | 'custom-header';
+
+export type InputOutputType =
+  | 'text'
+  | 'audio'
+  | 'video'
+  | 'image'
+  | 'multimodal';
+
+export interface ApplicationEndpoint {
+  url: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH';
+  headers?: Record<string, string>;
+  bodyTemplate?: string; // Template with {{prompt}} placeholder
+  responseField?: string; // JSON path to extract response (e.g., "data.response")
+}
+
+export interface ApplicationAuthentication {
+  type: AuthenticationType;
+  credentials?: {
+    apiKey?: string;
+    token?: string;
+    username?: string;
+    password?: string;
+    customHeaders?: Record<string, string>;
+  };
+  // Pour mode whitebox : stockage sécurisé des credentials
+  isEncrypted?: boolean;
+}
+
+export interface ApplicationTestability {
+  promptfooCompatible: boolean; // Peut être testé avec Promptfoo ?
+  requiresCustomTest: boolean; // Nécessite des tests custom ?
+  inputType: InputOutputType;
+  outputType: InputOutputType;
+  limitations?: string[]; // Limites connues (rate limit, etc.)
+  estimatedTestDuration?: number; // En minutes
+}
+
+export interface ApplicationSafetyConfig {
+  maxRequestsPerMinute?: number; // Rate limiting
+  maxTestsPerSession?: number; // Limite de tests
+  allowedPlugins?: string[]; // Plugins autorisés (si restriction)
+  dangerousPlugins?: string[]; // Plugins à éviter (ex: harmful-* pour prod)
+  requiresConfirmation?: boolean; // Confirmation avant chaque test
+  productionEnvironment?: boolean; // Flag si app en production
+}
+
+export interface ApplicationProfile {
+  id: string;
+  name: string;
+  description?: string;
+  architecture: ApplicationArchitecture;
+  testMode: TestMode;
+
+  // Configuration de l'endpoint
+  endpoint: ApplicationEndpoint;
+
+  // Authentication (optionnel pour blackbox simple)
+  authentication?: ApplicationAuthentication;
+
+  // Testability
+  testability: ApplicationTestability;
+
+  // Safety configuration
+  safetyConfig: ApplicationSafetyConfig;
+
+  // Metadata
+  owner?: string; // Nom du client ou propriétaire
+  tags?: string[]; // Tags pour catégorisation
+  createdAt: string;
+  updatedAt: string;
+
+  // Test history
+  lastTestedAt?: string;
+  testCount?: number;
+}
+
+export interface ApplicationTestSession {
+  id: string;
+  applicationId: string;
+  applicationName: string;
+  startedAt: string;
+  completedAt?: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+  // Configuration du test
+  testType: 'promptfoo' | 'custom-multimodal' | 'manual';
+  promptfooConfig?: string; // YAML content si Promptfoo
+
+  // Résultats
+  results?: {
+    totalTests: number;
+    passed: number;
+    failed: number;
+    score?: number;
+    duration?: number; // En secondes
+    outputPath?: string; // Chemin vers résultats JSON
+  };
+
+  // Logs et audit
+  logs: string[];
+  warnings: string[];
+  errors: string[];
 }

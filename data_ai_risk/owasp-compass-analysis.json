@@ -1,0 +1,4622 @@
+{
+  "0 Getting The Compass": {
+    "headers": [
+      "Getting Started"
+    ],
+    "data": [
+      [
+        "To begin using the compass you will need to create a copy of this spreadheet for your own use."
+      ],
+      [
+        "Simply go to the menu"
+      ],
+      [
+        "     File -> Make a Copy"
+      ],
+      [
+        "To create a copy you can use for yourself."
+      ],
+      [
+        "This resource is provided under Creative commons Licensing, and has no warranty or support. "
+      ]
+    ]
+  },
+  "1 About": {
+    "headers": [
+      "OWASP Threat Defense COMPASS V 1.0",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Guiding AI and cybersecurity teams through the AI frontier to chart a threat resilient course",
+        "",
+        ""
+      ],
+      [
+        "🗺️ What is the Purpose of this Workbook?",
+        "",
+        ""
+      ],
+      [
+        "This workbook helps organizations identify, assess, and prioritize AI related threats across the AI lifecycle using consistent, structured scoring and decision making. Its mission is to help defenders and builders have a resilient, AI threat informed, strategy.",
+        "",
+        ""
+      ],
+      [
+        "🤹🏻‍♂️ Who Should Use This ?",
+        "",
+        ""
+      ],
+      [
+        "CISO: Set AI threat priorities and communicate executive-level risks",
+        "",
+        ""
+      ],
+      [
+        "AI Red Teamer: Document and prioritize findings from adversarial testing",
+        "",
+        ""
+      ],
+      [
+        "Security Engineer: Track vulnerabilities and align mitigations",
+        "",
+        ""
+      ],
+      [
+        "Threat Intel Analyst: Consolidate emerging threats and incidents",
+        "",
+        ""
+      ],
+      [
+        "Developer/AI Engineer: Understand model abuse risks and design securely",
+        "",
+        ""
+      ],
+      [
+        "🎯 How to Use This Tool (Quick Start)",
+        "",
+        ""
+      ],
+      [
+        "1. The workbook is designed to be used iteratively so you have the option to focus on the top threats for your immediate objective or organize all the threats for each profile into a list of strategic and tactical items to remediate, or duplicate the dashboard to track threats which apply to the overall organization's attack surface. ",
+        "",
+        ""
+      ],
+      [
+        "2. Go to Tab 2a Observe Objective Profile' and define what systems or use cases you're assessing.",
+        "",
+        ""
+      ],
+      [
+        "3. Work through each OODA phase tab (Observe → Orient → Decide → Act) in order",
+        "",
+        ""
+      ],
+      [
+        "3. Use the 1–5 scoring system to estimate likelihood and impact",
+        "",
+        ""
+      ],
+      [
+        "4. Prioritize threats using the calculated scores (Likelihood × Impact)",
+        "",
+        ""
+      ],
+      [
+        "5. Build a roadmap based on the results in Tab 9 Act: Act Strategy & Roadmap",
+        "",
+        ""
+      ],
+      [
+        "🧭 Navigation (Click or Navigate to Each Tab)",
+        "",
+        ""
+      ],
+      [
+        "Observe: Objective Dashboard",
+        "2 Observe Objective Dashboard",
+        "This tab is the current status of rolled up organizational AI threats."
+      ],
+      [
+        "Observe: Objective Profile",
+        "2a. Observe Objective Threat Profile ",
+        "Use this tab to identify the Profile 1 & Profile 2 threats to your organization. Use the deployment types image to review organization's deployment types."
+      ],
+      [
+        "Observe: Attack Surface Analysis",
+        "2b Observe Attack Surface Analysis",
+        "Use the Observe: Attack Surface Modeling Tab to estimate Threat-Risk"
+      ],
+      [
+        "Orient Summary",
+        "3 Orient Summary",
+        "Provided as an option to merge all issues identified during Orient into a single tab "
+      ],
+      [
+        "Orient: Known Vulnerabilities",
+        "3a Orient Known AI Vulnerabilities",
+        "Use the Orient:Known Vulnerabilities tab to research vulnerabilities related to the target objective. Consider trends or patterns. For example vulnerabilities in a specific category. "
+      ],
+      [
+        "Orient: Incidents & Response",
+        "3b Orient Known AI Incidents",
+        "Use the Orient Incident tab to research AI Incidents and impact costs if available. Update the existing table of example incidents / impacts costs with objective relevant information by using the links to reports, incident databases, legal cases, and regulatory information"
+      ],
+      [
+        "Orient AI Incident Response Readiness",
+        "3c Orient AI Incident Response Readiness ",
+        "Use the Orient AI Incident Response Readiness to identify gaps in responding to AI incidents."
+      ],
+      [
+        "Orient: Red Team & Third Party",
+        "3d  Orient Red Team Security Review 6c Reference: Third Party Questions",
+        "Use the Red Teaming Test results tab to score identified vulnerabilities and the Reference Third Party Review Questions to track potential issues. "
+      ],
+      [
+        "Orient: AI Red Team Results",
+        "3e Orient AI Red Team Results",
+        "Use to score any vulnerabilities identified in AI Red Team or other types of testing. "
+      ],
+      [
+        "Decide: Testing & Mitigations",
+        "4 Decide Red Team or Vuln vs Mitigations",
+        "Use the mitigations tab to determine appropriate mitigations for the objective. "
+      ],
+      [
+        "Act: Strategy & Roadmap",
+        "5 Act Strategy & Roadmap",
+        "Document detailed action plan"
+      ],
+      [
+        "Reference Tabs",
+        "",
+        ""
+      ],
+      [
+        "",
+        "6 Reference: AI Security Matrix",
+        ""
+      ],
+      [
+        "",
+        "6a Reference: Defenses & Mitigations ",
+        ""
+      ],
+      [
+        "",
+        "6b Reference: Incident Monitoring & Alerts",
+        ""
+      ],
+      [
+        "",
+        "6c Reference: AI Third Party Questions",
+        ""
+      ],
+      [
+        "⚽️ Scoring Legend Key",
+        "",
+        ""
+      ],
+      [
+        "Impact Score",
+        "Impact Description",
+        ""
+      ],
+      [
+        5,
+        "Critical: Severe business disruption, regulatory or legal action, loss of life, or strategic failure.",
+        ""
+      ],
+      [
+        4,
+        "High: Significant financial, operational, or reputational damage.",
+        ""
+      ],
+      [
+        3,
+        "Moderate: Noticeable impact requiring cross-team response or mitigation.",
+        ""
+      ],
+      [
+        2,
+        "Low :Minor disruption: limited to a small system or team.",
+        ""
+      ],
+      [
+        1,
+        "Minimal: Negligible or no impact on business operations.",
+        ""
+      ],
+      [
+        "Likelihood Score",
+        "Likelihood Description",
+        ""
+      ],
+      [
+        5,
+        "Almost Certain: Threat is already happening or has been observed in the wild.",
+        ""
+      ],
+      [
+        4,
+        "Likely: High probability based on known vulnerabilities or exposure.",
+        ""
+      ],
+      [
+        3,
+        "Possible: Reasonable chance within the next year based on threat landscape.",
+        ""
+      ],
+      [
+        2,
+        "Unlikely: Can occur under specific conditions or attacker sophistication.",
+        ""
+      ],
+      [
+        1,
+        "Rare: Highly improbable or theoretical with current setup.",
+        ""
+      ],
+      [
+        "Score Range",
+        "Risk Level",
+        ""
+      ],
+      [
+        "20–25",
+        "Critical",
+        ""
+      ],
+      [
+        "15–19",
+        "High",
+        ""
+      ],
+      [
+        "10–14",
+        "Moderate",
+        ""
+      ],
+      [
+        "5–9",
+        "Low",
+        ""
+      ],
+      [
+        "1–4",
+        "Minimal",
+        ""
+      ],
+      [
+        "LICENSE AND USAGE",
+        "",
+        ""
+      ],
+      [
+        "This document is licensed under Creative Commons, CC BY-SA 4.0.",
+        "",
+        ""
+      ],
+      [
+        "You are free to: Share, copy and redistribute the material in any medium or format for any purpose, even commercially. Adapt, remix, transform, and build upon the material for any purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms. Under the following terms: Attribution, you must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way , that suggests the licensor endorses you or your use. ShareAlike: If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original No additional restrictions. You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.",
+        "",
+        ""
+      ],
+      [
+        "Link to full license text: https://creativecommons.org/licenses/by-sa/4.0/legalcode",
+        "",
+        ""
+      ]
+    ]
+  },
+  "1 FAQ": {
+    "headers": [
+      "OWASP GenAI COMPASS v.1 FAQ",
+      ""
+    ],
+    "data": [
+      [
+        "❓Can we modify the OWASP GenAI COMPASS workbook?",
+        "Yes! The workbook is provided under Creative Commons, CC BY-SA 4.0 licensed."
+      ],
+      [
+        "❓How does COMPASS & ATT&CK work together?",
+        "MITRE ATT&CK is a knowledge base of adversary tactics and techniques based on real-world observations used for modeling cyber threats and informing defense strategies. The OWASP GenAI COMPASS builds upon this by providing a structured approach to assess and prioritize AI-specific threats within the broader context of cybersecurity. By integrating ATT&CK’s taxonomy, the workbook enables organizations to map AI-related vulnerabilities and attack vectors to known adversary behaviors, facilitating more effective threat modeling and mitigation planning. "
+      ],
+      [
+        "❓How does the OWASP GenAI COMPASS align with MITRE ATLAS?",
+        "MITRE ATLAS is a knowledge base that focuses on adversary tactics and techniques targeting AI enabled systems. The OWASP GenAI COMPASS complements ATLAS by providing a practical tool for organizations to assess their AI systems against these documented threats. It allows for the identification of potential vulnerabilities and the development of mitigation strategies, thereby operationalizing the insights from ATLAS into actionable security measures"
+      ],
+      [
+        "❓In what ways does the OWASP GenAI COMPASS support NIST’s Secure Software Development Framework (SSDF)",
+        "NIST’s SSDF (SP 800-218) offers a set of secure software development practices aimed at reducing software vulnerabilities . The OWASP GenAI COMPASS supports these practices by providing a structured methodology to assess AI-related threats throughout the software development lifecycle. It enables developers and security teams to incorporate threat modeling, risk assessment, and mitigation planning into their development processes, aligning with SSDF’s emphasis on integrating security into every phase of software development."
+      ],
+      [
+        "❓How does the OWASP GenAI COMPASS facilitate adherence to NIST’s guidelines on managing misuse risk for dual-use foundation models?",
+        "NIST’s draft guidance (AI 800-1) addresses the risks associated with dual-use foundation models, emphasizing the need for comprehensive risk assessment and mitigation strategies. The OWASP GenAI COMPASS helps organizations with implementing these guidelines by providing a framework to identify, assess, and prioritize potential misuse scenarios of AI models. It encourages proactive risk management and the development of safeguards to prevent the malicious use of AI technologies, aligning with NIST’s recommendations for responsible AI deployment. "
+      ],
+      [
+        "❓Can the OWASP GenAI COMPASS be integrated into existing security and development workflows?",
+        "Absolutely. The OWASP GenAI COMPASS is designed to be flexible and adaptable, making it suitable for integration into various organizational workflows. Its structured approach to threat assessment and mitigation can enhance existing security protocols, development practices, and risk management strategies. By aligning with established frameworks like MITRE ATT&CK, MITRE ATLAS, and NIST’s guidelines, the workbook serves as a bridge between high-level risk management principles and practical, actionable steps tailored to AI systems."
+      ],
+      [
+        "❓Does OWASP GenAI COMPASS work with UK Playbook on Artificial Intelligence?",
+        "The OWASP GenAI COMPASS Workbook serves as a practical companion to the UK’s Artificial Intelligence Playbook, providing structured tools and methodologies that align with the Playbook’s principles for safe, effective, and responsible AI use in the public sector"
+      ],
+      [
+        "❓Should I only use OWASP GenAI COMPASS for precise Threat Modeling / Risk Assessment?",
+        "No! OWASP GenAI COMPASS is designed for fast assessment and fast answers. Additional tools, data, and expert guidance should be used if comprehensive and precise information is required."
+      ],
+      [
+        "❓Does OWASP GenAI COMPASS include all aspects of AI safety & privacy?",
+        "OWASP GenAI COMPASS considers AI Safety & Privacy in relation to an AI Incident & financial business impact. Consider other resources to specifically address the nuances related to AI Ethics, Safety, & Privacy"
+      ],
+      [
+        "❓ What about all the other Countries Guidance on AI Security?",
+        "OWASP GenAI COMPASS focus is on organization threat informed resilience, an initiative lead by MITRE. Users from other countries are encouraged to adapt OWASP GenAI COMPASS to align with their specific uses,"
+      ],
+      [
+        "❓ Should I use OWASP GenAI COMPASS if I am a Model Provider (Profile 3)?",
+        "Model Provider threats and resilience is included as a third party relationship for Incident Response, Resilience, and Supply Chain threats. A fully comprehensive Model Provider threats and AI resilience is outside of the scope of OWASP GenAI COMPASS."
+      ]
+    ]
+  },
+  "2 Observe Objective Dashboard": {
+    "headers": [
+      "2 Observe: Objective Dashboard",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use tab as the current status roll up of the organizational AI threats. Add rows as needed. ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Adding the business case objectives assists in keeping the mission objectives aligned. ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Business Case Objective ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Profile 1: External Adversary ",
+        "Threat Category / Attack Vector",
+        "Note",
+        "Initial Rating",
+        "Defenses & Mitigations",
+        "Tested",
+        "Adjusted Rating"
+      ],
+      [
+        "Profile 2a: Model Deployer AI Internal Existing / General ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Profile 2b: Model Deployer CoPilot or Gemini",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Profile 2c: Model Deployer New Proposed GenAI / Agent / Agentic",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Profile 3: Model Provider (3rd party threat)",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  " 2a Observe Objective Threat Pr": {
+    "headers": [
+      "2a Observe: Objective Threat Profile",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use this tab to identify the Profile 1 & Profile 2 threats to your organization. Use the deployment types image to review organization's deployment types.",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Adding the business case objectives assists in keeping the mission objectives aligned. ",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Business Case Objective ",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        " "
+      ],
+      [
+        "Profile 1: External Adversary",
+        "Threat Category / Attack Vector",
+        "Note",
+        "Initial Rating",
+        "Defenses & Mitigations"
+      ],
+      [
+        "",
+        "Deep Fakes : voice or image cloning",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Deep Fakes : phishing or invoice fraud or misinformation",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Adversary Attack w/ AI : Identity / Access",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Adversary Attack w/ AI : vulnerability or supply chain",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "OSINT Gathering",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Profile 2: Model Deployer",
+        "LLM01:2025 Prompt Injection",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM02:2025 Sensitive Information Disclosure",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM03:2025 Supply Chain",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM04: Data and Model Poisoning",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM05:2025 Improper Output Handling",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM06:2025 Excessive Agency",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM07:2025 System Prompt Leakage",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM08:2025 Vector and Embedding Weaknesses",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM09:2025 Misinformation",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "LLM10:2025 Unbounded Consumption",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T1: Memory Poisoning",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T2: Tool Misuse",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T3: Privilege Compromise",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T4: Resource Overload",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T5: Cascading Hallucination Attacks",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T6: Intent Breaking & Goal Manipulation",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T7: Misaligned & Deceptive Behaviors",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T8: Repudiation & Untraceability",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T9: Identity Spoofing & Impersonation",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T10: Overwhelming HITL",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T11: Unexpected RCE and Code Attacks",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T12: Agent Communication Poisoning",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T13: Rogue Agents in Multi-Agent Systems",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T14: Human Attacks on Multi-Agent Systems",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "T15: Human Manipulation",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Profile 3: Model Provider",
+        "AI Supply Chain Attack",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Data Exfiltration via AI",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Data Poisoning",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Model Evasion",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Model Stealing / Extraction",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Membership Inference",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Model Inversion",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "AI Resource Hijacking",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "AI Denial of Service (DoS)",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "2b Observe Attack Surface Analy": {
+    "headers": [
+      "2b Observe: Attack Surface Analysis",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use the Observe: Attack Surface Modeling Tab to estimate Threat-Risk",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Attack surface modeling is enabled by multiplying Threat - Risk Level by the value of organizational impact x consequence level. The Threat Category / Attack Vectors and the Threat - Risk Levels listed are provided as examples. Adjust based on your organization.",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Step 1",
+        "Revise the Organizational Impact Low Range and High Range values to align with your organizations Impact ratings for catastrophic, severe, major, moderate, and minor ratings. (Low Range D32 - D-36, High Range E32-E36) Example $$ provided",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Step 2",
+        "Specify 3 (or more) \"Nuclear AI Disaster\" Scenarios (row 48, 49, 50)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Step 3",
+        "Use the example Threat Category / Attack Vectors or modify the table from the Profile 1 and Profile 2 checklist,  and /or use from the list in tab 2a Observe: Objective Threat Profile.",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Threat Category / Attack Vector",
+        "Description",
+        "Threat - Risk Level",
+        ""
+      ],
+      [
+        "",
+        "Deep Fakes : voice or image cloning",
+        "Synthetic media where AI is used to create realistic fake content.",
+        5,
+        ""
+      ],
+      [
+        "",
+        "Adversary Attack w/ AI : Identity / Access",
+        "Adversaries using AI Tools to accelerate attacks to an organization",
+        5,
+        ""
+      ],
+      [
+        "",
+        "LLM01:2025 Prompt Injection",
+        "User maliciously alters prompt input",
+        5,
+        ""
+      ],
+      [
+        "",
+        "LLM03:2025 Supply Chain",
+        "Compromising third-party pre-trained models, libraries, or platforms used in the AI lifecycle.",
+        4,
+        ""
+      ],
+      [
+        "",
+        "Model Hallucinations",
+        "Models hallucinate or fabricate data, leading to poor decisions in critical contexts.",
+        4,
+        ""
+      ],
+      [
+        "",
+        "LLM05:2025 Improper Output Handling",
+        "Insufficient validation, sanitization, and handling of the outputs ",
+        4,
+        ""
+      ],
+      [
+        "",
+        "LLM06:2025 Excessive Agency",
+        "Vulnerability that enables damaging actions to be performed in response to unexpected, ambiguous or manipulated outputs from an LLM",
+        3,
+        ""
+      ],
+      [
+        "",
+        "Regulatory or Legal Threat",
+        "Violation due to data protection or AI Laws",
+        3,
+        ""
+      ],
+      [
+        "",
+        "LLM07:2025 System Prompt Leakage",
+        "Disclosing system prompt information that should not be public",
+        3,
+        ""
+      ],
+      [
+        "",
+        "LLM08:2025 Vector and Embedding Weaknesses",
+        "Weaknesses in how vectors and embeddings are generated, stored, or retrieved ",
+        2,
+        ""
+      ],
+      [
+        "",
+        "T8: Repudiation & Untraceability",
+        "actions performed by AI agents cannot be traced back or accounted for due to insufficient logging or transparency in decision-making processes.",
+        2,
+        ""
+      ],
+      [
+        "",
+        "LLM10:2025 Unbounded Consumption",
+        "Resource exploitation and unauthorized usage.",
+        2,
+        ""
+      ],
+      [
+        "",
+        "This score is the average of Impact & Likelihood ",
+        "Organizational Impact",
+        "",
+        ""
+      ],
+      [
+        "Impact Level",
+        "Rating",
+        "AI Specific Example",
+        "Low Range",
+        "High Range"
+      ],
+      [
+        "Catastrophic ",
+        5,
+        "Major problem from which there is no recovery or significant damage which has high financial cost and impacts ability to meet annual business objectives. Complete loss of ability to deliver a critical program.",
+        5000000,
+        10000000
+      ],
+      [
+        "Severe",
+        4,
+        "Incident that requires a major action to support mitigating how service is provided. Significant has a long recovery period. Failure to meet service delivery\n\n",
+        4000000,
+        1000000
+      ],
+      [
+        "Major",
+        3,
+        "Recovery from an incident requires cooperation across organization. May generate media attention.",
+        999999,
+        100000
+      ],
+      [
+        "Moderate",
+        2,
+        "Dealt with at a department level but requires Executive notification. Delay in funding or change in funding criteria. Stakeholder or client would take note.",
+        99999,
+        10000
+      ],
+      [
+        "Minor",
+        1,
+        "Dealt with internally at manager level. No escalation of the issue required.",
+        1000,
+        9999
+      ],
+      [
+        "Likelihood Level",
+        "Rating",
+        "Probability",
+        "",
+        ""
+      ],
+      [
+        "Almost Certain",
+        5,
+        "80% to 100% or once a year or more frequently",
+        "",
+        ""
+      ],
+      [
+        "Likely",
+        4,
+        "61% to 79% or once every 3 years",
+        "",
+        ""
+      ],
+      [
+        "Possible",
+        3,
+        "40% to 60% or once every 5 years",
+        "",
+        ""
+      ],
+      [
+        "Unlikely",
+        2,
+        "20% to 39% or once every 10 years",
+        "",
+        ""
+      ],
+      [
+        "Rare",
+        1,
+        "<20% or less than once every 20 years",
+        "",
+        ""
+      ],
+      [
+        "Establish Organization's \"Nuclear AI Disaster\"",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Catastrophic  AI Impact Scenario",
+        "",
+        "AI Scenario",
+        "Low Range",
+        "High Range"
+      ],
+      [
+        "Scenario 1",
+        5,
+        "",
+        "",
+        ""
+      ],
+      [
+        "Scenario 2",
+        5,
+        "",
+        "",
+        ""
+      ],
+      [
+        "Scenario 3",
+        5,
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "3 Orient Summary": {
+    "headers": [
+      "3 Orient Summary",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Provided as an option to merge all issues identified during Orient into a single tab ",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Use this tab to track all known issues for Profile 1 and Profile 2. The objective is to consolidate all known issues to be able to prioritize defenses and mitigations. Add sections and organize to best fit your organization.",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Known AI Vulnerability List ",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "ID / Name",
+        "Name",
+        "Description Summary",
+        "5-Point Score",
+        "Mitigation Status"
+      ],
+      [
+        "",
+        "Known AI Incidents",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "ID / Name",
+        "Name",
+        "Description  / Cost Summary",
+        "5-Point Score",
+        "Mitigation Status"
+      ],
+      [
+        "",
+        "AI Red Team Security Review Questions",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "ID / Name",
+        "Name",
+        "Description Summary",
+        "5-Point Score",
+        "Mitigation Status"
+      ],
+      [
+        "",
+        "Red Team Security Review Questions",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "AI Red Team Security Testing",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "ID / Name",
+        "Name",
+        "Description Summary",
+        "5-Point Score",
+        "Mitigation Status"
+      ],
+      [
+        "",
+        "Red Team Security Review Questions",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "AI Incident Response Readiness",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "ID / Name",
+        "Name",
+        "Description Summary",
+        "5-Point Score",
+        "Mitigation Status"
+      ],
+      [
+        "",
+        "AI Supply Chain or Third Party Visibility / Maturity ",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "ID / Name",
+        "Name",
+        "Description Summary",
+        "5-Point Score",
+        "Mitigation Status"
+      ]
+    ]
+  },
+  "3a Orient Known AI Vulnerabilit": {
+    "headers": [
+      "3a Orient: Known AI Vulnerabilities",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use the Orient:Known Vulnerabilities tab to research vulnerabilities related to the target objective. Consider trends or patterns. For example vulnerabilities in a specific category. !!! Important use the CVE.org database to search for CVE tuned to your organization's use case. This list of CVEs mapped to the OWASP LLM Categories and OWASP Agentic Top 15 are provided as an example. ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Use CVE.org keywords search to identify additional or specific vulnerabilities. ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Example Key Words: Large Language Model, LLM, language model, prompt injection, prompt leakage",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Organization/Tool",
+        "CVE Identifier",
+        "Associated CWE(s)",
+        "Description Summary",
+        "Original Severity",
+        "5-Point Score",
+        "OWASP LLM Category (2025)",
+        "OWASP Category Name (2025)",
+        "OWASP Agentic Top 15",
+        "Threat Name"
+      ],
+      [
+        "Llama Index",
+        "CVE-2024-12909",
+        "CWE-79 (Cross-site Scripting)",
+        "SQL injection in Finance Chat Llama Pack leading to RCE.",
+        "CRITICAL",
+        5,
+        "LLM03:2025",
+        "Supply Chain",
+        "T11",
+        "Unexpected RCE and Code Attacks"
+      ],
+      [
+        "Llama Index",
+        "CVE-2024-12911",
+        "CWE-79 (Cross-site Scripting)",
+        "SQL injection in JSONalyzeQueryEngine allowing arbitrary file creation/DoS.",
+        "HIGH",
+        4,
+        "LLM03:2025",
+        "Supply Chain",
+        "T11",
+        "Unexpected RCE and Code Attacks"
+      ],
+      [
+        "Llama Index",
+        "CVE-2024-12704",
+        "CWE-79 (Cross-site Scripting)",
+        "DoS via infinite loop in LangChainLLM class due to unhandled exceptions.",
+        "HIGH",
+        4,
+        "LLM10:2025",
+        "Unbounded Consumption",
+        "T4",
+        "Resource Overload"
+      ],
+      [
+        "InvokeAI",
+        "CVE-2024-12029",
+        "CWE-79 (Cross-site Scripting)",
+        "RCE via unsafe deserialization (torch.load) of model files.",
+        "CRITICAL",
+        5,
+        "LLM03:2025",
+        "Supply Chain",
+        "T11",
+        "Unexpected RCE and Code Attacks"
+      ],
+      [
+        "InvokeAI",
+        "CVE-2024-11042",
+        "CWE-89 (SQL Injection)",
+        "Arbitrary file deletion via images API impacting integrity/availability.",
+        "CRITICAL",
+        5,
+        "LLM06:2025",
+        "Excessive Agency",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "InvokeAI",
+        "CVE-2024-11043",
+        "CWE-89 (SQL Injection)",
+        "DoS via large payload in board_name field rendering UI unresponsive.",
+        "HIGH",
+        4,
+        "LLM10:2025",
+        "Unbounded Consumption",
+        "T4",
+        "Resource Overload"
+      ],
+      [
+        "InvokeAI",
+        "CVE-2024-10821",
+        "CWE-79 (Cross-site Scripting)",
+        "DoS via improper multipart request boundary handling causing infinite loops.",
+        "HIGH",
+        4,
+        "LLM10:2025",
+        "Unbounded Consumption",
+        "T4",
+        "Resource Overload"
+      ],
+      [
+        "DB-GPT",
+        "CVE-2024-10835",
+        "CWE-79 (Cross-site Scripting)",
+        "SQL injection via editor API allowing arbitrary file write (DuckDB) potentially leading to RCE.",
+        "CRITICAL",
+        5,
+        "LLM03:2025",
+        "Supply Chain",
+        "T11",
+        "Unexpected RCE and Code Attacks"
+      ],
+      [
+        "DB-GPT",
+        "CVE-2024-10834",
+        "CWE-79 (Cross-site Scripting)",
+        "Arbitrary file write via RAG-knowledge endpoint (doc_file.filename manipulation).",
+        "CRITICAL",
+        5,
+        "LLM08:2025",
+        "Vector and Embedding Weaknesses",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "DB-GPT",
+        "CVE-2024-10833",
+        "CWE-79 (Cross-site Scripting)",
+        "Arbitrary file write via knowledge API (absolute path traversal via doc_file.filename).",
+        "CRITICAL",
+        5,
+        "LLM03:2025",
+        "Supply Chain",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "DB-GPT",
+        "CVE-2024-10831",
+        "CWE-79 (Cross-site Scripting)",
+        "Absolute path traversal allowing arbitrary file upload/overwrite.",
+        "CRITICAL",
+        5,
+        "LLM03:2025",
+        "Supply Chain",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "DB-GPT",
+        "CVE-2024-10906",
+        "CWE-79 (Cross-site Scripting)",
+        "CSRF due to overly permissive CORS configuration allowing interaction with server endpoints.",
+        "HIGH",
+        4,
+        "",
+        "(General Web Vuln)",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "DB-GPT",
+        "CVE-2024-10829",
+        "CWE-79 (Cross-site Scripting)",
+        "DoS via improper multipart request boundary handling causing infinite loops.",
+        "HIGH",
+        4,
+        "LLM10:2025",
+        "Unbounded Consumption",
+        "T4",
+        "Resource Overload"
+      ],
+      [
+        "DB-GPT",
+        "CVE-2024-10830",
+        "CWE-79 (Cross-site Scripting)",
+        "Path Traversal allowing unauthenticated arbitrary file deletion via resource API.",
+        "HIGH",
+        4,
+        "LLM03:2025",
+        "Supply Chain",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-8999",
+        "CWE-79 (Cross-site Scripting)",
+        "Improper access control allowing unauthenticated full database export to BigQuery.",
+        "CRITICAL",
+        5,
+        "LLM02:2025",
+        "Sensitive Information Disclosure",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-10762",
+        "CWE-79 (Cross-site Scripting)",
+        "Improper access control allowing low-privilege users to delete evaluators.",
+        "HIGH",
+        4,
+        "",
+        "(General Access Control)",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-11300",
+        "CWE-79 (Cross-site Scripting)",
+        "Improper access control allowing unauthorised access to sensitive prompt data of other users.",
+        "HIGH",
+        4,
+        "LLM02:2025",
+        "Sensitive Information Disclosure",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-9000",
+        "CWE-89 (SQL Injection)",
+        "Authorisation bypass allowing unauthorised creation/modification of checklists.",
+        "HIGH",
+        4,
+        "",
+        "(General Access Control)",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-10274",
+        "CWE-79 (Cross-site Scripting)",
+        "Improper authorisation exposing sensitive team member info via /users/me/org endpoint.",
+        "MEDIUM",
+        3,
+        "LLM02:2025",
+        "Sensitive Information Disclosure",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-11301",
+        "CWE-79 (Cross-site Scripting)",
+        "Data integrity issue allowing overwriting evaluators due to lack of unique constraints.",
+        "MEDIUM",
+        3,
+        "",
+        "(Data Integrity)",
+        "",
+        "(Data Integrity)"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-10273",
+        "CWE-79 (Cross-site Scripting)",
+        "Improper privilege management allowing viewers to modify models owned by others.",
+        "MEDIUM",
+        3,
+        "LLM04:2025",
+        "Data and Model Poisoning",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Lunary",
+        "CVE-2024-10330",
+        "CWE-79 (Cross-site Scripting)",
+        "Improper access control allowing low-privilege users to access all evaluator data within a project.",
+        "MEDIUM",
+        3,
+        "LLM02:2025",
+        "Sensitive Information Disclosure",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Anything LLM",
+        "CVE-2024-6842",
+        "CWE-79 (Cross-site Scripting)",
+        "Unauthorised access exposing sensitive system settings (API keys) via /setup-complete endpoint.",
+        "HIGH",
+        4,
+        "LLM02:2025",
+        "Sensitive Information Disclosure",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Anything LLM",
+        "CVE-2024-10109",
+        "CWE-79 (Cross-site Scripting)",
+        "Authorisation flaw allowing low-privilege users access/modification of custom models endpoint (API key leak/DoS).",
+        "HIGH",
+        4,
+        "LLM02:2025",
+        "Sensitive Information Disclosure",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Anything LLM",
+        "CVE-2024-10513",
+        "CWE-79 (Cross-site Scripting)",
+        "Path traversal in document uploads allowing 'manager' role to access/manipulate database file.",
+        "HIGH",
+        4,
+        "LLM03:2025",
+        "Supply Chain",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "Ragflow",
+        "CVE-2024-12779",
+        "CWE-79 (Cross-site Scripting)",
+        "SSRF allowing unauthorised access to internal web resources via manipulated API parameters.",
+        "HIGH",
+        4,
+        "LLM03:2025",
+        "Supply Chain",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "GPT Academic",
+        "CVE-2024-10954",
+        "CWE-79 (Cross-site Scripting)",
+        "Command injection in manim plugin allowing RCE via untrusted code from prompts.",
+        "HIGH",
+        4,
+        "LLM01:2025",
+        "Prompt Injection",
+        "T11",
+        "Unexpected RCE and Code Attacks"
+      ],
+      [
+        "GPT Academic",
+        "CVE-2024-10950",
+        "CWE-79 (Cross-site Scripting)",
+        "Code injection in Code Interpreter plugin allowing RCE via prompt injection (no sandboxing).",
+        "HIGH",
+        4,
+        "LLM01:2025",
+        "Prompt Injection",
+        "T11",
+        "Unexpected RCE and Code Attacks"
+      ],
+      [
+        "NI Vision Builder AI",
+        "CVE-2025-2450",
+        "CWE-356: Product UI does not Warn User of Unsafe Actions",
+        "RCE due to missing warnings when processing VBAI files (malicious pages/files).",
+        "HIGH",
+        4,
+        "LLM03:2025",
+        "Supply Chain",
+        "T11",
+        "Unexpected RCE and Code Attacks"
+      ],
+      [
+        "LangChain",
+        "CVE-2024-10940",
+        "CWE-79 (Cross-site Scripting)",
+        "Arbitrary file read via Image Prompt Template in langchain-core.",
+        "MEDIUM",
+        3,
+        "LLM03:2025",
+        "Supply Chain",
+        "T3",
+        "Privilege Compromise"
+      ],
+      [
+        "MLflow",
+        "CVE-2024-6838",
+        "CWE-79 (Cross-site Scripting)",
+        "DoS due to lack of limits on parameters causing UI unresponsiveness.",
+        "MEDIUM",
+        3,
+        "LLM10:2025",
+        "Unbounded Consumption",
+        "T4",
+        "Resource Overload"
+      ],
+      [
+        "GitLab Duo",
+        "CVE-2025-2867",
+        "CWE-94: Improper Control of Generation of Code (Code Injection)",
+        "AI features could expose sensitive project data to unauthorised users via crafted issues.",
+        "MEDIUM",
+        3,
+        "LLM01:2025",
+        "Prompt Injection",
+        "T3",
+        "Privilege Compromise"
+      ]
+    ]
+  },
+  "3b Orient Known AI Incidents": {
+    "headers": [
+      "3b: Orient Known AI Incidents",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use the Orient Incident tab to research AI Incidents and impact costs if available. Update the existing table of example incidents / impacts costs with objective relevant information by using the links to reports, incident databases, legal cases, and regulatory information",
+        "",
+        "",
+        ""
+      ],
+      [
+        "** Scroll to the bottom of the sheet for links to AI Incident Databases",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Known AI Incidents ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Incident",
+        "Vulnerability",
+        "Impact",
+        "Reference"
+      ],
+      [
+        "Solana Scam",
+        "LLM05",
+        2500,
+        "Link"
+      ],
+      [
+        "ShadowRay",
+        "LLM02 LLM03",
+        1000000000,
+        "Link"
+      ],
+      [
+        "Chat GPT Inference Attack",
+        "LLM02",
+        "",
+        "Link"
+      ],
+      [
+        "Google Map Deaths",
+        "LLM09",
+        "",
+        "Link"
+      ],
+      [
+        "France welfare fraud detection algorithm accused of exacerbating inequality",
+        "Bias",
+        "",
+        "Link"
+      ],
+      [
+        "Deep Fake Fraud",
+        "LLM02",
+        25000000,
+        "Link"
+      ],
+      [
+        "McDonald sued for use of AI which collected voice print biometrics",
+        "LLM02",
+        "Dismissed",
+        "Link"
+      ],
+      [
+        "Equal Employment Opportunity Commission v. iTutorGroup, Inc.",
+        "Bias / Discrimination",
+        365000,
+        "Link"
+      ],
+      [
+        "Mobley v. Workday, Inc.",
+        "Bias / Discrimination",
+        "Still in the system but could have major impact on using Workday for hiring",
+        "Link"
+      ],
+      [
+        "Meta capturing facial data $1.4B Texas Settlement ",
+        "LLM02",
+        1000000000,
+        "Link"
+      ],
+      [
+        "SoundCloud discreetly changed its terms of service, adding a clause that many interpreted as giving the company the right to use users' music and audio uploads to train AI models - including generative AI capable of replicating or synthesising artists' voices, music, or likeness. ",
+        "LLM02",
+        "",
+        "Link"
+      ],
+      [
+        "The New York City government’s “MyCity” chatbot, launched as a pilot program in October 2023, was designed to provide business owners with information from over 2,000 NYC Business web pages and articles. ",
+        "LLM09",
+        "The New York City government spent over $600,000 on the development and initial six months of operation for the MyCity chatbot, which launched as a pilot program in October 2023",
+        "Link"
+      ],
+      [
+        "In early 2024, T-Mobile revealed that hackers used an AI-equipped application programming interface (API) to gain unauthorized access to sensitive customer information, including full names, contact numbers, and PINs of its customers. ",
+        "LLM02 / LLM07",
+        "$31.5 million settlement with the FCC in 2024, requiring the implementation of enhanced security measures such as phishing-resistant multifactor authentication and regular third-party security audits",
+        "Link"
+      ],
+      [
+        "Air Canada Chatbot customer who was misled into paying for full-price flight tickets by a contact center chatbot.",
+        "LLM09",
+        "812.02 refund",
+        "Link"
+      ],
+      [
+        "Serviceaide, a provider of agentic artificial intelligence-based IT management and workflow software,Agentic AI Tech Firm Says Health Data Leak Affects 483,000. certain information within its Catholic Health Elasticsearch database was inadvertently made publicly available.",
+        "LLM07",
+        "Expected to be in the millions",
+        "Link"
+      ],
+      [
+        "Clearview AI, a U.S.-based facial recognition company, has faced significant global scrutiny and legal action for scraping billions of images from the internet and social media platforms without user consent. These images were used to build a massive facial recognition database, which Clearview AI marketed primarily to law enforcement agencies for investigative purposes. ",
+        "LLM03",
+        "$92 million / Services banned",
+        " Link Link Link"
+      ],
+      [
+        "Epic Games, through its subsidiary Llama Productions, introduced an AI-powered Darth Vader character in online video game Fortnite, allowing players to interact with the villain using conversational AI that mimics James Earl Jones’ voice. ",
+        "LLM03",
+        "TBD - Court Cost",
+        " Link"
+      ],
+      [
+        "Shanghai police have arrested eight suspects for using AI tools to fabricate and spread false rumors about a tea drink company, causing reputational harm and a drop in daily sales by over 20% in some stores.",
+        "Deep Fake",
+        "20 % drop in sales",
+        " Link "
+      ],
+      [
+        "White House Chief of Staff Susie Wiles had been impersonated via a phone breach involving AI-generated voice messages and spoofed texts. ",
+        "Deep Fake",
+        "TBD ",
+        " Link"
+      ],
+      [
+        "Vietnamese authorities dismantled an international criminal network using AI to circumvent bank biometric systems on the KUBET platform. The gang facilitated online gambling and money laundering, recording transactions over 1,000 billion VND and more than 1 million accounts, marking a first in such sophisticated AI-driven crimes in Vietnam.",
+        "Disinformation",
+        "Money laundering",
+        " Link"
+      ],
+      [
+        "Financial Transaction Hijacking with M365 Copilot as an Insider. The attack abused the fact that Copilot ingests received emails into a retrieval augmented generation (RAG) database. The researchers sent an email that contained content designed to be retrieved by a user query as well as a prompt injection to manipulate the behavior of Copilot. The retrieval content targeted a user searching for banking information needed to complete a wire transfer, but contained the attacker's banking information instead.",
+        "LLM04",
+        "NA",
+        " Link"
+      ],
+      [
+        "Adversary use of AI Reports",
+        "",
+        "",
+        ""
+      ],
+      [
+        "OpenAI Influence and cyber operations updates",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Google Cloud Security Resources Hub ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Detecting and Countering Malicious Uses of Claude: March 2025",
+        "",
+        "",
+        ""
+      ],
+      [
+        "MISP Galaxy MITRE ATLAS Attack Pattern",
+        "",
+        "",
+        ""
+      ],
+      [
+        "AI Incident Data Bases",
+        "",
+        "",
+        ""
+      ],
+      [
+        "MITRE Atlas",
+        "",
+        "",
+        ""
+      ],
+      [
+        "AIAAIC Repository",
+        "",
+        "",
+        ""
+      ],
+      [
+        "OECD AI Incidents Monitor (AIM)",
+        "",
+        "",
+        ""
+      ],
+      [
+        "AI Incident Database",
+        "",
+        "",
+        ""
+      ],
+      [
+        "AI Risk Repository",
+        "",
+        "",
+        ""
+      ],
+      [
+        "RealHarm Dataset",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Language Model Security Database",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Legal & Regulatory",
+        "",
+        "",
+        ""
+      ],
+      [
+        "George Washington University AI Litigation database ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Mischon de Reya Gen AI IP case tracker",
+        "",
+        "",
+        ""
+      ],
+      [
+        "AI Copyright Lawsuits Edward Lee",
+        "",
+        "",
+        ""
+      ],
+      [
+        "IAPP Global AI Law and Policy Tracker",
+        "",
+        "",
+        ""
+      ],
+      [
+        "IAPP State AI Governance Legislation Tracker",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Fairly AI Map of Global Regulation",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "3c Orient AI Incident Response ": {
+    "headers": [
+      "3c Orient AI Incident Response Readiness ",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use the Orient AI Incident Response Readiness to identify gaps in responding to AI incidents.",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "AI Incident Preparation:",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Response",
+        "Rating",
+        "Tested",
+        "Revised Rating"
+      ],
+      [
+        "Has the organization updated your Incident Response Plan (IRP) ?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "1. Preparation",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are AI-specific incident types added to your IR policy (prompt injection, hallucinations, deepfakes, etc.).",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Is there a maintained and updated AI asset inventory (models, datasets, pipelines, agents).",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are clear roles defined for AI incident handling (AI Security Lead, MLOps, Privacy Officer).",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Have you develop AI-specific playbooks, severity levels, and escalation paths?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Has Integrated insights from AI red teaming and threat modeling been included?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "2. Detection & Analysis",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Has telemetry been expanded to capture prompt logs, inference results, agent activities?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are there defined triage rules for AI-specific incidents like jailbreaks, output toxicity, agent misbehavior?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Have you used AI aware severity classifications and behavioral baselines?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are you monitoring for deepfakes, model drift, adversarial prompts, and data leakage?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "3. Containment",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are you able to pause or disable AI systems, revert model versions, or quarantine agents?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Can prompt hardening or policy restrictions be implemented dynamically?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Can you stop the spread of generative content misuse (e.g., fake images, cloned voices)?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Can you disable access to compromised APIs, vector stores, or toolchains?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "4. Eradication",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Can you identify the root cause in events such as training data issues, prompt flaws, or supply chain compromise?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Is there a process to retrain or rollback models as needed, or replace vulnerable prompts or pipelines?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Have you deployed canary prompts to validate behavior?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Will you conduct red team testing postfix?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "5. Recovery",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Can you restore aligned, safe model and agent operation?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are you able to re enable logs and ensure output safety?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "How will bad AI output which impacted decisions be communicated or remediated? ",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "How will engineers and security teams be debrief?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "6. Post-Incident Review",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "How will you run an AI aware root cause analysis (RCA)?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Who is responsible for updates to threat models and prompt guidelines?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Who capture incident metrics and lessons learned?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Who will train teams on findings,update documentation and governance models?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "7. Tabletop Exercises",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Have you simulated an AI incidents via red team/tabletop exercises?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Risk Assessment and Management",
+        "Response",
+        "Initial Rating",
+        "Tested",
+        "Revised Rating"
+      ],
+      [
+        "Have you identified potential threat and impact of AI Incidents?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Have you estimated threat  and impact to organization's assets?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Have you estimated threat and impact to organization's operations?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Have you estimated threat and impact to organization's reputation?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Can you confirm threat and impact followed the organizations established Risk Management Framework?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are areas of unmitigated risk tracked in an IT or enterprise risk register?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Has a process been established to mitigate AI related risks?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Organization's AI Systems: does the organization have an AI Asset Inventory which captures",
+        "Response",
+        "Initial Rating",
+        "Tested",
+        "Revised Rating"
+      ],
+      [
+        "System metadata: Unique ID, name, owner, deployment date, lifecycle stage",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "SBOM inventory Type of AI System: ie. Foundation Model, Fine-Tuned Model, included in an application, autonomous Agent etc.",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Model Details: Model name/version, size, training data sources, how it is hosted (cloud/local)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Managed machine Identities (non human identities or NHI) / Service accounts ",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Data Inputs & Outputs: Input types, data sources, output consumers, downstream dependencies",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Workflow diagram / Network diagram",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Business Context: Use case, department, risk category (e.g. high risk per EU AI Act or internal policy)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Regulatory Mapping (e.g. NIST AI RMF, GDPR, EU AI Act, US State law, or other international laws) model cards, human in the loop points)",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Detecting AI Incident",
+        "Response",
+        "Initial Rating",
+        "Tested",
+        "Revised Rating"
+      ],
+      [
+        "What are the organizations detection mechanisms for an AI Incident?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are Indicators of compromise rules and alerts integrated into the SIEM / SOAR?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Are the implemented into dashboards?",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Detecting AI Incident",
+        "Response",
+        "",
+        "Tested",
+        "Revised Rating"
+      ],
+      [
+        "Detection mechanisms in the infrastructure",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "SIEM/SOAR Integration",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "3d Orient Red Team Security Rev": {
+    "headers": [
+      "3d Orient Red Team Security Review questions",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use this tab to ask specific business case & architecture review questions applicable to the objective being reviewed. ",
+        "",
+        ""
+      ],
+      [
+        "Business Case Objective",
+        "",
+        ""
+      ],
+      [
+        "General Questions",
+        "Response",
+        "Initial Rating"
+      ],
+      [
+        "What model is used?",
+        "",
+        ""
+      ],
+      [
+        "Is the application tracked in the Asset Management CMDB?",
+        "",
+        ""
+      ],
+      [
+        "Are logs from the application sent to the SIEM",
+        "",
+        ""
+      ],
+      [
+        "Is the application part of any critical business process?",
+        "",
+        ""
+      ],
+      [
+        "Is the model open-source, proprietary, or third-party API based?",
+        "",
+        ""
+      ],
+      [
+        "Are logs, prompts, and completions audited for abnormal behavior?",
+        "",
+        ""
+      ],
+      [
+        "Business Users",
+        "Response",
+        "Initial Rating"
+      ],
+      [
+        "Who owns and governs changes to prompts, templates, or workflows?",
+        "",
+        ""
+      ],
+      [
+        "Can users accidentally or intentionally view others’ info?",
+        "",
+        ""
+      ],
+      [
+        "Could a user craft inputs to bypass or confuse the automated agents (e.g. through language, formatting)?",
+        "",
+        ""
+      ],
+      [
+        "How do we ensure attachments or diagnostic logs submitted by users are safe and sanitized?",
+        "",
+        ""
+      ],
+      [
+        "What protections are in place to prevent social engineering or phishing via the support system?",
+        "",
+        ""
+      ],
+      [
+        "Is there a human-in-the-loop when agentic decisions impact users?",
+        "",
+        ""
+      ],
+      [
+        "How are user interactions and exceptions tracked and reviewed?",
+        "",
+        ""
+      ],
+      [
+        "Are sensitive terms or PII redacted from AI-generated responses?",
+        "",
+        ""
+      ],
+      [
+        "Is there logic to prevent the LLM from offering legal, medical, or financial advice?",
+        "",
+        ""
+      ],
+      [
+        "Are users warned or shown disclaimers when engaging with AI agents?",
+        "",
+        ""
+      ],
+      [
+        "What is the frequency and scope of model and prompt audits?",
+        "",
+        ""
+      ],
+      [
+        "Is there a formal process to update or retire deprecated models?",
+        "",
+        ""
+      ],
+      [
+        "How are output failures or hallucinations tracked and triaged?",
+        "",
+        ""
+      ],
+      [
+        "What’s the incident response plan specific to AI-driven components?",
+        "",
+        ""
+      ],
+      [
+        "Legal & Compliance",
+        "Response",
+        "Initial Rating"
+      ],
+      [
+        "Are model training sources auditable and legally cleared for use?",
+        "",
+        ""
+      ],
+      [
+        "Does the system log decisions made by AI agents for regulatory review?",
+        "",
+        ""
+      ],
+      [
+        "Is there a defined policy for AI explainability and transparency?",
+        "",
+        ""
+      ],
+      [
+        "Do we maintain records of which model version served which user query?",
+        "",
+        ""
+      ],
+      [
+        "Are any biometric data captured? (voice, face, other) ",
+        "",
+        ""
+      ],
+      [
+        "What personal data is collected through this workflow, and how is it protected under GDPR/CCPA, HIPAA, FDA, State Laws?",
+        "",
+        ""
+      ],
+      [
+        "What happens when a user requests deletion or access to their data? Are we equipped to comply?",
+        "",
+        ""
+      ],
+      [
+        "How are automated decisions reviewed or overridden by humans — and how is that tracked?",
+        "",
+        ""
+      ],
+      [
+        "Have AI models been tested for potential bias or unintended discrimination? What evidence supports this?",
+        "",
+        ""
+      ],
+      [
+        "How is user consent handled for telemetry, recordings, or diagnostics?",
+        "",
+        ""
+      ],
+      [
+        "Are third-party vendors in the loop, and what controls are in place to ensure data they touch is secure and compliant?",
+        "",
+        ""
+      ],
+      [
+        "Have we done a DPIA (Data Protection Impact Assessment) for AI workflows?",
+        "",
+        ""
+      ],
+      [
+        "Are data residency and localization laws considered in where prompts/completions are processed?",
+        "",
+        ""
+      ],
+      [
+        "Developers & Architects",
+        "Response",
+        "Initial Rating"
+      ],
+      [
+        "How do services authenticate to each other? What happens if one component is compromised?",
+        "",
+        ""
+      ],
+      [
+        "Are there limits on token length, prompt complexity, or chain depth?",
+        "",
+        ""
+      ],
+      [
+        "Can internal tools accessed by the AI be rate-limited or scope-restricted?",
+        "",
+        ""
+      ],
+      [
+        "Is the output filtered for content (e.g., profanity, hate speech, misinformation)?",
+        "",
+        ""
+      ],
+      [
+        "How are service accounts and secrets handled across AI service boundaries?",
+        "",
+        ""
+      ],
+      [
+        "What types of user inputs or telemetry could be weaponized? How are we defending against that?",
+        "",
+        ""
+      ],
+      [
+        "Could someone modify or skip workflow steps via configuration or API misuse?",
+        "",
+        ""
+      ],
+      [
+        "How are AI/ML models stored, updated, and secured? Could an attacker poison the model or extract it?",
+        "",
+        ""
+      ],
+      [
+        "Where are we potentially over-privileged in the system? Are agents or scripts doing more than they need to?",
+        "",
+        ""
+      ],
+      [
+        "If an agent crashes or gives a weird output, what’s the system’s default behavior — and is that safe?",
+        "",
+        ""
+      ],
+      [
+        "Are endpoints hardened to protect against prompt injection and malformed input?",
+        "",
+        ""
+      ],
+      [
+        "How is model chaining or tool calling validated and controlled?",
+        "",
+        ""
+      ],
+      [
+        "Adversary ",
+        "Response",
+        "Initial Rating"
+      ],
+      [
+        "How could an attacker manipulate the incident classification or resolution process?",
+        "",
+        ""
+      ],
+      [
+        "Could a malicious insider misuse override capabilities or escalate their privileges?",
+        "",
+        ""
+      ],
+      [
+        "What would it take to spoof or tamper with telemetry, audit logs, or workflow signals?",
+        "",
+        ""
+      ],
+      [
+        "Are there ways to fly under the radar (e.g. submitting stealthy tickets, abusing thresholds)?",
+        "",
+        ""
+      ],
+      [
+        "Can a user or attacker shut down, flood, or confuse the system via DoS or log manipulation?",
+        "",
+        ""
+      ],
+      [
+        "If this whole system was under attack, how fast would we detect it — and could we recover?",
+        "",
+        ""
+      ],
+      [
+        "Is there detection of recursive prompting or infinite loops in agent chains?",
+        "",
+        ""
+      ],
+      [
+        "How easily could an attacker extract model weights or fine-tuned data?",
+        "",
+        ""
+      ]
+    ]
+  },
+  "3e Orient AI Red Team Results": {
+    "headers": [
+      "3e Orient: AI Red Team Results : AI Vulnerability Severity & Scoring",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use this tab to score issues discovered in Red Team Testing.Add additional rows as needed. Creating a unique row for each  discovered vulnerability should simplify final reporting",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Important to note !! Severity by BugCrowd ranks the most severe issues as 1 and ranks down: To align with other Risk Matrix and to enable calculations they must be converted so the most severe is ranked as a 5 and the least severe a 1. CVSS V3 Calculator scores the most serious issues as a 10 and ranks down. They also must be converted.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Red Team Testing ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Name",
+        "Description ",
+        "Vulnerability",
+        "Score",
+        "Rating",
+        "Impact",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        1,
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "CVSS V3 Calculator Link",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "The severity of a vulnerability depends on context. Modify the Severity to align with your perception of threat & impact. The only published severity levels (I am aware of) are from Bugcrowd highlighted in blue",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Severity",
+        "Vulnerabilities ",
+        "",
+        "",
+        "BugCrowd Scoring ",
+        "CVSS v3 Score",
+        "COMPASS Score",
+        "",
+        ""
+      ],
+      [
+        1,
+        "LLM01 Prompt Injection",
+        "Indirect, Multimodal image attacks",
+        "",
+        1,
+        "9.0 – 10.0",
+        5,
+        "Critical",
+        "Severe impact, requires immediate action"
+      ],
+      [
+        1,
+        "LLM02 Sensitive Information Disclosure",
+        "Model data, Session PII",
+        "",
+        2,
+        "7.0 – 8.9",
+        4,
+        "High",
+        "Major impact, high priority remediation"
+      ],
+      [
+        2,
+        "LLM03 Supply Chain",
+        "Training data, Model ",
+        "",
+        3,
+        "4.0 – 6.9",
+        3,
+        "Medium",
+        "Moderate risk, needs mitigation"
+      ],
+      [
+        1,
+        "LLM04 Data Model Poisoning",
+        "",
+        "",
+        4,
+        "0.1 – 3.9",
+        2,
+        "Low ",
+        "Minor risk, monitor and plan fix"
+      ],
+      [
+        1,
+        "LLM05 Improper Output Handling",
+        "",
+        "",
+        5,
+        0,
+        1,
+        "None",
+        "No impact"
+      ],
+      [
+        3,
+        "LLM06 Excessive Agency",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        2,
+        "LLM07 System Prompt Leakage",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        1,
+        "LLM08 Vector And Embedding",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        2,
+        "LLM09 Misinformation",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3,
+        "LLM10 Unbounded Consumption",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        2,
+        "Shadow Prompting",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3,
+        "Context Switching",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3,
+        "Next Token Prediction",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        2,
+        "Bias & Discrimination, gender, religion, politics, ",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3,
+        "Toxicity, graphic content, hate speech, self harm and Dangerous Advice",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3,
+        "Malicious actors & misuse, illegal activities",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3,
+        "overreliance, manipulation or coercion",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        1,
+        "Socioeconomic & environmental harms",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3,
+        "transparency or interpretability",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        2,
+        "Copyright",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        1,
+        "Deep Fake",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        1,
+        "Prompt Infection",
+        "https://arxiv.org/pdf/2410.07283",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        2,
+        "Chat Mirroring",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        1,
+        "LLM Hijacking",
+        "LLM Hijacking is an attack where a threat actor gains unauthorized access to your LLM cloud resources and exploits them for their own purposes.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "4 Decide Red Team or Vuln vs Mi": {
+    "headers": [
+      "4 Decide: Red Team or Vuln vs Mitigations",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use this tab to map vulnerabilities to defenses and mitigations. Use the mitigations tabs (6 Reference: AI Security Matrix and 6a Reference: Defenses & Mitigations)  to determine appropriate mitigations for the objective. ",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Profile 1: External",
+        "Threat /Vulnerability",
+        "Description ",
+        "Score",
+        "Defense / mitigation",
+        "Residual Score"
+      ],
+      [
+        "Profile 2a: AI Internal Existing / General ",
+        "Threat /Vulnerability",
+        "Description ",
+        "Score",
+        "Defense / mitigation",
+        "Residual Score"
+      ],
+      [
+        "Profile 2b: AI Internal Co-pilot or Gemini",
+        "Threat /Vulnerability",
+        "Description ",
+        "Score",
+        "Defense / mitigation",
+        "Residual Score"
+      ],
+      [
+        "Profile 2c: New proposed GenAI / Agent / Agentic",
+        "Threat /Vulnerability",
+        "Description ",
+        "Score",
+        "Defense / mitigation",
+        "Residual Score"
+      ]
+    ]
+  },
+  "5 Act Strategy & Roadmap": {
+    "headers": [
+      "5 Act: Strategy & Roadmap",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use this tab to document the Objective defenses & mitigation strategy, owners, and timeline ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Owner(s)",
+        "Strategy",
+        "Timeline"
+      ],
+      [
+        "Enforce Security Controls and Policies",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Deploy preventative controls (e.g., input validation, RBAC, output filtering).",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Enable model-level protections (e.g., fine-tuning guardrails, instruction prefixing, prompt hardening).",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Enforce security boundaries for agent tools (tool use permissions, rate limits, execution scope).",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Integrate Monitoring & Logging",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Route LLM interactions (inputs/outputs) to a central logging system for auditing  ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Set up real-time alerting for anomalies, such as prompt injections or unexpected tool usage.",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Capture user and system behavior to support future OODA cycles.",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Apply Mitigations and Patches",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Remediate identified vulnerabilities ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Update and secure dependencies",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Patch misconfigurations uncovered during earlier phases",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Training and Awareness",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Train developers and data scientists on LLM security hygiene",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Update runbooks and security team workflows to include LLM-specific incident response playbooks",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Continuous Testing",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Simulate real-world attacks (prompt injection, jailbreaks, tool abuse) to validate defenses",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Feedback Loop ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Document incidents, detection results, and lessons learned",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Use feedback to revise prompts, access controls, or business logic for continuous improvement.",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "6 Reference AI Security Matrix": {
+    "headers": [
+      "6 Reference: Defenses & Mitigations",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Types of AI System Attacks",
+        "Threat ID & Name",
+        "AI Stack/Layer",
+        "Core Attack Vector ",
+        "Impact / Blast‑Radius",
+        "Mitigation ",
+        "References",
+        "Estimated Relation to OWASP Top 10 for LLM",
+        "MITRE ATLAS Technique / OWASP Top 10 for LLM / others"
+      ],
+      [
+        "A. Integrity & Poisoning",
+        "T1 – Memory Poisoning",
+        "Model",
+        "Malicious records / weights injected during pre‑train or fine‑tune.",
+        "Backdoored behaviour wherever model is deployed.",
+        "Provenance attestations; poison‑scan pipeline; cryptographic model signing.\nConsider DP‑ERA or robust fine‑tuning to withstand residual poison that makes it past scanning.",
+        "Agentic AI Red Teaming Guide",
+        "LLM04:2025 - Data and Model Poisoning",
+        "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/\nhttps://atlas.mitre.org/techniques/AML.T0018"
+      ],
+      [
+        "",
+        "",
+        "Runtime; Implementation",
+        "Untrusted input written to short‑/long‑term memory and later reused as fact.",
+        "Incorrect decisions across every session reading that memory.",
+        "Content validation, signed memory entries, versioned rollback.\nScope-bound memory (separate short- vs. long-term stores)\nTTL-based garbage collection",
+        "Agentic AI - Threats and Mitigations",
+        "LLM04:2025 - Data and Model Poisoning",
+        "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/\nhttps://atlas.mitre.org/techniques/AML.T0018"
+      ],
+      [
+        "",
+        "T17 – Knowledge‑Base / RAG Poisoning",
+        "Implementation; Runtime; Model",
+        "Adversary plants adversarial embeddings / docs in vector DB or external wiki.",
+        "Misinformation or malicious instructions returned in future queries.",
+        "Source authentication, ingestion moderation, trust‑scored retrieval.",
+        "Agentic AI Red Teaming Guide",
+        "LLM08:2025 - Vector and Embedding Weaknesses",
+        "https://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/"
+      ],
+      [
+        "B. Execution & Tool Abuse",
+        "T2 – Tool Misuse / Confused‑Deputy",
+        "Runtime; System; Implementation",
+        "Crafted prompt or param‑pollution forces agent to call privileged tool.",
+        "Unauthorised transactions, infrastructure changes.",
+        "Strict schema validation; human approval on risk‑classed tools.\nScope-token enforcement for tool access.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM06:2025 - Excessive Agency \nLLM03:2025 - Supply Chain\nLLM08:2025 - Vector and Embedding Weaknesses ",
+        "https://atlas.mitre.org/techniques/AML.T0010\nhttps://genai.owasp.org/llmrisk/llm032025-supply-chain/\nhttps://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/\n"
+      ],
+      [
+        "",
+        "T11 – Unexpected RCE and Code Attacks",
+        "Implementation; System; Runtime",
+        "Agents using tools like Python or browser environments can be tricked into running harmful code",
+        "Host compromise, lateral movement.",
+        "Container sandbox, network‑off, syscall allow‑list.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM05:2025 – Improper Output Handling, \nLLM06:2025 – Excessive Agency",
+        "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/\nhttps://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ],
+      [
+        "",
+        "T19 – Orchestration Exploitation",
+        "Runtime; System",
+        "External caller fuzzes agent or orchestration endpoint, invoking internal admin functions.",
+        "Data leak / privilege escalation across service mesh.",
+        "End‑to‑end authZ, policy‑gateway, shadow‑API discovery.",
+        "​Agentic AI Red Teaming Guide",
+        "LLM06:2025 – Excessive Agency ",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ],
+      [
+        "C. Access, Identity & Traceability",
+        "T3 – Privilege Compromise",
+        "Implementation; System",
+        "Temporary or inherited roles not revoked or scoped properly.",
+        "Full‑tenant data manipulation.",
+        "JIT roles; continuous RBAC checks; explicit delegation logs.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM06:2025 – Excessive Agency ",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ],
+      [
+        "",
+        "T9 – Identity Spoofing & Impersonation",
+        "Implementation; Runtime",
+        "Forged agent or user identity in inter-agent communication.",
+        "Unauthorised workflow execution.",
+        "Mutual TLS, signed messages, behavioural anomaly alerts.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM06:2025 – Excessive Agency ",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ],
+      [
+        "",
+        "T8 – Repudiation & Untraceability",
+        "System",
+        "Agent modifies or deletes its own audit logs.",
+        "Forensics impossible, regulatory breach.",
+        "Append‑only remote logging; log‑signature verification.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM02:2025 – Sensitive Information Disclosure",
+        "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/\nhttps://atlas.mitre.org/techniques/AML.T0024.000\nhttps://atlas.mitre.org/techniques/AML.T0024.001\nhttps://atlas.mitre.org/techniques/AML.T0024.002"
+      ],
+      [
+        "D. Reasoning & Alignment",
+        "T6 – Intent Breaking & Goal Manipulation",
+        "Model; Runtime",
+        "Adversary manipulates planner objectives via reflection or chain prompts.",
+        "Autonomous multi‑step harmful actions.",
+        "Signed objective list; secondary model audit on plan deltas.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM01:2025 – Prompt Injection, \nLLM06:2025 – Excessive Agency",
+        "https://atlas.mitre.org/techniques/AML.T0051.000\nhttps://atlas.mitre.org/techniques/AML.T0051.001\nhttps://atlas.mitre.org/techniques/AML.T0054\nhttps://genai.owasp.org/llmrisk/llm01-prompt-injection/\nhttps://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ],
+      [
+        "",
+        "T5 – Cascading Hallucination Attacks",
+        "Model; Runtime",
+        "Fabricated output treated as fact, propagates through memory or other agents.",
+        "System‑level misinformation, faulty operations.",
+        "Multi‑source cross‑check; majority‑vote ensembles.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM09:2025 – Misinformation",
+        "https://genai.owasp.org/llmrisk/llm092025-misinformation/\nhttps://atlas.mitre.org/techniques/AML.T0048"
+      ],
+      [
+        "",
+        "T7 – Misaligned & Deceptive Behaviors",
+        "Model; Runtime",
+        "Agent uses strategic deception (sycophancy, lies) to reach latent goal.",
+        "Policy, safety or compliance breach.",
+        "Truthfulness tuning, deception detectors and adversarial red-teaming.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM09:2025 – Misinformation",
+        "https://genai.owasp.org/llmrisk/llm092025-misinformation/\nhttps://atlas.mitre.org/techniques/AML.T0048"
+      ],
+      [
+        "E. Multi‑Agent & Communication",
+        "T12 – Agent Communication Poisoning",
+        "Implementation; Runtime",
+        "Tampered messages on agent-bus (e.g., forged “approved = true”).",
+        "Chain‑reaction of incorrect actions across fleet.",
+        "Signed, time stamped messages; quorum verification.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM04:2025 - Data and Model Poisoning\nLLM08:2025 – Vector and Embedding Weaknesses",
+        "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/\nhttps://atlas.mitre.org/techniques/AML.T0018\nhttps://genai.owasp.org/llmrisk/llm082025-vector-and-embedding-weaknesses/"
+      ],
+      [
+        "",
+        "T13 – Rogue Agents in Multi-Agent Systems",
+        "Implementation; System",
+        "Malicious or trojanised agent joins system.",
+        "Systemic data exfiltration / sabotage.",
+        "SBOM, attested runtime, behavioural trust scores.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM06:2025 – Excessive Agency",
+        "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+      ],
+      [
+        "",
+        "T14 – Human Attacks on Multi-Agent Systems",
+        "Runtime; Human",
+        "Social engineer persuades low‑trust agent to request secrets from high‑trust agent.",
+        "Cross‑domain data leakage, privilege escalation.",
+        "Cross‑agent ACL, delegation caps, OOB confirmation.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM01:2025 – Prompt Injection",
+        "https://atlas.mitre.org/techniques/AML.T0051.000\nhttps://atlas.mitre.org/techniques/AML.T0051.001\nhttps://atlas.mitre.org/techniques/AML.T0054\nhttps://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+      ],
+      [
+        "F. Human Interaction & Governance",
+        "T10 – Overwhelming Human in the Loop",
+        "Runtime; Human",
+        "Alert flooding overwhelms approver; malicious request slips through.",
+        "Unsafe operations in production.",
+        "Risk‑based throttling; adaptive HITL workflows.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM10:2025 – Unbounded Resource Consumption?",
+        "https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/\nhttps://cwe.mitre.org/data/definitions/400.html\nhttps://atlas.mitre.org/tactics/AML.TA0000\nhttps://atlas.mitre.org/techniques/AML.T0024\nhttps://atlas.mitre.org/techniques/AML.T0029\nhttps://atlas.mitre.org/techniques/AML.T0034\nhttps://atlas.mitre.org/techniques/AML.T0025\nhttps://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/"
+      ],
+      [
+        "",
+        "T15 – Human Manipulation / Social Engineering",
+        "Runtime; Human",
+        "Agent output crafted to mislead end‑user (fake invoice, phishing).",
+        "Financial loss, reputational harm.",
+        "Link‑scrub, content safety filters, dual confirmation on monetary actions.\nSemantic‑similarity to known fraud patterns + user‑interface cues (highlight suspicious totals).",
+        "Agentic AI - Threats and Mitigations",
+        "LLM09:2025 – Misinformation",
+        "https://genai.owasp.org/llmrisk/llm092025-misinformation/\nhttps://atlas.mitre.org/techniques/AML.T0048"
+      ],
+      [
+        "G. Operations & Availability",
+        "T4 – Resource Overload",
+        "Runtime; System",
+        "Recursive prompts or agent loop triggers massive GPU / API consumption.",
+        "Legit users denied service; spiralling cloud spend.",
+        "Quotas, budget alerts, circuit‑breakers.",
+        "Agentic AI - Threats and Mitigations",
+        "LLM10:2025 – Unbounded Resource Consumption?",
+        "https://genai.owasp.org/llmrisk/llm102025-unbounded-consumption/\nhttps://cwe.mitre.org/data/definitions/400.html\nhttps://atlas.mitre.org/tactics/AML.TA0000\nhttps://atlas.mitre.org/techniques/AML.T0024\nhttps://atlas.mitre.org/techniques/AML.T0029\nhttps://atlas.mitre.org/techniques/AML.T0034\nhttps://atlas.mitre.org/techniques/AML.T0025\nhttps://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/"
+      ],
+      [
+        "H. Confidentiality & IP",
+        "T18 – Data Exfiltration via Agent Tools",
+        "Runtime; System",
+        "Prompt‑injected instruction exports sensitive data through email / webhook.",
+        "PII/IP breach; follow‑on compromise.",
+        "DLP on outbound text & tool calls; scoped tokens; honey‑tokens.",
+        "GenAI Red Teaming Guide",
+        "LLM02:2025 – Sensitive Information Disclosure\nLLM06:2025 – Excessive Agency",
+        "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/\nhttps://atlas.mitre.org/techniques/AML.T0024.000\nhttps://atlas.mitre.org/techniques/AML.T0024.001\nhttps://atlas.mitre.org/techniques/AML.T0024.002"
+      ],
+      [
+        "",
+        "T20 – Model Extraction & Privacy Inference",
+        "Runtime; Model, System",
+        "High-volume probing reconstructs embeddings or reveals training membership.",
+        "IP theft; privacy violation (GDPR/HIPAA).",
+        "Output‑rate limits; DP‑SGD; watermarking.",
+        "GenAI Red Teaming Guide",
+        "LLM01:2025 – Prompt Injection",
+        "https://atlas.mitre.org/techniques/AML.T0051.000\nhttps://atlas.mitre.org/techniques/AML.T0051.001\nhttps://atlas.mitre.org/techniques/AML.T0054\nhttps://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+      ],
+      [
+        "I. Supply‑Chain & Dependencies",
+        "T21 – Supply‑Chain & Dependency Attacks",
+        "Implementation; Model; System",
+        "Trojanized library or plugin introduced during development",
+        "Widespread RCE or data leak across all deployments.",
+        "SBOM, signature‑verified dependencies, plugin sandbox.",
+        "​​Agentic AI Red Teaming Guide",
+        "LLM03:2025 – Supply Chain",
+        "https://genai.owasp.org/llmrisk/llm032025-supply-chain/\nhttps://atlas.mitre.org/techniques/AML.T0010"
+      ],
+      [
+        "Layer",
+        "Focus (AI Red Teaming Guide pp. 25‑26)",
+        "Typical objects in scope",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Model",
+        "Everything that was “baked in” before deployment: the model weights, training / fine‑tuning data and the MDLC itself.",
+        "Data‑pipeline integrity, poisoning, bias, alignment, adversarial robustness, back‑doors.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Implementation",
+        "The application glue that surrounds the model: guard‑rails, RAG pipelines, prompt / output filters, model firewalls or proxies.",
+        "System prompts, retrieval code, embedding / vector‑DB hygiene, control/validation logic, content firewalls.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "System",
+        "Underlying infrastructure and integration code that hosts, stores or moves the model and its data.",
+        "Cloud or on‑prem hosts, APIs, plug‑ins, CI/CD, supply‑chain artifacts, storage buckets, IAM, network paths.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Runtime",
+        "What happens after the service is live: live traffic, agents, business processes, human interaction and emergent behaviour.",
+        "Prompt injection, tool abuse, agent swarms, social‑engineering, DoS, cost‑explosions, live PII leakage.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Question",
+        "Condition",
+        "Mapped Layer",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Where does the attacker touch first?",
+        "Git‑pull of a trojan package",
+        "System",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Where does the attacker touch first?",
+        "Insert poisoned doc into vector‑DB",
+        "Implementation",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "When does the blast radius manifest?",
+        "Failure shows only during live inference",
+        "Runtime",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "When does the blast radius manifest?",
+        "Permanently skews weights / training provenance",
+        "Model",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "6a Reference Defenses & Mitigat": {
+    "headers": [
+      "6a Reference: Defenses & Mitigations",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use this tab to map preventative mechanisms and detective controls to LLM threats and vulnerabilities. ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Key Controls / Mitigation Strategies",
+        "",
+        "Key Detection Mechanisms",
+        ""
+      ],
+      [
+        "Secure data sourcing/provenance, data validation/sanitization, outlier detection in training, access controls on data pipelines, model behavior testing (benchmarking).",
+        "",
+        "Monitoring training data statistics, benchmarking model performance drift, periodic model retraining and validation.",
+        ""
+      ],
+      [
+        "Input validation/sanitization, adversarial training, defensive distillation, gradient masking (limited), limiting model output confidence scores, rate limiting inputs.",
+        "",
+        "Monitoring input patterns for anomalies, analyzing output confidence scores, detecting unusual prediction failures.",
+        ""
+      ],
+      [
+        "API rate limiting, query monitoring/throttling, watermarking model outputs, differential privacy (during training), access controls, obfuscation techniques.",
+        "",
+        "Analyzing query patterns/frequency, monitoring for automated probing activity, detecting similar model outputs externally.",
+        ""
+      ],
+      [
+        "Differential privacy, data anonymization/pseudonymization, reducing model complexity, secure multi-party computation (SMPC), access controls on model outputs.",
+        "",
+        "Difficult to detect directly; focus on preventative controls and data governance audits.",
+        ""
+      ],
+      [
+        "Strict input sanitization/parsing, context separation (user vs. instruction prompts), output filtering/validation, least privilege for connected tools, user awareness.",
+        "",
+        "Monitoring prompt/response patterns, anomaly detection in API calls made by AI, output content analysis, user feedback loops.",
+        ""
+      ],
+      [
+        "Vendor risk assessment, Software Bill of Materials (SBOM) for AI, code/model scanning, integrity checks, using trusted repositories/sources, secure build pipelines.",
+        "",
+        "Monitoring component integrity, vulnerability scanning of dependencies, behavioral analysis of AI components.",
+        ""
+      ],
+      [
+        "Input rate limiting, resource quotas, input validation (complexity checks), efficient model architecture, infrastructure scaling/resilience.",
+        "",
+        "Monitoring resource utilization (CPU, GPU, Memory), tracking request rates/latency, anomaly detection in traffic.",
+        ""
+      ],
+      [
+        "Acceptable Use Policies (AUPs), output filtering/monitoring (toxicity, harmful content), watermarking outputs, user identity verification, rate limiting generation.",
+        "",
+        "Monitoring generated content for policy violations, detecting anomalous usage patterns, external threat intelligence.",
+        ""
+      ],
+      [
+        "Explainability features (XAI), confidence scoring, human-in-the-loop workflows, clear UI/UX design indicating AI role, user training on AI limitations, regular audits.",
+        "",
+        "Monitoring downstream impact of AI decisions, tracking overrides/interventions by humans, feedback collection.",
+        ""
+      ],
+      [
+        "OWASP Top Ten for LLM:2025",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Vulnerability",
+        "Examples",
+        "Preventative Controls ",
+        "Detective Controls"
+      ],
+      [
+        "LLM01:2025 Prompt Injection",
+        "Direct/indirect injection, hidden prompts in images, code injection, multilingual attacks.",
+        "Constrain model behavior via system prompts and role definitions. Validate user input with allow-lists or templates. Enforce least privilege on external tool access.",
+        "Monitor prompts for injection patterns. Use anomaly detection on prompt sequences. Red-team adversarial prompts and log rule-breaking input/output."
+      ],
+      [
+        "LLM02:2025 Sensitive Information Disclosure",
+        "PII leakage, proprietary algorithm exposure, unintended training data inclusion.",
+        "Sanitize training data to remove sensitive info. Enforce output filtering for PII and restrict LLM data access. Apply policy-based response bounds.",
+        "Scan outputs for PII. Monitor queries and rate-limit odd patterns. Keep query/response audit logs. Solicit user disclosures."
+      ],
+      [
+        "LLM03:2025 Supply Chain",
+        "Malicious LoRA adapters, outdated models, compromised third-party sources.",
+        "Verify and sign third-party models. Use secure update pipelines and isolated deployment. Treat ML artifacts as critical software components.",
+        "Continuously audit model behavior. Validate model hashes. Use threat intel feeds and red-team tests for supply chain compromise."
+      ],
+      [
+        "LLM04:2025 Data and Model Poisoning",
+        "Backdoored datasets, poisoning via prompt input, trigger-based behavior change.",
+        "Use trusted datasets. Validate external data inputs. Employ adversarial training and defensive fine-tuning techniques.",
+        "Detect data anomalies during training. Keep training logs. Use canary queries to test model changes."
+      ],
+      [
+        "LLM05:2025 Improper Output Handling",
+        "Unescaped JavaScript, SQL injection via LLM, remote code execution.",
+        "Sanitize LLM outputs before execution. Enforce output encoding and secure coding practices. Apply least privilege on output-executing systems.",
+        "Log and monitor LLM-driven actions. Detect anomalous output types. Sandbox executions and simulate prompt-based output injections."
+      ],
+      [
+        "LLM06:2025 Excessive Agency",
+        "LLM given excessive permissions, executing unintended actions via agents.",
+        "Restrict agent tools. Enforce least privilege and tool use mediation. Require human confirmation for critical actions.",
+        "Log agent actions and apply rate limiting. Monitor for unauthorized tool use or privilege abuse. Audit agent decisions vs outcomes."
+      ],
+      [
+        "LLM07:2025 System Prompt Leakage",
+        "Leaked prompts containing API keys, internal rules, permissions.",
+        "Keep sensitive data out of prompts. Separate business logic from LLM instructions. Use prompt hygiene practices.",
+        "Scan outputs for prompt pattern leakage. Log system prompt mentions and user attempts to reveal prompts."
+      ],
+      [
+        "LLM08:2025 Vector and Embedding Weaknesses",
+        "Embedding inversion, poisoned RAG data, cross-tenant leakage.",
+        "Apply access control on vector DB. Validate embedding data. Authenticate data sources and separate trusted/untrusted sources.",
+        "Log vector queries and flag unusual access. Audit embeddings for poisoning. Validate retrieved content and query alignment."
+      ],
+      [
+        "LLM09:2025 Misinformation",
+        "Generated false claims, hallucinated citations, bias reinforcement.",
+        "Use RAG with verified sources. Tune for lower hallucination. Cross-verify critical outputs or require human review.",
+        "Automated fact-checking of outputs. Monitor correction feedback. Use human-in-the-loop for sensitive content. Sample logs for misinformation."
+      ],
+      [
+        "LLM10:2025 Unbounded Consumption",
+        "Denial of wallet, resource exhaustion, API rate abuse.",
+        "Set quotas on usage. Limit input/output sizes. Use resource budgeting and sandboxing for tool access.",
+        "Monitor system usage. Log request patterns. Set thresholds for usage alerts. Apply model theft heuristics and graceful degradation."
+      ],
+      [
+        "OWASP Agentic Top 15",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Vulnerability",
+        "Examples",
+        "Preventative Controls ",
+        "Detective Controls"
+      ],
+      [
+        "T1: Memory Poisoning",
+        "Manipulating short/long-term memory to change AI behavior or extract sensitive data.",
+        "Validate and sanitize agent memory. Enforce session isolation. Require authenticated and least-privileged memory writes.",
+        "Detect anomalies in memory usage. Use versioned memory snapshots. Monitor session activity for poisoning attempts."
+      ],
+      [
+        "T2: Tool Misuse",
+        "Deceptive prompts lead AI agents to misuse tools like email or APIs (e.g., agent hijacking).",
+        "Restrict tool access via allow-lists. Validate tool invocation parameters. Define operational boundaries for tools and APIs.",
+        "Monitor and log tool use. Alert on unexpected tool activity. Conduct post-incident analysis of tool misuse."
+      ],
+      [
+        "T3: Privilege Compromise",
+        "Dynamic role inheritance or misconfiguration lets attackers escalate privileges.",
+        "Apply granular permissions. Enforce dynamic privilege checks. Disable unnecessary cross-agent privilege delegation.",
+        "Audit all role and privilege changes. Log high-privilege agent actions. Use behavioral analytics to detect escalation."
+      ],
+      [
+        "T4: Resource Overload",
+        "DoS via task overload, memory cascade failures, API quota exhaustion.",
+        "Set CPU/memory/task limits. Use adaptive throttling. Rate-limit high-cost operations to prevent agent-based DoS.",
+        "Continuously monitor agent resource usage. Alert on spikes. Detect loops and abnormal resource consumption."
+      ],
+      [
+        "T5: Cascading Hallucination Attacks",
+        "AI hallucinations spread and reinforce errors through memory and multi-agent interactions.",
+        "Sanitize agent outputs before use by others. Require validation of outputs for multi-agent workflows. Limit high-risk autonomous behavior.",
+        "Trace output propagation across agents. Use ground truth for validation. Log inter-agent exchanges for backtracking."
+      ],
+      [
+        "T6: Intent Breaking & Goal Manipulation",
+        "Changing AI goals via direct/indirect prompt injection or reflection traps.",
+        "Review planned actions for goal alignment. Use safeguards for self-correction and enforce user intent confirmation for high-level changes.",
+        "Log goal changes over time. Use supervisory model to detect deviations from intent. Investigate shifts in agent reasoning."
+      ],
+      [
+        "T7: Misaligned & Deceptive Behaviors",
+        "Agents evade constraints to achieve goals deceptively (e.g., lying, illicit actions).",
+        "Train agents to reject harmful input. Enforce policy-based filters. Require human confirmation for risky actions.",
+        "Log and compare agent outputs vs. actions. Detect deception using behavior analysis or secondary truth-checkers."
+      ],
+      [
+        "T8: Repudiation & Untraceability",
+        "Insufficient logging makes agent behavior untraceable or unaccountable.",
+        "Log critical agent actions with cryptographic integrity. Enrich logs with traceable metadata. Prevent unauditable behavior.",
+        "Alert on missing or malformed logs. Monitor agent behavior for unlogged activity. Use immutable audit trails."
+      ],
+      [
+        "T9: Identity Spoofing & Impersonation",
+        "Impersonating users or agents for unauthorized actions (e.g., email spoofing).",
+        "Use strong identity verification and scoped trust. Authenticate all user and agent identities for privileged actions.",
+        "Detect impersonation via behavior profiling. Flag mismatched identities. Log identity-linked actions for traceability."
+      ],
+      [
+        "T10: Overwhelming HITL",
+        "Excessive AI prompts or alerts overwhelm human reviewers, causing errors.",
+        "Limit task frequency to reduce fatigue. Adjust autonomy based on risk. Queue tasks for human review when needed.",
+        "Track human feedback loops. Alert on rapid or unreviewed approvals. Survey users for signs of overload."
+      ],
+      [
+        "T11: Unexpected RCE and Code Attacks",
+        "Agent-generated code is executed without proper validation, leading to exploits.",
+        "Sandbox AI-generated code. Restrict access to critical resources. Require review or scanning before code execution.",
+        "Log AI-generated code execution. Alert on sensitive operations. Detect unsafe behavior using sandbox instrumentation."
+      ],
+      [
+        "T12: Agent Communication Poisoning",
+        "False data injected into multi-agent channels, disrupting workflows and trust.",
+        "Use signed/authenticated channels for agent comms. Enforce message validation. Require consensus before critical decisions.",
+        "Monitor agent communications for anomalies. Log consensus disagreements. Flag suspicious inter-agent traffic patterns."
+      ],
+      [
+        "T13: Rogue Agents in Multi-Agent Systems",
+        "Malicious agents embedded in workflows performing unauthorized actions.",
+        "Restrict agent roles to essential functions. Enforce execution boundaries. Conduct regular red team tests per agent.",
+        "Track deviations from agent role norms. Monitor input/output for rogue actions. Use health checks to contain anomalies."
+      ],
+      [
+        "T14: Human Attacks on Multi-Agent Systems",
+        "Exploiting agent dependencies and delegation for privilege escalation.",
+        "Authenticate inter-agent commands. Segment tasks to prevent escalation. Ensure trusted delegation mechanisms.",
+        "Monitor inter-agent command patterns. Detect trust misuse or privilege chaining. Use IDS for multi-agent workflows."
+      ],
+      [
+        "T15: Human Manipulation",
+        "Coercing users via AI trust (e.g., fake invoice, phishing links).",
+        "Constrain outputs to approved actions. Block manipulative content. Limit access to deception-enabling tools.",
+        "Scan dialogue for manipulation. Flag phishing-like content. Analyze override rates and user feedback for abuse signs."
+      ]
+    ]
+  },
+  "6b Reference Incident Monitorin": {
+    "headers": [
+      "6b Reference: Incident Monitoring",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "Use this tab to identify what type of LLM incident category to monitor for, the layer, alert type, and suggestions for tools. ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Category Type",
+        "Examples of Incidents",
+        "",
+        ""
+      ],
+      [
+        "Prompt or Input Attacks",
+        "Prompt injection, evasion, adversarial perturbations",
+        "",
+        ""
+      ],
+      [
+        "Output Manipulation / Hallucination",
+        "Inaccurate, toxic, biased, or misleading AI outputs",
+        "",
+        ""
+      ],
+      [
+        "Model Behavior Drift",
+        "Unexpected decisions, changes in performance or ethics",
+        "",
+        ""
+      ],
+      [
+        "Data Leakage / Exfiltration",
+        "PII leakage, inversion, model memorization",
+        "",
+        ""
+      ],
+      [
+        "Model Theft or Supply Chain Tampering",
+        "Unauthorized copying, model weight substitution, pipeline compromise",
+        "",
+        ""
+      ],
+      [
+        "Abuse of AI (e.g., deepfakes)",
+        "Use of AI for scams, misinformation, impersonation",
+        "",
+        ""
+      ],
+      [
+        "Autonomous System Misbehavior",
+        "Dangerous actions by agents, drones, robots, or self-driving systems",
+        "",
+        ""
+      ],
+      [
+        "Violation of Policy or Regulatory Use",
+        "AI used in prohibited domains, bias/fairness failures, lack of consent",
+        "",
+        ""
+      ],
+      [
+        "Layer",
+        "What to Monitor",
+        "Alert Type",
+        "Suggested Tools"
+      ],
+      [
+        "Input-Level Monitoring",
+        "Adversarial inputs (prompt injection, deepfakes, spoofed images)",
+        "Known exploit patterns, deepfake score threshold",
+        "Input sanitizers, deepfake detectors"
+      ],
+      [
+        "Input-Level Monitoring",
+        "Fake inputs or rate anomalies",
+        "Prompt rate anomalies, sensor spoof detection",
+        "Anomaly detection, LIDAR/GPS validators"
+      ],
+      [
+        "Model Inference Monitoring",
+        "Hallucinations, toxicity, or output drift",
+        "Toxicity/bias score exceeds threshold",
+        "LLM output filters, explainability tools"
+      ],
+      [
+        "Model Inference Monitoring",
+        "Unexpected model path activations or confidence drop",
+        "Deviation from expected model behavior",
+        "model-specific XAI"
+      ],
+      [
+        "System Behavior Monitoring",
+        "Agent task planning failures, reasoning loops",
+        "Loop detection, misaligned planning",
+        "SplxAI Agentic RADAR"
+      ],
+      [
+        "System Behavior Monitoring",
+        "Unsafe or unauthorized tool invocation",
+        "Critical action without approval (e.g., delete file)",
+        "Policy-as-code enforcement (OPA)"
+      ],
+      [
+        "Data Layer Monitoring",
+        "Shadow datasets, unauthorized data access",
+        "Sensitive data exposure or access anomalies",
+        "Data lineage tools, vector store scanners"
+      ],
+      [
+        "Data Layer Monitoring",
+        "PII or toxic content in embeddings/training data",
+        "Detection of PII or secrets in vector data",
+        "Embedding scanners, DLP systems"
+      ],
+      [
+        "Infrastructure/API Monitoring",
+        "Usage spikes, model scraping attempts",
+        "Token or API usage spikes",
+        "Cloud monitoring, API gateways"
+      ],
+      [
+        "Infrastructure/API Monitoring",
+        "Infra misconfigurations exposing models",
+        "Unauthorized access or model changes",
+        "Hash checkers, infra monitoring"
+      ],
+      [
+        "Abuse of AI Monitoring",
+        "Dissemination of synthetic media (deepfakes, bots)",
+        "Fake persona or bot detection alerts",
+        "Sensity AI, Deepware, Reality Defender"
+      ],
+      [
+        "Abuse of AI Monitoring",
+        "AI impersonation or voice cloning",
+        "Unauthorized cloning or speech matches",
+        "Voice fingerprinting"
+      ],
+      [
+        "Governance Monitoring",
+        "AI decision logging and traceability gaps",
+        "Missing logs, unexplainable critical decisions",
+        "Audit log systems, compliance monitors"
+      ],
+      [
+        "Governance Monitoring",
+        "Unauthorized model use or training without consent",
+        "Violation of AI governance policy",
+        "AI governance platforms "
+      ]
+    ]
+  },
+  "6c Reference Third Party Questi": {
+    "headers": [
+      "6c Reference: AI Third Party Questions",
+      "",
+      "",
+      ""
+    ],
+    "data": [
+      [
+        "These questions should be added to the TPRM Questionnaire for AI Assurance in third party services and vendors. ",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Category",
+        "Question",
+        "Response",
+        "Rating"
+      ],
+      [
+        "AI Use Transparency",
+        "What AI/ML capabilities are embedded in your product or services? Please specify use cases.",
+        "",
+        ""
+      ],
+      [
+        "AI Use Transparency",
+        "Are users made aware when interacting with AI-generated or AI-supported features?",
+        "",
+        ""
+      ],
+      [
+        "Bias & Fairness",
+        "Have your AI models been tested for potential bias or disparate impact on protected groups?",
+        "",
+        ""
+      ],
+      [
+        "Bias & Fairness",
+        "Do you maintain documentation for model risk assessments or fairness evaluations?",
+        "",
+        ""
+      ],
+      [
+        "Data Access & Security",
+        "Will the solution provider have access to any of the organization‚ clear text data submitted to model(s)? If yes, please provide job roles and reasons for any data access.",
+        "",
+        ""
+      ],
+      [
+        "Data Access & Security",
+        "In the event of a system crash, is any ephemeral data stored (data processed in memory)?",
+        "",
+        ""
+      ],
+      [
+        "Data Handling & Privacy",
+        "Does your system collect or process personally identifiable information (PII), biometric, health, or financial data?",
+        "",
+        ""
+      ],
+      [
+        "Data Handling & Privacy",
+        "How is user data used to train, fine-tune, or evaluate AI/ML models?",
+        "",
+        ""
+      ],
+      [
+        "Data Handling & Privacy",
+        "Can you confirm compliance with data privacy laws such as GDPR, CCPA, HIPAA, or others applicable to your operations?",
+        "",
+        ""
+      ],
+      [
+        "Data Handling & Privacy",
+        "How do you verify the legal and ethical provenance of every dataset used to train, fine-tune, or evaluate models interacting with our data?",
+        "",
+        ""
+      ],
+      [
+        "Data Handling & Privacy",
+        "Which privacy-preserving techniques (e.g., differential privacy, federated learning, homomorphic encryption) are available, and can customers opt in or out per use case?",
+        "",
+        ""
+      ],
+      [
+        "Data Hosting & Control",
+        "Is the solution provided as a single tenant so the encryption keys can be managed by the organization?",
+        "",
+        ""
+      ],
+      [
+        "Data Retention & Privacy",
+        "Is there an option for Zero Data Retention for prompt data, prompt completion (response), or inference data so data is never stored or retained in clear text at any point in the data lifecycle (including flat files, databases, logs, and all other storage locations)?",
+        "",
+        ""
+      ],
+      [
+        "Data Retention & Privacy",
+        "Can Zero Data Retention be verified in the configuration logs?",
+        "",
+        ""
+      ],
+      [
+        "Data Usage for Training",
+        "Will any of our organization's data be used to train AI (LLM, multimodal, or predictive) models?",
+        "",
+        ""
+      ],
+      [
+        "Data Usage for Training",
+        "Is there an option to opt out of the use of organization data for any model training?",
+        "",
+        ""
+      ],
+      [
+        "Explainability & Oversight",
+        "Can your AI system provide meaningful explanations of its outputs or decisions to end users or auditors?",
+        "",
+        ""
+      ],
+      [
+        "Explainability & Oversight",
+        "Are human override mechanisms in place for critical decisions?",
+        "",
+        ""
+      ],
+      [
+        "Future-Proofing & Compliance",
+        "What roadmap do you have for migrating model confidentiality and data-protection controls to post-quantum-secure algorithms?",
+        "",
+        ""
+      ],
+      [
+        "Future-Proofing & Compliance",
+        "Which AI-specific SLA metrics (accuracy, P95 latency, data freshness) do you contractually guarantee, and what remedies are offered if thresholds are missed?",
+        "",
+        ""
+      ],
+      [
+        "Governance & Ethics",
+        "Does an internal AI ethics board review new features and high-risk use cases? Describe its composition, meeting cadence, and veto authority.",
+        "",
+        ""
+      ],
+      [
+        "Governance & Ethics",
+        "How are ethical considerations and societal impacts documented and addressed throughout the model lifecycle?",
+        "",
+        ""
+      ],
+      [
+        "Incident Response & Resilience",
+        "Provide your AI-specific incident-response playbook, including maximum notification windows for model compromise, data leakage, or harmful output incidents.",
+        "",
+        ""
+      ],
+      [
+        "Incident Response & Resilience",
+        "Outline business-continuity and disaster-recovery provisions for critical inference endpoints, including recovery-time objectives and multi-region failover.",
+        "",
+        ""
+      ],
+      [
+        "Intellectual Property & Licensing",
+        "Who owns fine-tuned weights, embeddings, or derivative models created with our data, and what reuse rights do you retain across your client base?",
+        "",
+        ""
+      ],
+      [
+        "Intellectual Property & Licensing",
+        "How do you ensure that models or datasets used do not infringe third-party intellectual-property or licensing restrictions?",
+        "",
+        ""
+      ],
+      [
+        "Model Development & Governance",
+        "Who develops and maintains your AI models (in-house, open source, third-party vendor)?",
+        "",
+        ""
+      ],
+      [
+        "Model Development & Governance",
+        "What steps are taken to ensure model accuracy, integrity, and performance?",
+        "",
+        ""
+      ],
+      [
+        "Model Integrity & Drift",
+        "How do you continuously detect, log, and correct model drift in production (include thresholds, retraining triggers, and escalation paths)?",
+        "",
+        ""
+      ],
+      [
+        "Model Integrity & Drift",
+        "What automated and manual techniques do you use to identify hidden backdoors / Trojans in models before deployment?",
+        "",
+        ""
+      ],
+      [
+        "Model Quality & Auditability",
+        "Has an independent body performed an analysis of the model's accuracy used in your solution?",
+        "",
+        ""
+      ],
+      [
+        "Monitoring & Telemetry",
+        "Which telemetry APIs or dashboards can customers use to monitor inference latency, confidence scores, anomaly rates, and policy violations in real time?",
+        "",
+        ""
+      ],
+      [
+        "Monitoring & Telemetry",
+        "Can customers receive configurable alerts when model behavior deviates from expected baselines or policy thresholds?",
+        "",
+        ""
+      ],
+      [
+        "Regulatory & Compliance Alignment",
+        "Are your AI systems aligned with frameworks such as the NIST AI RMF, EU AI Act, or ISO/IEC 42001?",
+        "",
+        ""
+      ],
+      [
+        "Regulatory & Compliance Alignment",
+        "Do you provide AI impact assessments (e.g., DPIA or Algorithmic Impact Assessments)?",
+        "",
+        ""
+      ],
+      [
+        "Security & Abuse Prevention",
+        "What measures are in place to prevent prompt injection, model manipulation, or adversarial attacks?",
+        "",
+        ""
+      ],
+      [
+        "Security & Abuse Prevention",
+        "Do you perform red teaming or adversarial testing on your AI systems?",
+        "",
+        ""
+      ],
+      [
+        "Security & Abuse Prevention",
+        "Describe the adversarial-example libraries, red-team playbooks, and success criteria you employ to harden models against evasion or poisoning; share the latest results.",
+        "",
+        ""
+      ],
+      [
+        "Security & Abuse Prevention",
+        "When was your last independent red-team exercise against the AI stack, and can you provide an executive summary of findings and remediation status?",
+        "",
+        ""
+      ],
+      [
+        "Supply Chain & Fourth-Party Risk",
+        "Identify all cloud hosts, data brokers, dev-tool vendors, or other fourth parties supporting your AI workflow and explain how you monitor their security posture.",
+        "",
+        ""
+      ],
+      [
+        "Supply Chain & Fourth-Party Risk",
+        "What controls are in place to screen third-party or open-source models for vulnerabilities before integration into your product?",
+        "",
+        ""
+      ],
+      [
+        "Third-Party & Supply Chain Risk",
+        "Do any of your AI features rely on external APIs or models (e.g., OpenAI, Anthropic, Stability.ai)?",
+        "",
+        ""
+      ],
+      [
+        "Third-Party & Supply Chain Risk",
+        "How do you assess and monitor AI-related risks across your own supply chain or technology stack?",
+        "",
+        ""
+      ],
+      [
+        "Third-Party Dependencies",
+        "Does your solution use any third-party artificial intelligence service providers (including any public/proprietary foundational models) to fulfill the services provided by the service or solution?",
+        "",
+        ""
+      ],
+      [
+        "Third-Party Dependencies",
+        "Provide a list of all third-party AI service providers.",
+        "",
+        ""
+      ],
+      [
+        "Third-Party Dependencies",
+        "Where are the third-party AI services hosted?",
+        "",
+        ""
+      ],
+      [
+        "Third-Party Dependencies",
+        "Is any of our organization's data shared, accessed, or handled by, or processed by the AI Service provider?",
+        "",
+        ""
+      ],
+      [
+        "Transparency & Auditability",
+        "Do you provide customers with auditor-ready model cards, data-lineage documentation, and validation reports on request?",
+        "",
+        ""
+      ],
+      [
+        "Transparency & Auditability",
+        "Is every model decision and data transformation recorded in an immutable audit trail that can be exported for compliance investigations?",
+        "",
+        ""
+      ],
+      [
+        "Types of AI Services",
+        "What AI/ML capabilities are embedded in your product or services? Please specify use cases.",
+        "",
+        ""
+      ],
+      [
+        "Types of AI Services",
+        "Does the solution include a proprietary (owned by the company) GenAI model?",
+        "",
+        ""
+      ],
+      [
+        "Score",
+        "",
+        "",
+        ""
+      ]
+    ]
+  },
+  "Notes Uses Cases": {
+    "headers": [
+      "Use Case",
+      "Impact (1-5)",
+      "Likelihood (1-5)",
+      "Risk Score",
+      "Recommendation",
+      "Associated Threat",
+      "ATT&CK/ATLAS Mapping"
+    ],
+    "data": [
+      [
+        "Jailbreak of internal chatbot",
+        4,
+        5,
+        20,
+        "Immediate mitigation and executive review required.",
+        "Model control bypass via prompt manipulation",
+        "T1566.001 – Spear Phishing via Service / T1647 – Prompt Injection (ATLAS)"
+      ],
+      [
+        "Deepfake targeting executive",
+        5,
+        3,
+        15,
+        "High priority: plan mitigations and monitor closely.",
+        "Executive impersonation and reputational harm",
+        "T1586.002 – Identity Theft: Executive Impersonation"
+      ],
+      [
+        "Prompt injection via public API",
+        4,
+        5,
+        20,
+        "Immediate mitigation and executive review required.",
+        "Remote code execution or command injection",
+        "T1203 – Exploitation for Client Execution / T1647 – Prompt Injection (ATLAS)"
+      ],
+      [
+        "LLM auto-response leaks PII",
+        5,
+        4,
+        20,
+        "Immediate mitigation and executive review required.",
+        "Unauthorized disclosure of sensitive personal data",
+        "T1005 – Data from Local System / T1644 – Data Leakage (ATLAS)"
+      ],
+      [
+        "Model used to generate ransomware code",
+        5,
+        2,
+        10,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Weaponization of GenAI for malware development",
+        "T1587.001 – Malware Development / T1657 – Model Misuse (ATLAS)"
+      ],
+      [
+        "Unauthorized fine-tuning with sensitive data",
+        5,
+        4,
+        20,
+        "Immediate mitigation and executive review required.",
+        "Data exfiltration through unapproved model updates",
+        "T1531 – Account Access Removal / T1642 – Data Poisoning (ATLAS)"
+      ],
+      [
+        "AI hallucination misguides customer support",
+        3,
+        4,
+        12,
+        "Moderate risk: assign to engineering/security backlog.",
+        "User misdirection due to fabricated answers",
+        "T1609 – Container Administration Command / T1643 – Hallucination (ATLAS)"
+      ],
+      [
+        "Synthetic review fraud in ecommerce",
+        3,
+        3,
+        9,
+        "Low risk: document and monitor.",
+        "Consumer deception and trust erosion",
+        "T1585.002 – Fraudulent Reviews / T1645 – Synthetic Identity Fraud (ATLAS)"
+      ],
+      [
+        "Supply chain AI model poisoning",
+        4,
+        3,
+        12,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Model poisoning in training pipelines",
+        "T1565.001 – Stored Data Manipulation / T1638 – Model Poisoning (ATLAS)"
+      ],
+      [
+        "Voice cloning used in phishing attack",
+        5,
+        4,
+        20,
+        "Immediate mitigation and executive review required.",
+        "Real-time audio social engineering",
+        "T1059.003 – Command and Scripting Interpreter: PowerShell / T1655 – Voice Cloning (ATLAS)"
+      ],
+      [
+        "AI model generates discriminatory outputs",
+        4,
+        3,
+        12,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Regulatory violations due to bias and harm",
+        "T1481.001 – Web Service: Offensive Content / T1649 – Toxic Outputs (ATLAS)"
+      ],
+      [
+        "AI Red Team identifies unfiltered NSFW output",
+        3,
+        5,
+        15,
+        "High priority: plan mitigations and monitor closely.",
+        "Inappropriate or noncompliant content generation",
+        "T1491 – Defacement / T1646 – Unfiltered Output (ATLAS)"
+      ],
+      [
+        "Fake legal advice generated by AI assistant",
+        4,
+        4,
+        16,
+        "High priority: plan mitigations and monitor closely.",
+        "Misuse of AI for legal misinformation",
+        "T1565 – Data Manipulation / T1654 – Legal Misinformation (ATLAS)"
+      ],
+      [
+        "Model exposes training data fragments",
+        5,
+        3,
+        15,
+        "High priority: plan mitigations and monitor closely.",
+        "Exposure of proprietary or confidential training data",
+        "T1005 – Data from Local System / T1644 – Training Data Leakage (ATLAS)"
+      ],
+      [
+        "Credential leakage in model weights",
+        5,
+        2,
+        10,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Leaking of credentials embedded in model artifacts",
+        "T1555.003 – Credentials from Password Stores / T1641 – Model Artifact Leakage (ATLAS)"
+      ],
+      [
+        "Use of non-compliant open weights",
+        4,
+        3,
+        12,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Use of unvetted models with license risks",
+        "T1608.001 – Upload Malware / T1640 – Use of Untrusted Models (ATLAS)"
+      ],
+      [
+        "GenAI use violates copyright at scale",
+        4,
+        4,
+        16,
+        "High priority: plan mitigations and monitor closely.",
+        "Mass-scale IP violations and legal exposure",
+        "T1496 – Resource Hijacking / T1651 – Copyright Abuse (ATLAS)"
+      ],
+      [
+        "Compromised AI DevOps pipeline",
+        5,
+        3,
+        15,
+        "High priority: plan mitigations and monitor closely.",
+        "Tampering with CI/CD for AI components",
+        "T1608.002 – Code Signing / T1637 – AI Supply Chain Compromise (ATLAS)"
+      ],
+      [
+        "Malicious plugin extends LLM functions",
+        5,
+        4,
+        20,
+        "Immediate mitigation and executive review required.",
+        "Backdoor capability injection via plugins",
+        "T1055 – Process Injection / T1653 – Plugin Abuse (ATLAS)"
+      ],
+      [
+        "Business logic bypass using LLM",
+        4,
+        4,
+        16,
+        "High priority: plan mitigations and monitor closely.",
+        "Bypassing rule-based business logic via LLM reasoning",
+        "T1565.002 – Stored Business Logic Bypass / T1656 – Reasoning Exploits (ATLAS)"
+      ],
+      [
+        "LLM-generated spear phishing emails",
+        5,
+        4,
+        20,
+        "Immediate mitigation and executive review required.",
+        "Highly targeted phishing campaigns facilitated by AI.",
+        "T1566 – Phishing: Spear Phishing"
+      ],
+      [
+        "AI-driven election disinformation campaign",
+        5,
+        3,
+        15,
+        "High priority: plan mitigations and monitor closely.",
+        "Rapid, large-scale misinformation to influence public opinion.",
+        "T1648 – Disinformation Generation"
+      ],
+      [
+        "Side-channel model extraction via API timing",
+        4,
+        2,
+        8,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Attacker infers model parameters by measuring response times.",
+        "T1658 – Side-Channel Model Extraction"
+      ],
+      [
+        "Unauthorized AI-powered vulnerability scanning",
+        4,
+        3,
+        12,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Automated scanning of internal systems using AI to discover weaknesses.",
+        "T1595 – Active Scanning / T1652 – Automated Reconnaissance"
+      ],
+      [
+        "Adversarial example attack at inference",
+        4,
+        4,
+        16,
+        "High priority: plan mitigations and monitor closely.",
+        "Subtle perturbations in input to force misclassification",
+        "T1620 – Adversarial Example Generation / T1647 – Prompt Injection (ATLAS)"
+      ],
+      [
+        "Insider uses AI to craft targeted internal spear phishing",
+        5,
+        3,
+        15,
+        "High priority: plan mitigations and monitor closely.",
+        "AI-driven social engineering exploiting internal context",
+        "T1566 – Spear Phishing: Internal"
+      ],
+      [
+        "Data drift in a safety-critical AI system",
+        4,
+        4,
+        16,
+        "High priority: plan mitigations and monitor closely.",
+        "Model performance degradation over time leading to unsafe decisions",
+        "T1622 – Data Drift Detection / T1643 – Hallucination (ATLAS)"
+      ],
+      [
+        "AI-enabled automated credential stuffing",
+        4,
+        3,
+        12,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Automated attacks leveraging AI to guess or validate large credential lists",
+        "T1110.003 – Brute Force: Credential Stuffing / T1652 – Automated Reconnaissance (ATLAS)"
+      ],
+      [
+        "Hyperparameter inference via black-box queries",
+        3,
+        2,
+        6,
+        "Low risk: document and monitor.",
+        "Inferring model hyperparameters to replicate or fine-tune an approximation",
+        "T1658 – Side-Channel Model Extraction / T1638 – Model Poisoning (ATLAS)"
+      ],
+      [
+        "Unauthorized access to model training logs or metadata",
+        4,
+        3,
+        12,
+        "Moderate risk: assign to engineering/security backlog.",
+        "Leakage of sensitive training details (e.g., data sources, labeling schema)",
+        "T1082 – System Information Discovery / T1644 – Training Data Leakage (ATLAS)"
+      ],
+      [
+        "Threat of AI Dependency",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ]
+  }
+}

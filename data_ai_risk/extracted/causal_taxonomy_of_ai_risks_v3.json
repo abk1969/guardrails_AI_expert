@@ -1,0 +1,117 @@
+[
+  {
+    "__EMPTY": "Causal Taxonomy of AI Risks",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "This page is mobile-friendly.",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "Description of Taxonomy",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "The Causal Taxonomy of AI Risks, adapted from Yampolskiy (2016), classifies risks by its causal factors (1) entity (human, AI), (2) intentionality (intentional, unintentional), and (3) timing (pre-deployment, post-deployment).",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "How to use",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "The high-level taxonomy makes it possible to use our database to, for instance, identify all mentions of risks which are presented as occurring pre-deployment or post-deployment, intentionally or unintentionally, and caused by AI or by humans, or any combination.",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "Category",
+    "__EMPTY_1": "Level",
+    "Updated: 26 March 2025": "Description"
+  },
+  {
+    "__EMPTY": "Entity",
+    "__EMPTY_1": "AI",
+    "Updated: 26 March 2025": "The risk is caused by a decision or action made by an AI system "
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Human",
+    "Updated: 26 March 2025": "The risk is caused by a decision or action made by humans "
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Other",
+    "Updated: 26 March 2025": "The risk is caused by some other reason or is ambiguous"
+  },
+  {
+    "__EMPTY": "Intent",
+    "__EMPTY_1": "Intentional",
+    "Updated: 26 March 2025": "The risk occurs due to an expected outcome from pursuing a goal"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Unintentional",
+    "Updated: 26 March 2025": "The risk occurs due to an unexpected outcome from pursuing a goal"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Other",
+    "Updated: 26 March 2025": "The risk is presented as occurring without clearly specifying the intentionality"
+  },
+  {
+    "__EMPTY": "Timing",
+    "__EMPTY_1": "Pre- deployment",
+    "Updated: 26 March 2025": "The risk occurs before the AI is deployed"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Post- deployment",
+    "Updated: 26 March 2025": "The risk occurs after the AI model has been trained and deployed"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Other",
+    "Updated: 26 March 2025": "The risk is presented without a clearly specified time of occurrence"
+  },
+  {
+    "__EMPTY": "More information",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "🌐 https://airisk.mit.edu/",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "Feedback/Contact us",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "💬 Use this form to offer feedback, and suggest resources or risks to add",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "📧 Email: pslat[at]mit.edu",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "📄 Cite as: Slattery, P., Saeri, A. K., Grundy, E. A. C., Graham, J., Noetel, M., Uuk, R., Dao, J., Pour, S., Casper, S., & Thompson, N. (2024). A systematic evidence review and common frame of reference for the risks from artificial intelligence. https://doi.org/10.48550/arXiv.2408.12622",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  },
+  {
+    "__EMPTY": "This work is licensed under CC BY 4.0",
+    "__EMPTY_1": "",
+    "Updated: 26 March 2025": ""
+  }
+]

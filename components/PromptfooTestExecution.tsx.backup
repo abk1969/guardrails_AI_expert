@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+import Card from './ui/Card';
+import Button from './ui/Button';
+import { Play, Pause, Square, Terminal, AlertCircle, CheckCircle2, Loader } from 'lucide-react';
+
+/**
+ * Composant pour lancer et suivre l'exécution des tests Promptfoo
+ *
+ * TODO Phase 3:
+ * - Implémenter promptfooIntegrationService.runRealTests()
+ * - Lancer subprocess: node promptfoo/dist/src/main.js eval
+ * - Écouter stdout/stderr en temps réel
+ * - Afficher progression (X/Y tests)
+ * - Permettre pause/annulation
+ * - Lire résultats JSON et naviguer vers Analytics
+ */
+const PromptfooTestExecution: React.FC = () => {
+  const [testStatus, setTestStatus] = useState<'idle' | 'running' | 'completed' | 'failed'>('idle');
+  const [progress, setProgress] = useState(0);
+  const [testsCompleted, setTestsCompleted] = useState(0);
+  const [totalTests, setTotalTests] = useState(150);
+  const [elapsedTime, setElapsedTime] = useState('0:00');
+  const [logs, setLogs] = useState<string[]>([
+    '[Info] Configuration chargée: promptfooconfig.yaml',
+    '[Info] Target: vertex:gemini-2.0-flash-exp',
+    '[Info] Plugins actifs: prompt-injection, jailbreak, pii',
+  ]);
+
+  const handleStartTest = () => {
+    setTestStatus('running');
+    // TODO: Implémenter lancement réel de Promptfoo
+    // const service = new PromptfooIntegrationService();
+    // await service.runRealTests(config, onProgress);
+  };
+
+  const handlePauseTest = () => {
+    setTestStatus('idle');
+    // TODO: Pause subprocess
+  };
+
+  const handleStopTest = () => {
+    setTestStatus('idle');
+    setProgress(0);
+    // TODO: Kill subprocess
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <Card className="bg-gradient-to-r from-cyan-900/20 to-green-900/20 border-cyan-500/30">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-400">
+              {testStatus === 'running' ? (
+                <Loader size={24} className="animate-spin" />
+              ) : testStatus === 'completed' ? (
+                <CheckCircle2 size={24} className="text-green-400" />
+              ) : testStatus === 'failed' ? (
+                <AlertCircle size={24} className="text-red-400" />
+              ) : (
+                <Play size={24} />
+              )}
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {testStatus === 'idle' && 'Prêt à Lancer les Tests'}
+                {testStatus === 'running' && 'Exécution des Tests en Cours...'}
+                {testStatus === 'completed' && 'Tests Terminés avec Succès!'}
+                {testStatus === 'failed' && 'Échec de l\'Exécution'}
+              </h2>
+              <p className="text-gray-300">
+                {testStatus === 'idle' && 'Cliquez sur "Lancer les Tests" pour commencer l\'exécution de Promptfoo.'}
+                {testStatus === 'running' && 'Les tests sont en cours d\'exécution. Cela peut prendre plusieurs minutes.'}
+                {testStatus === 'completed' && 'Tous les tests ont été exécutés. Consultez les résultats ci-dessous.'}
+                {testStatus === 'failed' && 'Une erreur s\'est produite pendant l\'exécution. Consultez les logs.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Barre de progression */}
+      {testStatus !== 'idle' && (
+        <Card>
+          <h3 className="text-lg font-bold text-white mb-4">Progression</h3>
+
+          {/* Barre */}
+          <div className="relative w-full h-8 bg-gray-700 rounded-lg overflow-hidden mb-4">
+            <div
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-green-500 transition-all duration-500 flex items-center justify-center"
+              style={{ width: `${progress}%` }}
+            >
+              {progress > 10 && (
+                <span className="text-sm font-bold text-white">{progress}%</span>
+              )}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="bg-gray-700/50 p-3 rounded">
+              <p className="text-sm text-gray-400">Tests Complétés</p>
+              <p className="text-2xl font-bold text-white">{testsCompleted} / {totalTests}</p>
+            </div>
+            <div className="bg-gray-700/50 p-3 rounded">
+              <p className="text-sm text-gray-400">Temps Écoulé</p>
+              <p className="text-2xl font-bold text-white">{elapsedTime}</p>
+            </div>
+            <div className="bg-gray-700/50 p-3 rounded">
+              <p className="text-sm text-gray-400">Temps Estimé</p>
+              <p className="text-2xl font-bold text-white">~7:30</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Contrôles */}
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-white">Contrôles d'Exécution</h3>
+            <p className="text-sm text-gray-400 mt-1">
+              Gérez l'exécution des tests Promptfoo
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {testStatus === 'idle' && (
+              <Button onClick={handleStartTest} className="px-6">
+                <Play size={16} className="mr-2" />
+                Lancer les Tests
+              </Button>
+            )}
+            {testStatus === 'running' && (
+              <>
+                <Button onClick={handlePauseTest} variant="secondary">
+                  <Pause size={16} className="mr-2" />
+                  Pause
+                </Button>
+                <Button onClick={handleStopTest} variant="secondary" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  <Square size={16} className="mr-2" />
+                  Arrêter
+                </Button>
+              </>
+            )}
+            {testStatus === 'completed' && (
+              <Button onClick={() => {/* Navigate to results */}} className="px-6">
+                Voir les Résultats
+              </Button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Console de logs */}
+      <Card>
+        <div className="flex items-center gap-2 mb-4">
+          <Terminal size={20} className="text-cyan-400" />
+          <h3 className="text-lg font-bold text-white">Console Promptfoo</h3>
+        </div>
+
+        <div className="bg-gray-900 rounded-lg p-4 h-64 overflow-y-auto font-mono text-sm">
+          {logs.map((log, index) => (
+            <div key={index} className="text-gray-300 mb-1">
+              <span className="text-gray-500">[{new Date().toLocaleTimeString()}]</span> {log}
+            </div>
+          ))}
+          {testStatus === 'running' && (
+            <div className="text-cyan-400 animate-pulse">
+              <span className="text-gray-500">[{new Date().toLocaleTimeString()}]</span> ▓ En cours d'exécution...
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Instructions */}
+      {testStatus === 'idle' && (
+        <Card className="bg-gray-700/30 border-gray-600">
+          <h4 className="text-sm font-bold text-white mb-2">📋 Ce Qui Va Se Passer</h4>
+          <ul className="text-sm text-gray-300 space-y-2 ml-4">
+            <li>• Promptfoo sera lancé en arrière-plan via subprocess Node.js</li>
+            <li>• Les tests seront exécutés selon la configuration YAML définie</li>
+            <li>• Vous verrez la progression en temps réel dans la console</li>
+            <li>• Une fois terminé, les résultats seront automatiquement chargés et analysés</li>
+            <li>• Durée estimée: 5-30 minutes selon le nombre de tests configurés</li>
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default PromptfooTestExecution;

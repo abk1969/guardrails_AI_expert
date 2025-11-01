@@ -4,7 +4,6 @@ import {
   MessageSquare, Clock, Settings, Download, Sparkles, Zap, BookOpen,
   Search, Filter, Star, Trash2, MoreVertical
 } from 'lucide-react';
-import { geminiService } from '../../services/geminiService';
 import { runAgenticQuery } from '../../services/agenticService';
 import { useAllContexts } from '../../hooks/useAllContexts';
 import './ChatbotModern.css';

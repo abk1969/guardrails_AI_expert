@@ -2,11 +2,12 @@ import React, { useMemo } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import { useIncidentReadiness } from '../contexts/IncidentReadinessContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { IncidentReadinessQuestion, ReadinessRating, IncidentCategory, IncidentMonitoringReference } from '../types';
 import { READINESS_RATINGS } from '../constants';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, ArrowLeft, Compass, X } from 'lucide-react';
 
-const QuestionRow: React.FC<{ question: IncidentReadinessQuestion }> = ({ question }) => {
+const QuestionRow: React.FC<{ question: IncidentReadinessQuestion; isHighlighted?: boolean }> = ({ question, isHighlighted = false }) => {
     const { updateQuestion, deleteQuestion } = useIncidentReadiness();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -20,7 +21,11 @@ const QuestionRow: React.FC<{ question: IncidentReadinessQuestion }> = ({ questi
     };
 
     return (
-        <tr className="border-b border-gray-700 hover:bg-gray-800/50 align-top">
+        <tr className={`border-b border-gray-700 hover:bg-gray-800/50 align-top transition-all ${
+            isHighlighted
+                ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
+                : ''
+        }`}>
             <td className="px-4 py-3 font-medium text-white w-1/3">{question.question}</td>
             <td className="px-2 py-2 w-1/4">
                 <textarea
@@ -76,11 +81,12 @@ const QuestionRow: React.FC<{ question: IncidentReadinessQuestion }> = ({ questi
 };
 
 const IncidentReadinessView: React.FC = () => {
-    const { 
+    const {
         questions, addQuestion,
         incidentCategories, addIncidentCategory, updateIncidentCategory, deleteIncidentCategory,
         incidentMonitoringReferences, addIncidentMonitoringReference, updateIncidentMonitoringReference, deleteIncidentMonitoringReference
      } = useIncidentReadiness();
+    const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
 
     const groupedQuestions = useMemo(() => {
         return questions.reduce((acc, current) => {
@@ -88,15 +94,15 @@ const IncidentReadinessView: React.FC = () => {
             return acc;
         }, {} as Record<string, IncidentReadinessQuestion[]>);
     }, [questions]);
-    
+
     // Maintain a consistent order for categories
     const categoryOrder = [
-        'Preparation', 
-        'Detection & Analysis', 
-        'Containment', 
-        'Eradication', 
-        'Recovery', 
-        'Post-Incident Review', 
+        'Preparation',
+        'Detection & Analysis',
+        'Containment',
+        'Eradication',
+        'Recovery',
+        'Post-Incident Review',
         'Tabletop Exercises',
         'Risk Assessment and Management',
         "Organization's AI Systems",
@@ -113,6 +119,37 @@ const IncidentReadinessView: React.FC = () => {
 
     return (
         <div className="space-y-8">
+            {/* Navigation Breadcrumb */}
+            {navigationSource && filterParams?.highlightIds && (
+                <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={clearNavigation}
+                            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <Compass className="w-5 h-5" />
+                            <span className="font-medium">Retour à OWASP COMPASS</span>
+                        </button>
+                        <button
+                            onClick={clearNavigation}
+                            className="p-1 hover:bg-cyan-900/30 rounded transition-colors"
+                            aria-label="Fermer"
+                        >
+                            <X className="w-5 h-5 text-gray-400" />
+                        </button>
+                    </div>
+                    {sourceTitle && (
+                        <div className="mt-2 text-sm text-gray-300">
+                            Navigation depuis: <span className="font-semibold text-cyan-300">{sourceTitle}</span>
+                        </div>
+                    )}
+                    <div className="mt-1 text-xs text-gray-400">
+                        {filterParams.highlightIds.length} question(s) de préparation liée(s)
+                    </div>
+                </Card>
+            )}
+
             {/* --- NOUVELLE SECTION DE RÉFÉRENCE --- */}
             <div className="space-y-6">
                 <header>
@@ -204,7 +241,11 @@ const IncidentReadinessView: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {groupedQuestions[categoryName].map(q => <QuestionRow key={q.id} question={q} />)}
+                                    {groupedQuestions[categoryName].map(q => {
+                                        const questionIndex = questions.indexOf(q);
+                                        const isHighlighted = filterParams?.highlightIds?.includes(String(questionIndex)) || false;
+                                        return <QuestionRow key={q.id} question={q} isHighlighted={isHighlighted} />;
+                                    })}
                                 </tbody>
                             </table>
                         </div>
