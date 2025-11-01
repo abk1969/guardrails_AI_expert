@@ -29,3 +29,6 @@ dist-ssr
 # Excel temporary files
 ~.xlsx
 ~.xls
+
+# Embedded Promptfoo (separate git repo)
+guardrail/solution_promptfoo/promptfoo/
