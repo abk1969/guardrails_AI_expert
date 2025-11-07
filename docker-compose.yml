@@ -73,7 +73,7 @@ services:
       - ./backend/prisma:/app/prisma
       - ./guardrail:/app/guardrail  # Mount guardrail directory for Promptfoo tests
       - /app/node_modules  # Use container's node_modules (Debian-compiled)
-      - /app/dist
+      # Removed /app/dist volume to allow hot-reload to work properly
     depends_on:
       postgres:
         condition: service_healthy
@@ -215,6 +215,112 @@ services:
     networks:
       - airiskmgr-network
 
+  # ========================================
+  # PENTEST TOOLS ISOLATION
+  # ========================================
+  # These services run security testing tools in complete isolation
+  # - No external ports exposed
+  # - Separate network for isolation
+  # - CPU/RAM limits to prevent DoS
+  # - Non-root users inside containers
+  # - Dedicated volumes for outputs
+  # ========================================
+
+  # Garak LLM Vulnerability Scanner (isolated)
+  garak-runner:
+    build:
+      context: ./backend/docker/garak
+      dockerfile: Dockerfile
+    container_name: airiskmgr-garak-runner
+    restart: unless-stopped
+    volumes:
+      - garak_output:/app/output
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      PYTHONUNBUFFERED: 1
+      GARAK_OUTPUT_DIR: /app/output
+    networks:
+      - pentest-isolated-network
+      - airiskmgr-network  # Allow communication with API Gateway
+    healthcheck:
+      test: ["CMD", "garak", "--help"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Strix Agentic AI Testing Framework (isolated)
+  strix-runner:
+    build:
+      context: ./backend/docker/strix
+      dockerfile: Dockerfile
+    container_name: airiskmgr-strix-runner
+    restart: unless-stopped
+    volumes:
+      - strix_output:/app/output
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      PYTHONUNBUFFERED: 1
+      STRIX_OUTPUT_DIR: /app/output
+      CHROME_BIN: /usr/bin/chromium
+      CHROMIUM_FLAGS: "--no-sandbox --disable-dev-shm-usage"
+    networks:
+      - pentest-isolated-network
+      - airiskmgr-network  # Allow communication with API Gateway
+    healthcheck:
+      test: ["CMD", "strix", "--help"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Promptfoo LLM Testing Framework (isolated)
+  promptfoo-runner:
+    build:
+      context: ./backend/docker/promptfoo
+      dockerfile: Dockerfile
+    container_name: airiskmgr-promptfoo-runner
+    restart: unless-stopped
+    volumes:
+      - promptfoo_output:/app/output
+      - promptfoo_configs:/app/configs
+      - ./guardrail/solution_promptfoo:/app/promptfoo-repo:ro  # Read-only mount of configs
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    environment:
+      NODE_ENV: production
+      PROMPTFOO_OUTPUT_DIR: /app/output
+      PROMPTFOO_CONFIG_DIR: /app/configs
+    networks:
+      - pentest-isolated-network
+      - airiskmgr-network  # Allow communication with API Gateway
+    healthcheck:
+      test: ["CMD", "promptfoo", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
 volumes:
   postgres_data:
     driver: local
@@ -224,7 +330,21 @@ volumes:
     driver: local
   grafana_data:
     driver: local
+  # Pentest tools isolated volumes
+  garak_output:
+    driver: local
+  strix_output:
+    driver: local
+  promptfoo_output:
+    driver: local
+  promptfoo_configs:
+    driver: local
 
 networks:
   airiskmgr-network:
     driver: bridge
+  # Isolated network for pentest tools
+  # Tools can communicate with each other and API Gateway, but not external services
+  pentest-isolated-network:
+    driver: bridge
+    internal: false  # Allow external communication for testing targets

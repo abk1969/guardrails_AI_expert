@@ -159,7 +159,7 @@ THROTTLE_LIMIT=100
 **Important:**
 - Frontend uses `import.meta.env.VITE_*` (NOT `process.env`)
 - Backend uses `process.env`
-- Gemini API is called for test prompt generation (`geminiService.ts`) and chatbot responses (`agenticService.ts`)
+- **Gemini API Migration:** For full-stack mode, use `geminiServiceSecure.ts` (backend-proxied). `geminiService.ts` is deprecated for production use but still works in standalone mode.
 - The system has fallback to mock generation if API fails
 
 ## Architecture
@@ -221,7 +221,8 @@ Located in `backend/`:
   - Custom hook pattern: `useContextName()` throws error if used outside provider
 
 - `/services/` - Business logic layer, decoupled from UI
-  - `geminiService.ts` - ONLY place making external API calls (Gemini)
+  - `geminiService.ts` - **DEPRECATED** - Direct Gemini API calls (browser-side, use only in standalone mode)
+  - `geminiServiceSecure.ts` - **RECOMMENDED** - Secure backend-proxied Gemini calls (full-stack mode)
   - `mcpClientService.ts` - MCP (Model Context Protocol) client integration (see MCP section below)
   - `testRunnerService.ts` - Simulates test execution (mock mode)
   - `sandboxService.ts` - Local sandbox test mode
@@ -612,6 +613,22 @@ The `guardrail/solution_promptfoo/` directory contains a complete Promptfoo inst
 - Used for optional advanced test execution via `promptfooIntegrationService.ts`
 - Integrated into frontend via YAML generation and test execution service
 
+### 13. Unified Security Testing Platform (In Progress)
+
+The backend is being extended with integrations for multiple security testing frameworks:
+
+**Location:** `backend/apps/api-gateway/src/`
+
+**Components:**
+- `unified/` - Unified platform orchestration layer (in development)
+- `garak/` - [Garak](https://github.com/leondz/garak) LLM vulnerability scanner integration
+- `strix/` - [Strix](https://github.com/hupe1980/strix) AI security testing framework integration
+- `auth/` - Enhanced authentication for multi-framework support
+
+**Status:** These integrations are under active development. The goal is to provide a unified interface for running tests across Promptfoo, Garak, and Strix from a single platform.
+
+**Note:** When working on core AI Risk Manager features, these directories can be ignored. They represent future extensibility for advanced security testing workflows.
+
 ## Working with Contexts
 
 When modifying state management:
@@ -715,3 +732,124 @@ interface NavSection {
 4. Output to `/data/` or `/data_ai_risk/`
 5. Update types in `types.ts` if needed
 6. Document in this file under "Data Transformation Scripts"
+
+## Deployment
+
+### Local Development
+See "Development Commands" section above for standalone, Docker, and full-stack modes.
+
+### Production Deployment
+
+**Docker Production:**
+```bash
+docker-compose -f docker-compose.production.yml up -d
+```
+
+**Vercel Deployment (Frontend Only):**
+The frontend can be deployed to Vercel as a standalone SPA:
+1. Push code to GitHub repository
+2. Connect repository to Vercel
+3. Configure environment variables (`GEMINI_API_KEY`, etc.)
+4. Deploy
+
+See recent commit `840fbbd` for Vercel deployment guide details.
+
+**Note:** For full-stack deployments, you'll need to deploy backend separately (e.g., Railway, Render, AWS, Azure) and configure `VITE_API_URL` to point to the deployed backend.
+
+## Troubleshooting
+
+### Prisma Client Issues
+
+**Problem:** `@prisma/client` import errors or type mismatches
+```bash
+cd backend
+npm run prisma:generate  # Regenerate Prisma client
+```
+
+**Problem:** Database schema out of sync
+```bash
+cd backend
+npm run prisma:push      # Push schema changes to database
+```
+
+### Port Conflicts
+
+**Problem:** `EADDRINUSE: address already in use`
+
+**Solution:** Check which ports are in use:
+```bash
+# Windows
+netstat -ano | findstr :5080
+netstat -ano | findstr :3003
+
+# Linux/Mac
+lsof -i :5080
+lsof -i :3003
+```
+
+Kill the process using the port or change the port in configuration.
+
+**Docker Port Conflicts:** The project uses non-default ports (3004, 3003, 5435, 6380) specifically to avoid conflicts. If these ports are taken, modify `docker-compose.yml`.
+
+### Context Provider Errors
+
+**Problem:** `useContext must be used within Provider` error
+
+**Solution:** Check `App.tsx` for proper provider nesting order. The component must be wrapped inside the provider whose context it's trying to use.
+
+**Problem:** Context state not persisting across sessions
+
+**Solution:** Check localStorage keys. If localStorage is disabled or full, persistence will fail. Clear old data:
+```javascript
+// In browser console
+localStorage.clear();  // Nuclear option - clears all data
+// Or selectively:
+localStorage.removeItem('llmGuardrailTestHistory');
+```
+
+### Docker Container Issues
+
+**Problem:** Frontend container can't reach backend
+
+**Solution:**
+- Inside Docker network, use service names: `http://api-gateway:3001`
+- From host machine, use external ports: `http://localhost:3003`
+- Check `VITE_API_URL` environment variable
+
+**Problem:** Node modules not working after rebuilding
+
+**Solution:** Docker volumes cache compiled node_modules. Rebuild with no cache:
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Data Transformation Issues
+
+**Problem:** COMPASS data changes not appearing in UI
+
+**Solution:** Regenerate transformed data:
+```bash
+node scripts/transform-compass-data.cjs
+node scripts/finalize-compass-translations.cjs
+```
+
+Then refresh the browser to reload the static imports.
+
+**Problem:** Excel parsing errors in transformation scripts
+
+**Solution:** Ensure Excel file path is correct and file is not open in another program. Check `data_ai_risk/` directory for source files.
+
+### Build Failures
+
+**Problem:** TypeScript errors during `npm run build`
+
+**Common Causes:**
+1. Missing type definitions - run `npm install`
+2. Prisma client not generated - run `cd backend && npm run prisma:generate`
+3. Import path errors - check `@/*` aliases in `vite.config.ts`
+
+**Problem:** Vite build succeeds but app doesn't work in production
+
+**Solution:** Check environment variables. Vite only includes `VITE_*` prefixed variables in build. Ensure all required variables are set in production environment.

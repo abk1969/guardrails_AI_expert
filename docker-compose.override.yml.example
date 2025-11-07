@@ -1,0 +1,42 @@
+# ========================================
+# Docker Compose Override Example
+# ========================================
+# Copy this file to docker-compose.override.yml and customize
+# This file is automatically merged with docker-compose.yml
+# Use for local development overrides
+# ========================================
+
+version: '3.8'
+
+services:
+  # Override Garak runner for development
+  garak-runner:
+    environment:
+      # Add development-specific environment variables
+      LOG_LEVEL: debug
+    # Uncomment to enable interactive shell access
+    # stdin_open: true
+    # tty: true
+
+  # Override Strix runner for development
+  strix-runner:
+    environment:
+      LOG_LEVEL: debug
+    # Uncomment for debugging with browser UI visible
+    # environment:
+    #   CHROMIUM_FLAGS: "--disable-dev-shm-usage"
+
+  # Override Promptfoo runner for development
+  promptfoo-runner:
+    environment:
+      LOG_LEVEL: debug
+    # Mount additional test configs for development
+    # volumes:
+    #   - ./my-local-tests:/app/my-tests:ro
+
+  # Override API Gateway to enable pentest tool debugging
+  api-gateway:
+    environment:
+      # Enable detailed logging for pentest tool execution
+      LOG_LEVEL: debug
+      PENTEST_DEBUG: "true"
