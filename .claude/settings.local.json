@@ -38,7 +38,8 @@
       "Bash(npx promptfoo --version)",
       "WebFetch(domain:www.promptfoo.dev)",
       "Bash(chmod:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
