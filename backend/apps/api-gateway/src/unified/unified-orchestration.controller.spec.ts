@@ -3,12 +3,15 @@ import { UnifiedOrchestrationController } from './unified-orchestration.controll
 import { UnifiedOrchestrationService } from './unified-orchestration.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 import {
   ExecutionMode,
   Framework,
   UnifiedExecutionConfigDto,
   AttackMode,
   UnifiedExecutionDto,
+  GarakConfigDto,
 } from './dto/unified-execution.dto';
 
 // Mock the auth guards and decorators to avoid importing real implementations
@@ -62,7 +65,7 @@ describe('UnifiedOrchestrationController - TDD Strict', () => {
   });
 
   describe('DTO Validation', () => {
-    it('should reject invalid execution mode', async () => {
+    it('should reject invalid execution mode enum value', async () => {
       const invalidConfig = {
         mode: 'INVALID_MODE', // Not a valid ExecutionMode enum value
         frameworks: [Framework.GARAK],
@@ -74,40 +77,42 @@ describe('UnifiedOrchestrationController - TDD Strict', () => {
         },
       };
 
-      // This test MUST FAIL because controller doesn't validate yet
-      await expect(
-        controller.startExecution(mockUser, invalidConfig as any),
-      ).rejects.toThrow();
+      const dto = plainToInstance(UnifiedExecutionConfigDto, invalidConfig);
+      const errors = await validate(dto);
+
+      // Should have validation error for mode enum
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors.some((err) => err.property === 'mode')).toBe(true);
     });
 
     it('should reject empty frameworks array', async () => {
-      const invalidConfig: any = {
+      const invalidConfig = {
         mode: ExecutionMode.PARALLEL,
         frameworks: [], // Empty array - invalid
       };
 
-      // This test MUST FAIL because controller doesn't validate yet
-      await expect(
-        controller.startExecution(mockUser, invalidConfig),
-      ).rejects.toThrow('frameworks should not be empty');
+      const dto = plainToInstance(UnifiedExecutionConfigDto, invalidConfig);
+      const errors = await validate(dto);
+
+      // Should have validation error for frameworks array
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors.some((err) => err.property === 'frameworks')).toBe(true);
     });
 
-    it('should reject missing required Garak fields', async () => {
-      const invalidConfig: any = {
-        mode: ExecutionMode.PARALLEL,
-        frameworks: [Framework.GARAK],
-        garak: {
-          // Missing required 'model' field
-          probes: ['injection'],
-          generators: ['default'],
-          detectors: ['default'],
-        },
+    it('should reject missing required Garak model field', async () => {
+      const invalidGarakConfig = {
+        // Missing required 'model' field
+        probes: ['injection'],
+        generators: ['default'],
+        detectors: ['default'],
       };
 
-      // This test MUST FAIL because controller doesn't validate yet
-      await expect(
-        controller.startExecution(mockUser, invalidConfig),
-      ).rejects.toThrow();
+      const dto = plainToInstance(GarakConfigDto, invalidGarakConfig);
+      const errors = await validate(dto);
+
+      // Should have validation error for missing model
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors.some((err) => err.property === 'model')).toBe(true);
     });
   });
 
