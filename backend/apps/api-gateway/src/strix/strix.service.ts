@@ -57,6 +57,11 @@ export class StrixService {
       args.push('--headless');
     }
 
+    // API Key (if provided)
+    if (config.apiKey) {
+      args.push('--api-key', config.apiKey);
+    }
+
     // Output directory
     args.push('--output', outputDir);
 

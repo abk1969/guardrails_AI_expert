@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEnum, IsBoolean, IsNumber, Min, Max, IsUrl } from 'class-validator';
+import { IsString, IsEnum, IsBoolean, IsNumber, Min, Max, IsUrl, IsOptional } from 'class-validator';
 
 export enum AttackMode {
   LIGHT = 'light',
@@ -35,4 +35,13 @@ export class AgentConfigDto {
   @Min(60)
   @Max(1800)
   timeout: number;
+
+  @ApiProperty({
+    example: 'sk-test-api-key-12345',
+    description: 'Optional API key for authenticating with the target service',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  apiKey?: string;
 }
