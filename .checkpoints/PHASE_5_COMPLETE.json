@@ -1,0 +1,98 @@
+{
+  "phaseId": "PHASE_5",
+  "phaseName": "Docker Isolation (REQUIRED)",
+  "status": "completed",
+  "timestamp": "2025-01-07T15:00:00Z",
+  "tasksCompleted": [
+    "TASK_005_01: Analyser infrastructure Docker existante",
+    "TASK_005_02: Créer Dockerfile pour Garak runner",
+    "TASK_005_03: Créer Dockerfile pour Strix runner",
+    "TASK_005_04: Créer Dockerfile pour Promptfoo runner",
+    "TASK_005_05: Mettre à jour docker-compose.yml avec services isolés",
+    "TASK_005_06: Créer DockerExecutorService pour exécution dans conteneurs"
+  ],
+  "filesCreated": [
+    "backend/docker/garak/Dockerfile",
+    "backend/docker/strix/Dockerfile",
+    "backend/docker/promptfoo/Dockerfile",
+    "backend/apps/api-gateway/src/docker/docker-executor.service.ts",
+    "docker-compose.override.yml.example"
+  ],
+  "filesModified": [
+    "docker-compose.yml"
+  ],
+  "keyFeatures": [
+    "3 conteneurs Docker isolés (Garak, Strix, Promptfoo)",
+    "Multi-stage builds (development uniquement pour l'instant)",
+    "Non-root users dans tous les conteneurs (garak, strix, promptfoo users)",
+    "CPU limits: 2 CPUs pour Garak/Strix, 1 CPU pour Promptfoo",
+    "RAM limits: 2GB pour Garak/Strix, 1GB pour Promptfoo",
+    "Réseau isolé 'pentest-isolated-network' avec bridge",
+    "Volumes dédiés pour outputs (garak_output, strix_output, promptfoo_output)",
+    "Healthchecks pour tous les runners (30s interval)",
+    "DockerExecutorService pour exécution via 'docker exec'",
+    "Support signaux (SIGSTOP/SIGCONT/SIGTERM) via docker exec kill",
+    "Copie de fichiers host<->container",
+    "Vérification de disponibilité Docker et état conteneurs",
+    "Logs container accessibles via API"
+  ],
+  "securityFeatures": {
+    "isolation": "Conteneurs séparés pour chaque framework",
+    "resourceLimits": "CPU et RAM limités pour prévenir DoS",
+    "nonRootUsers": "Tous les conteneurs utilisent des users non-root",
+    "networkIsolation": "Réseau bridge séparé pour les outils pentest",
+    "volumeIsolation": "Volumes dédiés, pas de montage du système hôte",
+    "noExposedPorts": "Aucun port externe exposé pour les runners",
+    "readOnlyMounts": "Configs Promptfoo montés en lecture seule"
+  },
+  "dockerComposeServices": {
+    "garak-runner": {
+      "image": "Custom Dockerfile (Python 3.11 slim)",
+      "cpus": "2.0",
+      "memory": "2G",
+      "networks": ["pentest-isolated-network", "airiskmgr-network"],
+      "volumes": ["garak_output"]
+    },
+    "strix-runner": {
+      "image": "Custom Dockerfile (Python 3.11 slim + Chromium)",
+      "cpus": "2.0",
+      "memory": "2G",
+      "networks": ["pentest-isolated-network", "airiskmgr-network"],
+      "volumes": ["strix_output"]
+    },
+    "promptfoo-runner": {
+      "image": "Custom Dockerfile (Node 20 slim)",
+      "cpus": "1.0",
+      "memory": "1G",
+      "networks": ["pentest-isolated-network", "airiskmgr-network"],
+      "volumes": ["promptfoo_output", "promptfoo_configs", "./guardrail/solution_promptfoo (ro)"]
+    }
+  },
+  "dockerExecutorServiceMethods": [
+    "executeInContainer(containerName, command, options) -> ChildProcess",
+    "isDockerAvailable() -> boolean",
+    "isContainerRunning(containerName) -> boolean",
+    "sendSignalToContainer(containerName, pid, signal) -> void",
+    "copyFromContainer(containerName, containerPath, hostPath) -> void",
+    "copyToContainer(hostPath, containerName, containerPath) -> void",
+    "getContainerLogs(containerName, tail) -> string"
+  ],
+  "validationCriteria": {
+    "dockerfilesCreated": true,
+    "dockerComposeUpdated": true,
+    "resourceLimitsDefined": true,
+    "networkIsolationConfigured": true,
+    "healthchecksAdded": true,
+    "dockerExecutorCreated": true,
+    "securityBestPractices": true
+  },
+  "nextSteps": [
+    "Intégrer DockerExecutorService dans GarakService et StrixService",
+    "Remplacer spawn() par dockerExecutor.executeInContainer()",
+    "Tester build des 3 images Docker",
+    "Tester docker-compose up avec les nouveaux services",
+    "Valider healthchecks",
+    "Tester exécution réelle de Garak/Strix dans conteneurs"
+  ],
+  "nextPhase": "PHASE_6: Frontend Unified Dashboard"
+}

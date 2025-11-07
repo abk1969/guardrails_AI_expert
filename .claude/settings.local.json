@@ -36,7 +36,9 @@
       "Bash(docker port:*)",
       "Bash(cat:*)",
       "Bash(npx promptfoo --version)",
-      "WebFetch(domain:www.promptfoo.dev)"
+      "WebFetch(domain:www.promptfoo.dev)",
+      "Bash(chmod:*)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []

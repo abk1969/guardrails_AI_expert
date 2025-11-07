@@ -12,7 +12,7 @@ async function main() {
     await prisma.testResult.deleteMany();
     await prisma.testRun.deleteMany();
     await prisma.testTarget.deleteMany();
-    await prisma.aiPolicy.deleteMany();
+    await prisma.aIPolicy.deleteMany();
     await prisma.useCase.deleteMany();
     await prisma.threatProfile.deleteMany();
     await prisma.knownVulnerability.deleteMany();

@@ -22,6 +22,10 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { McpModule } from './mcp/mcp.module';
 import { GeminiModule } from './gemini/gemini.module';
 import { PromptfooModule } from './promptfoo/promptfoo.module';
+import { UnifiedModule } from './unified/unified.module';
+import { GarakModule } from './garak/garak.module';
+import { StrixModule } from './strix/strix.module';
+import { SystemModule } from './system/system.module';
 
 @Module({
   imports: [
@@ -34,31 +38,31 @@ import { PromptfooModule } from './promptfoo/promptfoo.module';
     // Database
     DatabaseModule,
 
-    // Redis Cache
-    CacheModule.registerAsync({
-      isGlobal: true,
-      useFactory: async () => ({
-        store: await redisStore({
-          socket: {
-            host: process.env.REDIS_HOST || 'localhost',
-            port: parseInt(process.env.REDIS_PORT || '6379'),
-          },
-          password: process.env.REDIS_PASSWORD,
-          ttl: 3600 * 1000, // 1 hour default
-        }),
-      }),
-    }),
+    // Redis Cache - TEMPORARILY DISABLED FOR TESTING
+    // CacheModule.registerAsync({
+    //   isGlobal: true,
+    //   useFactory: async () => ({
+    //     store: await redisStore({
+    //       socket: {
+    //         host: process.env.REDIS_HOST || 'localhost',
+    //         port: parseInt(process.env.REDIS_PORT || '6379'),
+    //       },
+    //       password: process.env.REDIS_PASSWORD,
+    //       ttl: 3600 * 1000, // 1 hour default
+    //     }),
+    //   }),
+    // }),
 
-    // Queue
-    BullModule.forRootAsync({
-      useFactory: () => ({
-        redis: {
-          host: process.env.REDIS_HOST || 'localhost',
-          port: parseInt(process.env.REDIS_PORT || '6379'),
-          password: process.env.REDIS_PASSWORD,
-        },
-      }),
-    }),
+    // Queue - TEMPORARILY DISABLED FOR TESTING
+    // BullModule.forRootAsync({
+    //   useFactory: () => ({
+    //     redis: {
+    //       host: process.env.REDIS_HOST || 'localhost',
+    //       port: parseInt(process.env.REDIS_PORT || '6379'),
+    //       password: process.env.REDIS_PASSWORD,
+    //     },
+    //   }),
+    // }),
 
     // Rate limiting
     ThrottlerModule.forRoot([
@@ -73,11 +77,15 @@ import { PromptfooModule } from './promptfoo/promptfoo.module';
     AuthModule,
 
     // Feature modules
+    SystemModule,
     TestsModule,
     PoliciesModule,
     RisksModule,
     UsersModule,
     AnalyticsModule,
+    UnifiedModule,
+    GarakModule,
+    StrixModule,
     McpModule,
     GeminiModule,
     PromptfooModule,

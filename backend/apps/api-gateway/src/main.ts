@@ -16,7 +16,11 @@ async function bootstrap() {
   // Security
   app.use(helmet());
   app.enableCors({
-    origin: configService.get('CORS_ORIGIN'),
+    origin: [
+      configService.get('CORS_ORIGIN', 'http://localhost:3004'),
+      'http://localhost:5080', // Standalone mode
+      'http://localhost:3000', // Alternative dev port
+    ],
     credentials: true,
   });
 

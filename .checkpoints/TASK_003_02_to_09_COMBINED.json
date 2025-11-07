@@ -1,0 +1,45 @@
+{
+  "taskId": "TASK_003_02_to_09_COMBINED",
+  "taskName": "Refactoring Complet Strix Service - Exécution Agent Réelle",
+  "phase": "PHASE_3",
+  "status": "completed",
+  "timestamp": "2025-01-07T13:15:00Z",
+  "filesCreated": [],
+  "filesModified": [
+    "backend/apps/api-gateway/src/strix/strix.service.ts",
+    "backend/apps/api-gateway/src/strix/strix.module.ts"
+  ],
+  "validationsPassed": [
+    "StrixGateway injected with forwardRef",
+    "processes Map added for process control",
+    "buildStrixCommand() method implemented",
+    "runStrixAgent() avec spawn() pour process interactif",
+    "parseStrixOutput() pour parsing temps réel JSON",
+    "parseAndSaveResults() pour rapport final JSON",
+    "determineSeverity() avec type strict",
+    "pauseExecution() avec SIGSTOP",
+    "resumeExecution() avec SIGCONT",
+    "stopExecution() avec SIGTERM/SIGKILL",
+    "WebSocket events emitted (9 methods)",
+    "Simulation code removed",
+    "StrixGateway added to module providers/exports",
+    "NestJS build successful"
+  ],
+  "features": [
+    "Real Strix agent execution (spawn not execAsync)",
+    "Process control: pause/resume/stop avec Unix signals",
+    "Real-time stdout/stderr parsing",
+    "JSON line-by-line output parsing",
+    "WebSocket progress updates",
+    "Finding discovery events",
+    "Database persistence",
+    "Graceful shutdown (SIGTERM then SIGKILL)",
+    "Error handling with process event listeners",
+    "Output directory per execution"
+  ],
+  "keyDifferences": {
+    "Garak": "execAsync (blocking, no process control)",
+    "Strix": "spawn (interactive, pause/resume/stop support)"
+  },
+  "nextTask": "TASK_003_10"
+}

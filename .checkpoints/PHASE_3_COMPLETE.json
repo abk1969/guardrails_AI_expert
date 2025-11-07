@@ -1,0 +1,45 @@
+{
+  "phaseId": "PHASE_3",
+  "phaseName": "Service Strix - Exécution Réelle Agent",
+  "status": "completed",
+  "timestamp": "2025-01-07T13:20:00Z",
+  "tasksCompleted": [
+    "TASK_003_01: WebSocket Gateway pour Strix",
+    "TASK_003_02-09: Refactoring complet Strix Service"
+  ],
+  "filesCreated": [
+    "backend/apps/api-gateway/src/strix/strix.gateway.ts"
+  ],
+  "filesModified": [
+    "backend/apps/api-gateway/src/strix/strix.service.ts",
+    "backend/apps/api-gateway/src/strix/strix.module.ts"
+  ],
+  "keyFeatures": [
+    "Real Strix agent execution via spawn()",
+    "Process control: pause (SIGSTOP), resume (SIGCONT), stop (SIGTERM/SIGKILL)",
+    "Real-time stdout/stderr parsing",
+    "JSON line-by-line output parsing for progress and findings",
+    "WebSocket namespace 'strix' avec 9 events",
+    "Real-time finding discovery notifications",
+    "Database persistence avec Prisma",
+    "Progress tracking (0-100%)",
+    "Error handling with graceful shutdown",
+    "Process reference storage for control operations"
+  ],
+  "validationCriteria": {
+    "gatewayCreated": true,
+    "serviceRefactored": true,
+    "spawnIntegration": true,
+    "processControl": true,
+    "jsonParsing": true,
+    "websocketEvents": true,
+    "compilationSuccess": true
+  },
+  "architecturalDecisions": {
+    "spawnVsExec": "spawn() choisi pour permettre le contrôle interactif (pause/resume/stop) contrairement à execAsync utilisé pour Garak",
+    "signalHandling": "SIGSTOP pour pause, SIGCONT pour resume, SIGTERM puis SIGKILL pour stop",
+    "outputParsing": "Parsing temps réel ligne par ligne (JSON) + parsing final du rapport JSON",
+    "processStorage": "Map<executionId, ChildProcess> pour stocker les références de processus"
+  },
+  "nextPhase": "PHASE_4: Service d'Orchestration (Unified Execution)"
+}

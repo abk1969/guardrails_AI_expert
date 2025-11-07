@@ -1,0 +1,75 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'ai-risk-manager'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Load rules
+rule_files:
+  - 'alerts.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:3001']
+    metrics_path: '/metrics'
+
+  # Orchestrator
+  - job_name: 'orchestrator'
+    static_configs:
+      - targets: ['orchestrator:3000']
+    metrics_path: '/metrics'
+
+  # GitHub Sync Service
+  - job_name: 'github-sync'
+    static_configs:
+      - targets: ['github-sync:3000']
+    metrics_path: '/metrics'
+
+  # Promptfoo Service
+  - job_name: 'promptfoo-service'
+    static_configs:
+      - targets: ['promptfoo-service:3000']
+    metrics_path: '/metrics'
+
+  # Garak Service
+  - job_name: 'garak-service'
+    static_configs:
+      - targets: ['garak-service:3000']
+    metrics_path: '/metrics'
+
+  # Strix Service
+  - job_name: 'strix-service'
+    static_configs:
+      - targets: ['strix-service:3000']
+    metrics_path: '/metrics'
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # Node Exporter (system metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
