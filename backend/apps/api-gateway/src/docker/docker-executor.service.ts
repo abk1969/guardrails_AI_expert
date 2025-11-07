@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { spawn, ChildProcess } from 'child_process';
 
 /**
@@ -9,6 +9,64 @@ import { spawn, ChildProcess } from 'child_process';
 @Injectable()
 export class DockerExecutorService {
   private readonly logger = new Logger(DockerExecutorService.name);
+  private readonly MAX_TAIL_LINES = 10000;
+  private readonly MAX_CONTAINER_NAME_LENGTH = 255;
+
+  /**
+   * Validate container name to prevent command injection
+   * Only allows alphanumeric, hyphens, underscores, and dots
+   */
+  private validateContainerName(containerName: string): void {
+    if (!containerName || containerName.trim().length === 0) {
+      throw new BadRequestException('Container name cannot be empty');
+    }
+
+    if (containerName.length > this.MAX_CONTAINER_NAME_LENGTH) {
+      throw new BadRequestException('Container name too long (max 255 characters)');
+    }
+
+    // Only allow safe characters: alphanumeric, hyphens, underscores, dots
+    const safePattern = /^[a-zA-Z0-9_.-]+$/;
+    if (!safePattern.test(containerName)) {
+      throw new BadRequestException(
+        'Invalid container name: only alphanumeric characters, hyphens, underscores, and dots are allowed',
+      );
+    }
+
+    // Check for command injection patterns
+    const dangerousPatterns = [';', '&&', '||', '|', '`', '$', '<', '>', '&', '\n', '\r'];
+    for (const pattern of dangerousPatterns) {
+      if (containerName.includes(pattern)) {
+        throw new BadRequestException(
+          `Invalid container name: contains forbidden character '${pattern}'`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Validate file path to prevent path traversal attacks
+   */
+  private validateFilePath(filePath: string): void {
+    if (!filePath || filePath.trim().length === 0) {
+      throw new BadRequestException('File path cannot be empty');
+    }
+
+    // Check for null bytes (directory traversal attack vector)
+    if (filePath.includes('\x00')) {
+      throw new BadRequestException('Invalid file path: contains null byte');
+    }
+
+    // Check for path traversal patterns
+    const traversalPatterns = ['../', '..\\'];
+    for (const pattern of traversalPatterns) {
+      if (filePath.includes(pattern)) {
+        throw new BadRequestException(
+          'Invalid file path: path traversal attempt detected',
+        );
+      }
+    }
+  }
 
   /**
    * Execute command in Docker container using docker exec
@@ -26,6 +84,9 @@ export class DockerExecutorService {
       user?: string;
     } = {},
   ): ChildProcess {
+    // Validate container name for security
+    this.validateContainerName(containerName);
+
     this.logger.log(`Executing in container ${containerName}: ${command.join(' ')}`);
 
     // Build docker exec command
@@ -99,6 +160,9 @@ export class DockerExecutorService {
    * Check if container is running
    */
   async isContainerRunning(containerName: string): Promise<boolean> {
+    // Validate container name for security
+    this.validateContainerName(containerName);
+
     return new Promise((resolve) => {
       const process = spawn('docker', [
         'inspect',
@@ -167,6 +231,11 @@ export class DockerExecutorService {
     containerPath: string,
     hostPath: string,
   ): Promise<void> {
+    // Validate inputs for security
+    this.validateContainerName(containerName);
+    this.validateFilePath(containerPath);
+    this.validateFilePath(hostPath);
+
     this.logger.log(`Copying ${containerPath} from ${containerName} to ${hostPath}`);
 
     return new Promise((resolve, reject) => {
@@ -198,6 +267,11 @@ export class DockerExecutorService {
     containerName: string,
     containerPath: string,
   ): Promise<void> {
+    // Validate inputs for security
+    this.validateFilePath(hostPath);
+    this.validateContainerName(containerName);
+    this.validateFilePath(containerPath);
+
     this.logger.log(`Copying ${hostPath} to ${containerName}:${containerPath}`);
 
     return new Promise((resolve, reject) => {
@@ -228,11 +302,17 @@ export class DockerExecutorService {
     containerName: string,
     tail: number = 100,
   ): Promise<string> {
+    // Validate container name for security
+    this.validateContainerName(containerName);
+
+    // Limit tail to prevent resource exhaustion
+    const safeTail = Math.min(tail, this.MAX_TAIL_LINES);
+
     return new Promise((resolve, reject) => {
       const process = spawn('docker', [
         'logs',
         '--tail',
-        tail.toString(),
+        safeTail.toString(),
         containerName,
       ]);
 
