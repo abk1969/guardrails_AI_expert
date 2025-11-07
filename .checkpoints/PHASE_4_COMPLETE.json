@@ -1,0 +1,70 @@
+{
+  "phaseId": "PHASE_4",
+  "phaseName": "Service d'Orchestration - Unified Execution",
+  "status": "completed",
+  "timestamp": "2025-01-07T14:00:00Z",
+  "tasksCompleted": [
+    "TASK_004_01: Créer unified-execution.dto.ts",
+    "TASK_004_02: Créer unified-orchestration.service.ts",
+    "TASK_004_03: Créer unified.gateway.ts",
+    "TASK_004_04: Créer unified-orchestration.controller.ts",
+    "TASK_004_05: Mettre à jour unified.module.ts",
+    "TASK_004_06: Vérifier compilation"
+  ],
+  "filesCreated": [
+    "backend/apps/api-gateway/src/unified/dto/unified-execution.dto.ts",
+    "backend/apps/api-gateway/src/unified/unified-orchestration.service.ts",
+    "backend/apps/api-gateway/src/unified/unified.gateway.ts",
+    "backend/apps/api-gateway/src/unified/unified-orchestration.controller.ts"
+  ],
+  "filesModified": [
+    "backend/apps/api-gateway/src/unified/unified.module.ts"
+  ],
+  "keyFeatures": [
+    "Unified orchestration across 3 frameworks (Promptfoo, Garak, Strix)",
+    "3 execution modes: PARALLEL, SEQUENTIAL, SELECTIVE",
+    "WebSocket namespace 'unified' avec 8 events",
+    "Framework-specific status tracking",
+    "Aggregated results across all frameworks",
+    "Individual framework control (start/stop)",
+    "Real-time progress updates per framework",
+    "Error handling with partial success support",
+    "Polling mechanism (temporary, will be replaced by WebSocket listeners)",
+    "ForwardRef injection for circular dependencies"
+  ],
+  "validationCriteria": {
+    "dtoCreated": true,
+    "serviceCreated": true,
+    "gatewayCreated": true,
+    "controllerCreated": true,
+    "moduleUpdated": true,
+    "compilationSuccess": true
+  },
+  "architecturalDecisions": {
+    "executionModes": {
+      "PARALLEL": "Run all frameworks simultaneously (fastest)",
+      "SEQUENTIAL": "Run frameworks one after another (better resource management)",
+      "SELECTIVE": "Run only selected frameworks with validation"
+    },
+    "statusTracking": "Each framework has independent status: pending, running, completed, failed",
+    "aggregation": "Results aggregated across frameworks: totalVulnerabilities, totalFindings, byFramework",
+    "pollingVsWebSocket": "Currently uses polling for Garak/Strix completion. Will be replaced by WebSocket event listeners in production.",
+    "circularDependencies": "Used forwardRef() to resolve circular dependencies between Unified, Garak, and Strix modules"
+  },
+  "apiEndpoints": [
+    "POST /unified/orchestration/start - Start unified execution",
+    "GET /unified/orchestration/:id - Get execution status",
+    "POST /unified/orchestration/:id/stop - Stop execution"
+  ],
+  "websocketEvents": [
+    "unified:started:${unifiedId} - Unified execution started",
+    "unified:framework:started:${unifiedId} - Framework started",
+    "unified:framework:progress:${unifiedId} - Framework progress update",
+    "unified:framework:completed:${unifiedId} - Framework completed",
+    "unified:framework:failed:${unifiedId} - Framework failed",
+    "unified:completed:${unifiedId} - Unified execution completed",
+    "unified:failed:${unifiedId} - Unified execution failed",
+    "unified:stopped:${unifiedId} - Unified execution stopped"
+  ],
+  "nextPhase": "PHASE_5: Docker Isolation (REQUIRED)"
+}

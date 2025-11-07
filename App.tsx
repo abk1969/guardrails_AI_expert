@@ -28,6 +28,9 @@ import ChatbotModern from './components/chatbot/ChatbotModern';
 import ChatbotFab from './components/chatbot/ChatbotFab';
 import ApplicationProfileManager from './components/ApplicationProfileManager';
 import PromptfooResultsView from './components/PromptfooResultsView';
+import UnifiedSecurityHub from './src/components/unified/UnifiedSecurityHub';
+import GarakScannerUI from './src/components/unified/GarakScannerUI';
+import StrixDashboard from './src/components/unified/StrixDashboard';
 import { TestRunProvider } from './contexts/TestRunContext';
 import { DatasetProvider } from './contexts/DatasetContext';
 import { UseCaseProvider } from './contexts/UseCaseContext';
@@ -53,7 +56,7 @@ import {
   ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse,
   SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked, Lock,
   RefreshCw, MoreHorizontal, BookCopy, Compass, TestTube2, Settings, FileText, Play,
-  Target, Shield, BookOpenCheck, FileCode, Server, Zap, Wrench
+  Target, Shield, BookOpenCheck, FileCode, Server, Zap, Wrench, Activity, AlertTriangle, Layers
 } from 'lucide-react';
 
 // ============================================
@@ -182,6 +185,42 @@ const expertSection: NavSection = {
       section: 'Mode Expert',
       stepNumber: 5,
       description: 'Vulnérabilités détectées, graphiques et statistiques'
+    },
+  ]
+};
+
+// ============================================
+// SECTION 1C : PLATEFORME UNIFIÉE (Promptfoo + Garak + Strix)
+// ============================================
+const unifiedPlatformSection: NavSection = {
+  id: 'unified-platform',
+  label: '🛡️ Plateforme Unifiée (3 Outils)',
+  icon: <Layers size={20} />,
+  defaultOpen: false,
+  items: [
+    {
+      id: 'unified-security-hub',
+      label: 'Centre de Sécurité Unifié',
+      icon: <Activity size={18} />,
+      content: <UnifiedSecurityHub />,
+      section: 'Plateforme Unifiée',
+      description: 'Dashboard central - Vue d\'ensemble Promptfoo, Garak & Strix'
+    },
+    {
+      id: 'garak-scanner',
+      label: 'Scanner Garak (LLM)',
+      icon: <AlertTriangle size={18} />,
+      content: <GarakScannerUI />,
+      section: 'Plateforme Unifiée',
+      description: 'Scanner de vulnérabilités LLM (OWASP Top 10)'
+    },
+    {
+      id: 'strix-agent',
+      label: 'Agent Strix (Agentic AI)',
+      icon: <Zap size={18} />,
+      content: <StrixDashboard />,
+      section: 'Plateforme Unifiée',
+      description: 'Tests automatisés avec agent autonome'
     },
   ]
 };
@@ -361,6 +400,7 @@ export const navSections: NavSection[] = [
   applicationsSection,
   beginnerSection,
   expertSection,
+  unifiedPlatformSection,  // ✨ NOUVEAU: Plateforme Unifiée (Promptfoo + Garak + Strix)
   governanceSection,
   redTeamSection,
   referencesSection,
