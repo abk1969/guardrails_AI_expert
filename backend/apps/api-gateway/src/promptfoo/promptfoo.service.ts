@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef, NotFoundException } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { exec } from 'child_process';
@@ -183,14 +183,35 @@ export class PromptfooService {
    * Récupère le statut d'une exécution de tests
    */
   async getTestStatus(testRunId: string): Promise<{
-    status: 'running' | 'completed' | 'failed';
+    status: 'queued' | 'running' | 'completed' | 'failed';
     progress?: number;
   }> {
-    // TODO: Implémenter un système de tracking des tests en cours
-    // Pour l'instant, retourner un statut mock
+    // Récupérer le TestRun depuis la base de données
+    const testRun = await this.prisma.testRun.findUnique({
+      where: { id: testRunId },
+      select: {
+        status: true,
+        progress: true,
+      },
+    });
+
+    if (!testRun) {
+      throw new NotFoundException(`Test run ${testRunId} not found`);
+    }
+
+    // Mapper le statut Prisma vers le format de réponse
+    const statusMap: Record<TestRunStatus, 'queued' | 'running' | 'completed' | 'failed'> = {
+      [TestRunStatus.PENDING]: 'queued',
+      [TestRunStatus.QUEUED]: 'queued',
+      [TestRunStatus.RUNNING]: 'running',
+      [TestRunStatus.COMPLETED]: 'completed',
+      [TestRunStatus.FAILED]: 'failed',
+      [TestRunStatus.CANCELLED]: 'failed',
+    };
+
     return {
-      status: 'running',
-      progress: 50,
+      status: statusMap[testRun.status],
+      progress: testRun.progress ?? 0,
     };
   }
 
