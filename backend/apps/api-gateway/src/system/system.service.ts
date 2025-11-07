@@ -8,6 +8,9 @@ const execAsync = promisify(exec);
 @Injectable()
 export class SystemService {
   private readonly logger = new Logger(SystemService.name);
+  private healthCache: SystemHealthDto | null = null;
+  private cacheTimestamp: number = 0;
+  private readonly CACHE_TTL_MS = 30000; // 30 seconds
 
   /**
    * Check Python version
@@ -219,6 +222,13 @@ export class SystemService {
    * Get overall system health
    */
   async getSystemHealth(): Promise<SystemHealthDto> {
+    // Check cache first
+    const now = Date.now();
+    if (this.healthCache && (now - this.cacheTimestamp) < this.CACHE_TTL_MS) {
+      this.logger.debug('Returning cached health check result');
+      return this.healthCache;
+    }
+
     this.logger.log('Performing system health check...');
 
     try {
@@ -289,6 +299,10 @@ export class SystemService {
       if (missingDependencies.length > 0) {
         this.logger.warn(`Missing dependencies: ${missingDependencies.join(', ')}`);
       }
+
+      // Cache the result
+      this.healthCache = result;
+      this.cacheTimestamp = now;
 
       return result;
     } catch (error) {

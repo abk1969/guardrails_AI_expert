@@ -16,6 +16,7 @@ describe('SystemService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    jest.useRealTimers(); // Ensure real timers before each test
 
     // Create fresh mock for each test
     mockExecAsync = jest.fn();
@@ -180,7 +181,7 @@ describe('SystemService', () => {
   });
 
   describe('Health Check Caching', () => {
-    beforeEach(() => {
+    it('should cache health check results for 30 seconds', async () => {
       // Mock all tools to succeed
       mockExecAsync.mockImplementation((command: string) => {
         let stdout = '';
@@ -195,9 +196,7 @@ describe('SystemService', () => {
 
         return Promise.resolve({ stdout, stderr: '' });
       });
-    });
 
-    it('should cache health check results for 30 seconds', async () => {
       // First call - should execute checks
       const result1 = await service.getSystemHealth();
       const execCallCount1 = mockExecAsync.mock.calls.length;
@@ -215,15 +214,28 @@ describe('SystemService', () => {
     });
 
     it('should refresh cache after 30 seconds', async () => {
+      // Mock all tools to succeed
+      mockExecAsync.mockImplementation((command: string) => {
+        let stdout = '';
+        if (command.includes('python --version')) stdout = 'Python 3.11.0';
+        else if (command.includes('pipx --version')) stdout = '1.2.0';
+        else if (command.includes('garak --version')) stdout = '0.9.0';
+        else if (command.includes('strix --version')) stdout = '0.1.0';
+        else if (command.includes('node --version')) stdout = 'v18.17.0';
+        else if (command.includes('npx promptfoo')) stdout = '0.50.0';
+        else if (command.includes('docker --version')) stdout = 'Docker version 24.0.0';
+        else if (command.includes('docker ps')) stdout = 'CONTAINER ID   IMAGE';
+
+        return Promise.resolve({ stdout, stderr: '' });
+      });
+
       // First call
       const result1 = await service.getSystemHealth();
       const timestamp1 = result1.timestamp;
       const execCallCount1 = mockExecAsync.mock.calls.length;
 
-      // Mock time passing (30+ seconds)
-      jest.useFakeTimers();
-      jest.advanceTimersByTime(31000);
-      jest.useRealTimers();
+      // Manually expire the cache by setting timestamp to past
+      (service as any).cacheTimestamp = Date.now() - 31000;
 
       // Second call - should re-execute checks
       const result2 = await service.getSystemHealth();
@@ -238,6 +250,21 @@ describe('SystemService', () => {
     });
 
     it('should return cached result even if subsequent checks would fail', async () => {
+      // Mock all tools to succeed initially
+      mockExecAsync.mockImplementation((command: string) => {
+        let stdout = '';
+        if (command.includes('python --version')) stdout = 'Python 3.11.0';
+        else if (command.includes('pipx --version')) stdout = '1.2.0';
+        else if (command.includes('garak --version')) stdout = '0.9.0';
+        else if (command.includes('strix --version')) stdout = '0.1.0';
+        else if (command.includes('node --version')) stdout = 'v18.17.0';
+        else if (command.includes('npx promptfoo')) stdout = '0.50.0';
+        else if (command.includes('docker --version')) stdout = 'Docker version 24.0.0';
+        else if (command.includes('docker ps')) stdout = 'CONTAINER ID   IMAGE';
+
+        return Promise.resolve({ stdout, stderr: '' });
+      });
+
       // First call - all healthy
       const result1 = await service.getSystemHealth();
       expect(result1.status).toBe('healthy');
@@ -263,6 +290,9 @@ describe('SystemService', () => {
         if (command.includes('docker --version')) {
           return Promise.resolve({ stdout: 'Docker version unknown format', stderr: '' });
         }
+        if (command.includes('docker ps')) {
+          return Promise.resolve({ stdout: 'CONTAINER ID   IMAGE', stderr: '' });
+        }
         return Promise.resolve({ stdout: 'version 1.0.0', stderr: '' });
       });
 
@@ -280,6 +310,15 @@ describe('SystemService', () => {
         }
         if (command.includes('python --version')) {
           return Promise.resolve({ stdout: 'Python 3.11.0', stderr: '' });
+        }
+        if (command.includes('node --version')) {
+          return Promise.resolve({ stdout: 'v18.17.0', stderr: '' });
+        }
+        if (command.includes('docker --version')) {
+          return Promise.resolve({ stdout: 'Docker version 24.0.0', stderr: '' });
+        }
+        if (command.includes('docker ps')) {
+          return Promise.resolve({ stdout: 'CONTAINER ID   IMAGE', stderr: '' });
         }
         return Promise.resolve({ stdout: 'version 1.0.0', stderr: '' });
       });
@@ -300,16 +339,27 @@ describe('SystemService', () => {
         if (command.includes('python --version')) {
           return Promise.resolve({ stdout: 'Python 3.11.0', stderr: '' });
         }
+        if (command.includes('node --version')) {
+          return Promise.resolve({ stdout: 'v18.17.0', stderr: '' });
+        }
+        if (command.includes('docker --version')) {
+          return Promise.resolve({ stdout: 'Docker version 24.0.0', stderr: '' });
+        }
+        if (command.includes('docker ps')) {
+          return Promise.resolve({ stdout: 'CONTAINER ID   IMAGE', stderr: '' });
+        }
         return Promise.resolve({ stdout: 'version 1.0.0', stderr: '' });
       });
 
       // Test Windows
       Object.defineProperty(process, 'platform', { value: 'win32', writable: true });
+      (service as any).healthCache = null; // Clear cache before first call
       const resultWin = await service.getSystemHealth();
       expect(resultWin.recommendations).toContain('.ps1');
 
       // Test Linux/Mac
       Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
+      (service as any).healthCache = null; // Clear cache before second call
       const resultLinux = await service.getSystemHealth();
       expect(resultLinux.recommendations).toContain('.sh');
 
