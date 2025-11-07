@@ -13,8 +13,8 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/apps/', '<rootDir>/libs/'],
   moduleNameMapper: {
-    '^@app/(.*)$': '<rootDir>/libs/$1/src',
     '^@app/auth/(.*)$': '<rootDir>/libs/auth/src/$1',
     '^@app/database(.*)$': '<rootDir>/libs/database/src$1',
+    '^@app/(.*)$': '<rootDir>/libs/$1/src',
   },
 };
