@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
+import EditableTableRow, { ColumnDef } from './ui/EditableTableRow';
 import { useKnownVulnerabilities } from '../contexts/KnownVulnerabilitiesContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { KnownVulnerability, VulnerabilitySeverity } from '../types';
-import { PlusCircle, Trash2, Edit, Save, X, Search, ArrowLeft, Compass, Download } from 'lucide-react';
+import { PlusCircle, Search, ArrowLeft, Compass, Download, X } from 'lucide-react';
 import { exportToPDF } from '../utils/pdfExport';
 
 const SEVERITY_OPTIONS: VulnerabilitySeverity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', ''];
@@ -16,121 +17,52 @@ const SEVERITY_COLORS: Record<VulnerabilitySeverity, string> = {
     '': 'bg-gray-600/80 text-gray-200 border-gray-500'
 };
 
-const EditableCell: React.FC<{ value: string | number; onChange: (value: string) => void; type?: string, rows?: number }> = ({ value, onChange, type = 'text', rows }) => {
-    if (rows) {
-        return (
-            <textarea
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="w-full h-full bg-gray-900 border-cyan-500 border p-1 rounded-md text-white focus:ring-1 focus:ring-cyan-400 focus:outline-none"
-                rows={rows}
-            />
-        )
-    }
-    return (
-        <input
-            type={type}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full h-full bg-gray-900 border-cyan-500 border p-1 rounded-md text-white focus:ring-1 focus:ring-cyan-400 focus:outline-none"
-        />
-    );
-};
+const VULN_COLUMNS: ColumnDef<KnownVulnerability>[] = [
+    { key: 'organizationTool' },
+    {
+        key: 'cveIdentifier',
+        renderView: (item) => {
+            const link = item.cveIdentifier.startsWith('CVE-')
+                ? `https://cve.mitre.org/cgi-bin/cvename.cgi?name=${item.cveIdentifier}`
+                : `https://www.google.com/search?q=${encodeURIComponent(item.cveIdentifier)}`;
+            return <a href={link} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline font-mono">{item.cveIdentifier}</a>;
+        },
+    },
+    { key: 'associatedCwes' },
+    {
+        key: 'descriptionSummary',
+        rows: 4,
+        minWidth: 'min-w-[300px]',
+        renderView: (item) => <span className="text-sm">{item.descriptionSummary}</span>,
+    },
+    {
+        key: 'originalSeverity',
+        renderView: (item) => (
+            <span className={`px-2 py-0.5 text-xs font-bold rounded-md border ${SEVERITY_COLORS[item.originalSeverity]}`}>
+                {item.originalSeverity || 'N/A'}
+            </span>
+        ),
+        renderEdit: (value, onChange) => (
+            <select
+                value={String(value)}
+                onChange={e => onChange(e.target.value)}
+                className={`w-full bg-gray-900 border-cyan-500 border p-1 rounded-md text-white ${SEVERITY_COLORS[value as VulnerabilitySeverity]}`}
+            >
+                {SEVERITY_OPTIONS.map(opt => <option key={opt || 'none'} value={opt} className="bg-gray-800">{opt || 'N/A'}</option>)}
+            </select>
+        ),
+    },
+    { key: 'fivePointScore', inputType: 'number' },
+    { key: 'owaspLlmCategory' },
+    { key: 'owaspCategoryName' },
+    { key: 'owaspAgenticTop15' },
+    { key: 'owaspAgenticTop15ThreatName' },
+];
 
-const VulnerabilityRow: React.FC<{ vulnerability: KnownVulnerability; isHighlighted?: boolean }> = ({ vulnerability, isHighlighted = false }) => {
-    const { updateVulnerability, deleteVulnerability } = useKnownVulnerabilities();
-    const [isEditing, setIsEditing] = useState(false);
-    const [editState, setEditState] = useState(vulnerability);
-
-    const handleUpdate = (field: keyof Omit<KnownVulnerability, 'id'>, value: string | number) => {
-        setEditState(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleSave = () => {
-        const { id, ...dataToSave } = editState;
-        updateVulnerability(id, dataToSave);
-        setIsEditing(false);
-    };
-
-    const handleCancel = () => {
-        setEditState(vulnerability);
-        setIsEditing(false);
-    };
-    
-    const handleDelete = () => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer la vulnérabilité ${vulnerability.cveIdentifier} ?`)) {
-            deleteVulnerability(vulnerability.id);
-        }
-    }
-    
-    const cveLink = vulnerability.cveIdentifier.startsWith('CVE-') 
-        ? `https://cve.mitre.org/cgi-bin/cvename.cgi?name=${vulnerability.cveIdentifier}`
-        : `https://www.google.com/search?q=${encodeURIComponent(vulnerability.cveIdentifier)}`;
-
-    return (
-        <tr data-highlighted={isHighlighted} className={`border-b border-gray-700 hover:bg-gray-800/50 transition-all ${
-            isHighlighted
-                ? 'bg-gradient-to-r from-cyan-900/40 to-transparent border-l-4 border-l-cyan-400 ring-2 ring-cyan-500/30'
-                : ''
-        }`}>
-            {Object.keys(editState).filter(key => key !== 'id').map((key) => {
-                const fieldKey = key as keyof Omit<KnownVulnerability, 'id'>;
-                if (!isEditing) {
-                    return (
-                        <td key={fieldKey} className="px-3 py-2 align-top">
-                            {fieldKey === 'cveIdentifier' ? (
-                                <a href={cveLink} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline font-mono">{vulnerability[fieldKey]}</a>
-                            ) : fieldKey === 'originalSeverity' ? (
-                                <span className={`px-2 py-0.5 text-xs font-bold rounded-md border ${SEVERITY_COLORS[vulnerability[fieldKey]]}`}>{vulnerability[fieldKey] || 'N/A'}</span>
-                            ) : (
-                                <span className={fieldKey === 'descriptionSummary' ? 'text-sm' : ''}>{String(vulnerability[fieldKey])}</span>
-                            )}
-                        </td>
-                    );
-                }
-                // Editing mode
-                return (
-                    <td key={fieldKey} className="px-2 py-1 align-top">
-                        {fieldKey === 'originalSeverity' ? (
-                            <select
-                                value={editState[fieldKey]}
-                                onChange={e => handleUpdate(fieldKey, e.target.value)}
-                                className={`w-full bg-gray-900 border-cyan-500 border p-1 rounded-md text-white ${SEVERITY_COLORS[editState[fieldKey]]}`}
-                            >
-                                {SEVERITY_OPTIONS.map(opt => <option key={opt || 'none'} value={opt} className="bg-gray-800">{opt || 'N/A'}</option>)}
-                            </select>
-                        ) : (
-                             <EditableCell
-                                value={editState[fieldKey]}
-                                onChange={value => handleUpdate(fieldKey, value)}
-                                type={fieldKey === 'fivePointScore' ? 'number' : 'text'}
-                                rows={fieldKey === 'descriptionSummary' ? 4 : undefined}
-                            />
-                        )}
-                    </td>
-                );
-            })}
-            <td className="px-3 py-2 align-top">
-                <div className="flex justify-center space-x-2">
-                    {isEditing ? (
-                        <>
-                            <button onClick={handleSave} className="p-2 text-green-400 hover:text-green-300" aria-label="Sauvegarder"><Save size={16} /></button>
-                            <button onClick={handleCancel} className="p-2 text-gray-400 hover:text-white" aria-label="Annuler"><X size={16} /></button>
-                        </>
-                    ) : (
-                        <>
-                            <button onClick={() => setIsEditing(true)} className="p-2 text-gray-400 hover:text-cyan-400" aria-label="Modifier"><Edit size={16} /></button>
-                            <button onClick={handleDelete} className="p-2 text-gray-400 hover:text-red-400" aria-label="Supprimer"><Trash2 size={16} /></button>
-                        </>
-                    )}
-                </div>
-            </td>
-        </tr>
-    );
-};
+const HEADERS = ['Org/Tool', 'CVE ID', 'CWEs', 'Description', 'Sévérité', 'Score/5', 'OWASP LLM Cat.', 'Nom Cat.', 'OWASP Agentic T15', 'Nom Menace', 'Actions'];
 
 const KnownVulnerabilitiesView: React.FC = () => {
-    const { vulnerabilities, addVulnerability } = useKnownVulnerabilities();
+    const { vulnerabilities, addVulnerability, updateVulnerability, deleteVulnerability } = useKnownVulnerabilities();
     const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
     const [filters, setFilters] = useState({ tool: '', severity: '' as VulnerabilitySeverity, category: '' });
 
@@ -157,7 +89,6 @@ const KnownVulnerabilitiesView: React.FC = () => {
             return toolMatch && severityMatch && categoryMatch;
         });
 
-        // If navigated from COMPASS, prioritize highlighted vulnerabilities
         if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
             filtered = filtered.sort((a, b) => {
                 const aHighlighted = filterParams.highlightIds!.includes(a.cveIdentifier);
@@ -171,18 +102,12 @@ const KnownVulnerabilitiesView: React.FC = () => {
 
     const owaspCategories = useMemo(() => [...new Set(vulnerabilities.map(v => v.owaspLlmCategory).filter(Boolean))], [vulnerabilities]);
 
-    // Auto-scroll to first highlighted item
     useEffect(() => {
         if (filterParams?.highlightIds && filterParams.highlightIds.length > 0) {
-            // Wait for DOM to render
             setTimeout(() => {
                 const firstHighlighted = document.querySelector('[data-highlighted="true"]');
                 if (firstHighlighted) {
-                    firstHighlighted.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'nearest'
-                    });
+                    firstHighlighted.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
                 }
             }, 300);
         }
@@ -195,20 +120,16 @@ const KnownVulnerabilitiesView: React.FC = () => {
                 <p className="text-gray-400 mt-1">
                     Utilisez cet onglet pour rechercher les vulnérabilités liées à l'objectif cible. Cette liste de CVE mappées aux catégories OWASP LLM et OWASP Agentic Top 15 est fournie à titre d'exemple.
                 </p>
-                 <p className="text-gray-400 mt-2">
-                    Utilisez la recherche par mots-clés sur <a href="https://cve.org" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">CVE.org</a> pour identifier des vulnérabilités supplémentaires ou spécifiques. Mots-clés exemples : Large Language Model, LLM, language model, prompt injection, prompt leakage.
+                <p className="text-gray-400 mt-2">
+                    Utilisez la recherche par mots-clés sur <a href="https://cve.org" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">CVE.org</a> pour identifier des vulnérabilités supplémentaires ou spécifiques.
                 </p>
             </header>
 
-            {/* Navigation Breadcrumb */}
             {navigationSource && filterParams?.highlightIds && (
                 <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-transparent border-l-4 border-l-cyan-400 animate-in slide-in-from-top-4 duration-300 fade-in">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <button
-                                onClick={clearNavigation}
-                                className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
-                            >
+                            <button onClick={clearNavigation} className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
                                 <ArrowLeft className="w-5 h-5" />
                                 <Compass className="w-5 h-5" />
                                 <span>Retour à OWASP COMPASS</span>
@@ -222,9 +143,7 @@ const KnownVulnerabilitiesView: React.FC = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => {
-                                    const highlightedVulns = vulnerabilities.filter(v =>
-                                        filterParams?.highlightIds?.includes(v.cveIdentifier)
-                                    );
+                                    const highlightedVulns = vulnerabilities.filter(v => filterParams?.highlightIds?.includes(v.cveIdentifier));
                                     exportToPDF({
                                         title: 'Vulnérabilités IA Liées',
                                         sourceUseCase: sourceTitle || undefined,
@@ -244,10 +163,7 @@ const KnownVulnerabilitiesView: React.FC = () => {
                                 <Download size={16} />
                                 Exporter (HTML)
                             </button>
-                            <button
-                                onClick={clearNavigation}
-                                className="text-gray-500 hover:text-gray-300 transition-colors"
-                            >
+                            <button onClick={clearNavigation} className="text-gray-500 hover:text-gray-300 transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -260,18 +176,18 @@ const KnownVulnerabilitiesView: React.FC = () => {
                     <div className="relative">
                         <label className="text-xs text-gray-400">Filtrer par Outil/Organisation</label>
                         <Search size={16} className="absolute left-2.5 top-8 text-gray-500" />
-                        <input 
-                            type="text" 
-                            placeholder="ex: Llama Index" 
-                            value={filters.tool} 
+                        <input
+                            type="text"
+                            placeholder="ex: Llama Index"
+                            value={filters.tool}
                             onChange={e => setFilters(f => ({ ...f, tool: e.target.value }))}
                             className="w-full bg-gray-800 border-gray-600 rounded-md p-2 pl-8 text-white focus:ring-cyan-500 focus:border-cyan-500"
                         />
                     </div>
                     <div>
                         <label className="text-xs text-gray-400">Filtrer par Sévérité</label>
-                        <select 
-                            value={filters.severity} 
+                        <select
+                            value={filters.severity}
                             onChange={e => setFilters(f => ({ ...f, severity: e.target.value as VulnerabilitySeverity }))}
                             className={`w-full bg-gray-800 border-gray-600 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500 ${filters.severity ? SEVERITY_COLORS[filters.severity] : ''}`}
                         >
@@ -279,10 +195,10 @@ const KnownVulnerabilitiesView: React.FC = () => {
                             {SEVERITY_OPTIONS.filter(Boolean).map(opt => <option key={opt} value={opt} className="bg-gray-800">{opt}</option>)}
                         </select>
                     </div>
-                     <div>
+                    <div>
                         <label className="text-xs text-gray-400">Filtrer par Catégorie OWASP</label>
-                        <select 
-                            value={filters.category} 
+                        <select
+                            value={filters.category}
                             onChange={e => setFilters(f => ({ ...f, category: e.target.value }))}
                             className="w-full bg-gray-800 border-gray-600 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
                         >
@@ -302,30 +218,26 @@ const KnownVulnerabilitiesView: React.FC = () => {
                     <table className="w-full text-xs text-left text-gray-400">
                         <thead className="text-xs text-gray-300 uppercase bg-gray-700/60 sticky top-0">
                             <tr>
-                                <th className="px-3 py-3">Org/Tool</th>
-                                <th className="px-3 py-3">CVE ID</th>
-                                <th className="px-3 py-3">CWEs</th>
-                                <th className="px-3 py-3 min-w-[300px]">Description</th>
-                                <th className="px-3 py-3">Sévérité</th>
-                                <th className="px-3 py-3">Score/5</th>
-                                <th className="px-3 py-3">OWASP LLM Cat.</th>
-                                <th className="px-3 py-3">Nom Cat.</th>
-                                <th className="px-3 py-3">OWASP Agentic T15</th>
-                                <th className="px-3 py-3">Nom Menace</th>
-                                <th className="px-3 py-3 text-center">Actions</th>
+                                {HEADERS.map(h => (
+                                    <th key={h} className={`px-3 py-3 ${h === 'Description' ? 'min-w-[300px]' : ''} ${h === 'Actions' ? 'text-center' : ''}`}>{h}</th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-700">
                             {filteredVulnerabilities.map(v => (
-                                <VulnerabilityRow
+                                <EditableTableRow<KnownVulnerability>
                                     key={v.id}
-                                    vulnerability={v}
+                                    item={v}
+                                    columns={VULN_COLUMNS}
+                                    onUpdate={updateVulnerability}
+                                    onDelete={deleteVulnerability}
                                     isHighlighted={filterParams?.highlightIds?.includes(v.cveIdentifier) || false}
+                                    confirmDelete={`Êtes-vous sûr de vouloir supprimer la vulnérabilité ${v.cveIdentifier} ?`}
                                 />
                             ))}
                         </tbody>
                     </table>
-                     {filteredVulnerabilities.length === 0 && (
+                    {filteredVulnerabilities.length === 0 && (
                         <div className="text-center py-8 text-gray-500">
                             Aucune vulnérabilité ne correspond à vos critères de recherche.
                         </div>

@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
+import EditableTableRow, { ColumnDef } from './ui/EditableTableRow';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useDefensesMitigations } from '../contexts/DefensesMitigationsContext';
 import { DefenseMitigationReference, KeyControlStrategy, OwaspReference } from '../types';
 import { DEFENSE_LAYERS, DEFENSE_QUESTIONS, DEFENSE_CONDITIONS, DEFENSE_OBJECTS_IN_SCOPE } from '../constants';
-import { PlusCircle, Trash2, Edit, Save, X, Link as LinkIcon, Search, ArrowLeft, Compass, Download } from 'lucide-react';
+import { PlusCircle, Trash2, Link as LinkIcon, Search } from 'lucide-react';
 import { exportToPDF } from '../utils/pdfExport';
 
 // Reusable component for OWASP tables
@@ -64,7 +65,7 @@ const renderLinks = (text: string) => {
 
     return (
         <>
-            {parts.map((part, index) => 
+            {parts.map((part, index) =>
                 urlRegex.test(part) ? (
                     <a key={index} href={part} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline inline-block mr-2 break-all">
                         <LinkIcon size={12} className="inline mr-1" />
@@ -78,91 +79,22 @@ const renderLinks = (text: string) => {
     );
 };
 
-const DefenseRow: React.FC<{ defense: DefenseMitigationReference }> = ({ defense }) => {
-    const { updateDefense, deleteDefense } = useDefensesMitigations();
-    const { filterParams } = useNavigation();
-    const [isEditing, setIsEditing] = useState(false);
-    const [editState, setEditState] = useState(defense);
-
-    const isHighlighted = filterParams?.highlightIds?.includes(String(defense.id)) || false;
-
-    const handleSave = () => {
-        updateDefense(defense.id, editState);
-        setIsEditing(false);
-    };
-
-    const handleCancel = () => {
-        setEditState(defense);
-        setIsEditing(false);
-    };
-    
-    const handleDelete = () => {
-        if (window.confirm("Êtes-vous sûr de vouloir supprimer cette référence ?")) {
-            deleteDefense(defense.id);
-        }
-    };
-
-    const renderCell = (field: keyof Omit<DefenseMitigationReference, 'id'>) => (
-        <td className="px-2 py-1 align-top">
-            <textarea
-                value={editState[field]}
-                onChange={e => setEditState(prev => ({ ...prev, [field]: e.target.value }))}
-                className="w-full h-full bg-gray-900 border-cyan-500 border p-2 rounded-md text-white focus:ring-1 focus:ring-cyan-400 focus:outline-none"
-                rows={5}
-            />
-        </td>
-    );
-
-    return (
-         <tr className="border-b border-gray-700 hover:bg-gray-800/50 text-xs">
-            {isEditing ? (
-                <>
-                    {renderCell('attackType')}
-                    {renderCell('threatIdName')}
-                    {renderCell('aiStackLayer')}
-                    {renderCell('coreAttackVector')}
-                    {renderCell('impactBlastRadius')}
-                    {renderCell('mitigation')}
-                    {renderCell('references')}
-                    {renderCell('estimatedRelation')}
-                    {renderCell('mitreAtlasOwaspLinks')}
-                </>
-            ) : (
-                <>
-                    <td className="px-3 py-2 align-top font-semibold text-white">{defense.attackType}</td>
-                    <td className="px-3 py-2 align-top text-white">{defense.threatIdName}</td>
-                    <td className="px-3 py-2 align-top">{defense.aiStackLayer}</td>
-                    <td className="px-3 py-2 align-top">{defense.coreAttackVector}</td>
-                    <td className="px-3 py-2 align-top">{defense.impactBlastRadius}</td>
-                    <td className="px-3 py-2 align-top">{defense.mitigation}</td>
-                    <td className="px-3 py-2 align-top">{defense.references}</td>
-                    <td className="px-3 py-2 align-top">{defense.estimatedRelation}</td>
-                    <td className="px-3 py-2 align-top">{renderLinks(defense.mitreAtlasOwaspLinks)}</td>
-                </>
-            )}
-             <td className="px-3 py-2 align-top sticky right-0 bg-gray-800">
-                <div className="flex flex-col items-center justify-center space-y-2 h-full">
-                    {isEditing ? (
-                        <>
-                            <button onClick={handleSave} className="p-2 text-green-400 hover:text-green-300" aria-label="Sauvegarder"><Save size={16} /></button>
-                            <button onClick={handleCancel} className="p-2 text-gray-400 hover:text-white" aria-label="Annuler"><X size={16} /></button>
-                        </>
-                    ) : (
-                        <>
-                            <button onClick={() => setIsEditing(true)} className="p-2 text-gray-400 hover:text-cyan-400" aria-label="Modifier"><Edit size={16} /></button>
-                            <button onClick={handleDelete} className="p-2 text-gray-400 hover:text-red-400" aria-label="Supprimer"><Trash2 size={16} /></button>
-                        </>
-                    )}
-                </div>
-            </td>
-        </tr>
-    );
-};
+const DEFENSE_COLUMNS: ColumnDef<DefenseMitigationReference>[] = [
+    { key: 'attackType', rows: 5, renderView: (item) => <span className="font-semibold text-white">{item.attackType}</span> },
+    { key: 'threatIdName', rows: 5, renderView: (item) => <span className="text-white">{item.threatIdName}</span> },
+    { key: 'aiStackLayer', rows: 5 },
+    { key: 'coreAttackVector', rows: 5 },
+    { key: 'impactBlastRadius', rows: 5 },
+    { key: 'mitigation', rows: 5 },
+    { key: 'references', rows: 5 },
+    { key: 'estimatedRelation', rows: 5 },
+    { key: 'mitreAtlasOwaspLinks', rows: 5, renderView: (item) => <>{renderLinks(item.mitreAtlasOwaspLinks)}</> },
+];
 
 
 const DefensesMitigationsView: React.FC = () => {
     const {
-        defenses, addDefense,
+        defenses, addDefense, updateDefense, deleteDefense,
         keyControlsStrategies, updateKeyControlStrategy,
         keyDetectionMechanisms, updateKeyDetectionMechanism,
         owaspTopTen, addOwaspTopTenRow, updateOwaspTopTenRow, deleteOwaspTopTenRow,
@@ -328,7 +260,18 @@ const DefensesMitigationsView: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-700">
                             {filteredData.defenses.map(d => (
-                                <DefenseRow key={d.id} defense={d} />
+                                <EditableTableRow<DefenseMitigationReference>
+                                    key={d.id}
+                                    item={d}
+                                    columns={DEFENSE_COLUMNS}
+                                    onUpdate={updateDefense}
+                                    onDelete={deleteDefense}
+                                    isHighlighted={filterParams?.highlightIds?.includes(String(d.id)) || false}
+                                    confirmDelete="Êtes-vous sûr de vouloir supprimer cette référence ?"
+                                    rowClassName="text-xs"
+                                    actionCellClassName="sticky right-0 bg-gray-800"
+                                    actionContainerClassName="flex flex-col items-center justify-center space-y-2 h-full"
+                                />
                             ))}
                         </tbody>
                     </table>

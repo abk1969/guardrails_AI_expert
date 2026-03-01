@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
+import EditableTableRow, { ColumnDef } from './ui/EditableTableRow';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useKnownIncidents } from '../contexts/KnownIncidentsContext';
 import { KnownAIIncident, ResourceLink, ResourceLinkCategory } from '../types';
@@ -8,71 +9,22 @@ import { RESOURCE_LINK_CATEGORIES } from '../constants';
 import { PlusCircle, Trash2, Edit, Save, X, Link as LinkIcon, ArrowLeft, Compass, Download } from 'lucide-react';
 import { exportToPDF } from '../utils/pdfExport';
 
-// Editable Row for Incidents Table
-const IncidentRow: React.FC<{ incident: KnownAIIncident; isHighlighted?: boolean }> = ({ incident, isHighlighted = false }) => {
-    const { updateIncident, deleteIncident } = useKnownIncidents();
-    const [isEditing, setIsEditing] = useState(false);
-    const [editState, setEditState] = useState(incident);
+const INCIDENT_COLUMNS: ColumnDef<KnownAIIncident>[] = [
+    { key: 'incident', rows: 2 },
+    { key: 'vulnerability' },
+    { key: 'impact' },
+    {
+        key: 'referenceUrl',
+        inputType: 'url',
+        renderView: (item) => (
+            <a href={item.referenceUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline inline-flex items-center">
+                Link <LinkIcon size={12} className="ml-1" />
+            </a>
+        ),
+    },
+];
 
-    const handleUpdate = (field: keyof Omit<KnownAIIncident, 'id'>, value: string) => {
-        setEditState(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleSave = () => {
-        updateIncident(incident.id, editState);
-        setIsEditing(false);
-    };
-
-    const handleCancel = () => {
-        setEditState(incident);
-        setIsEditing(false);
-    };
-    
-    const handleDelete = () => {
-        if (window.confirm("Êtes-vous sûr de vouloir supprimer cet incident ?")) {
-            deleteIncident(incident.id);
-        }
-    }
-
-    return (
-        <tr className="border-b border-gray-700 hover:bg-gray-800/50">
-            {isEditing ? (
-                <>
-                    <td className="px-2 py-1"><textarea rows={2} value={editState.incident} onChange={e => handleUpdate('incident', e.target.value)} className="w-full bg-gray-900 p-1 rounded-md text-white focus:ring-1 focus:ring-cyan-400" /></td>
-                    <td className="px-2 py-1"><input type="text" value={editState.vulnerability} onChange={e => handleUpdate('vulnerability', e.target.value)} className="w-full bg-gray-900 p-1 rounded-md text-white focus:ring-1 focus:ring-cyan-400" /></td>
-                    <td className="px-2 py-1"><input type="text" value={editState.impact} onChange={e => handleUpdate('impact', e.target.value)} className="w-full bg-gray-900 p-1 rounded-md text-white focus:ring-1 focus:ring-cyan-400" /></td>
-                    <td className="px-2 py-1"><input type="url" value={editState.referenceUrl} onChange={e => handleUpdate('referenceUrl', e.target.value)} className="w-full bg-gray-900 p-1 rounded-md text-white focus:ring-1 focus:ring-cyan-400" /></td>
-                </>
-            ) : (
-                <>
-                    <td className="px-4 py-3 font-medium text-white">{incident.incident}</td>
-                    <td className="px-4 py-3">{incident.vulnerability}</td>
-                    <td className="px-4 py-3">{incident.impact}</td>
-                    <td className="px-4 py-3">
-                        <a href={incident.referenceUrl} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline inline-flex items-center">
-                            Link <LinkIcon size={12} className="ml-1" />
-                        </a>
-                    </td>
-                </>
-            )}
-            <td className="px-4 py-3 text-center">
-                <div className="flex justify-center space-x-2">
-                    {isEditing ? (
-                        <>
-                            <button onClick={handleSave} className="p-2 text-green-400 hover:text-green-300" aria-label="Sauvegarder"><Save size={16} /></button>
-                            <button onClick={handleCancel} className="p-2 text-gray-400 hover:text-white" aria-label="Annuler"><X size={16} /></button>
-                        </>
-                    ) : (
-                        <>
-                            <button onClick={() => setIsEditing(true)} className="p-2 text-gray-400 hover:text-cyan-400" aria-label="Modifier"><Edit size={16} /></button>
-                            <button onClick={handleDelete} className="p-2 text-gray-400 hover:text-red-400" aria-label="Supprimer"><Trash2 size={16} /></button>
-                        </>
-                    )}
-                </div>
-            </td>
-        </tr>
-    );
-};
+const INCIDENT_HEADERS = ['Incident', 'Vulnérabilité', 'Impact', 'Référence', 'Actions'];
 
 // Editable Item for Resource Links
 const ResourceLinkItem: React.FC<{ link: ResourceLink }> = ({ link }) => {
@@ -121,7 +73,7 @@ const ResourceLinkItem: React.FC<{ link: ResourceLink }> = ({ link }) => {
 }
 
 const KnownIncidentsView: React.FC = () => {
-    const { incidents, resourceLinks, addIncident, addResourceLink } = useKnownIncidents();
+    const { incidents, resourceLinks, addIncident, updateIncident, deleteIncident, addResourceLink } = useKnownIncidents();
     const { navigationSource, sourceTitle, filterParams, clearNavigation } = useNavigation();
 
     // Sort incidents to prioritize highlighted ones
@@ -226,16 +178,22 @@ const KnownIncidentsView: React.FC = () => {
                     <table className="w-full text-sm text-left text-gray-400">
                         <thead className="text-xs text-gray-300 uppercase bg-gray-700">
                             <tr>
-                                <th scope="col" className="px-4 py-3 w-1/3">Incident</th>
-                                <th scope="col" className="px-4 py-3">Vulnérabilité</th>
-                                <th scope="col" className="px-4 py-3">Impact</th>
-                                <th scope="col" className="px-4 py-3">Référence</th>
-                                <th scope="col" className="px-4 py-3 text-center">Actions</th>
+                                {INCIDENT_HEADERS.map(h => (
+                                    <th key={h} scope="col" className={`px-4 py-3 ${h === 'Incident' ? 'w-1/3' : ''} ${h === 'Actions' ? 'text-center' : ''}`}>{h}</th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {incidents.map(incident => (
-                                <IncidentRow key={incident.id} incident={incident} />
+                            {sortedIncidents.map(incident => (
+                                <EditableTableRow<KnownAIIncident>
+                                    key={incident.id}
+                                    item={incident}
+                                    columns={INCIDENT_COLUMNS}
+                                    onUpdate={updateIncident}
+                                    onDelete={deleteIncident}
+                                    isHighlighted={filterParams?.highlightIds?.includes(incident.incident) || false}
+                                    confirmDelete="Êtes-vous sûr de vouloir supprimer cet incident ?"
+                                />
                             ))}
                         </tbody>
                     </table>
