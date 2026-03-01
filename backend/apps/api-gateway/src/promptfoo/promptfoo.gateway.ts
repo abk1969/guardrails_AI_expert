@@ -9,16 +9,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
+import { WS_CORS_CONFIG, WS_TRANSPORT_OPTIONS } from '../shared/constants';
 
-/**
- * Gateway WebSocket pour les mises à jour en temps réel des tests Promptfoo
- */
 @WebSocketGateway({
   namespace: '/promptfoo',
-  cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5080',
-    credentials: true,
-  },
+  cors: WS_CORS_CONFIG,
+  ...WS_TRANSPORT_OPTIONS,
 })
 export class PromptfooGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

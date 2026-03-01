@@ -10,26 +10,12 @@ import {
 import { Server, Socket } from 'socket.io';
 import { UseGuards, Logger } from '@nestjs/common';
 import { WsJwtAuthGuard } from '@app/auth/guards/ws-jwt-auth.guard';
+import { WS_CORS_CONFIG, WS_TRANSPORT_OPTIONS } from '../shared/constants';
 
-/**
- * WebSocket Gateway pour les mises à jour en temps réel des tests
- *
- * Événements émis par le serveur:
- * - test-run:progress - Mise à jour de progression
- * - test-run:result - Nouveau résultat de test
- * - test-run:completed - Test terminé
- * - test-run:error - Erreur durant l'exécution
- *
- * Événements reçus du client:
- * - test-run:subscribe - S'abonner aux updates d'un test
- * - test-run:unsubscribe - Se désabonner
- */
 @WebSocketGateway({
   namespace: '/tests',
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5080',
-    credentials: true,
-  },
+  cors: WS_CORS_CONFIG,
+  ...WS_TRANSPORT_OPTIONS,
 })
 @UseGuards(WsJwtAuthGuard)
 export class TestsGateway implements OnGatewayConnection, OnGatewayDisconnect {
