@@ -1,30 +1,23 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   ApplicationProfile,
   ApplicationTestSession,
   ApplicationArchitecture,
-  TestMode,
 } from '../types';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface ApplicationProfileContextType {
-  // Applications management
   applications: ApplicationProfile[];
   addApplication: (app: ApplicationProfile) => void;
   updateApplication: (id: string, app: Partial<ApplicationProfile>) => void;
   deleteApplication: (id: string) => void;
   getApplication: (id: string) => ApplicationProfile | undefined;
-
-  // Test sessions
   testSessions: ApplicationTestSession[];
   createTestSession: (session: ApplicationTestSession) => void;
   updateTestSession: (id: string, session: Partial<ApplicationTestSession>) => void;
   getSessionsForApplication: (applicationId: string) => ApplicationTestSession[];
-
-  // UI State
   selectedApplicationId: string | null;
   setSelectedApplicationId: (id: string | null) => void;
-
-  // Utilities
   getApplicationsByArchitecture: (arch: ApplicationArchitecture) => ApplicationProfile[];
   getPromptfooCompatibleApps: () => ApplicationProfile[];
   getApplicationStats: () => {
@@ -47,50 +40,10 @@ export const useApplicationProfile = () => {
   return context;
 };
 
-interface ApplicationProfileProviderProps {
-  children: ReactNode;
-}
-
-export const ApplicationProfileProvider: React.FC<ApplicationProfileProviderProps> = ({ children }) => {
-  const [applications, setApplications] = useState<ApplicationProfile[]>([]);
-  const [testSessions, setTestSessions] = useState<ApplicationTestSession[]>([]);
+export const ApplicationProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [applications, setApplications] = useLocalStorage<ApplicationProfile[]>('application-profiles', []);
+  const [testSessions, setTestSessions] = useLocalStorage<ApplicationTestSession[]>('application-test-sessions', []);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    const storedApps = localStorage.getItem('application-profiles');
-    const storedSessions = localStorage.getItem('application-test-sessions');
-
-    if (storedApps) {
-      try {
-        setApplications(JSON.parse(storedApps));
-      } catch (error) {
-        console.error('Failed to load applications:', error);
-      }
-    }
-
-    if (storedSessions) {
-      try {
-        setTestSessions(JSON.parse(storedSessions));
-      } catch (error) {
-        console.error('Failed to load test sessions:', error);
-      }
-    }
-  }, []);
-
-  // Save to localStorage whenever applications change
-  useEffect(() => {
-    if (applications.length > 0) {
-      localStorage.setItem('application-profiles', JSON.stringify(applications));
-    }
-  }, [applications]);
-
-  // Save to localStorage whenever test sessions change
-  useEffect(() => {
-    if (testSessions.length > 0) {
-      localStorage.setItem('application-test-sessions', JSON.stringify(testSessions));
-    }
-  }, [testSessions]);
 
   const addApplication = (app: ApplicationProfile) => {
     setApplications(prev => [...prev, app]);
@@ -108,7 +61,6 @@ export const ApplicationProfileProvider: React.FC<ApplicationProfileProviderProp
 
   const deleteApplication = (id: string) => {
     setApplications(prev => prev.filter(app => app.id !== id));
-    // Also delete related test sessions
     setTestSessions(prev => prev.filter(session => session.applicationId !== id));
   };
 
@@ -118,8 +70,6 @@ export const ApplicationProfileProvider: React.FC<ApplicationProfileProviderProp
 
   const createTestSession = (session: ApplicationTestSession) => {
     setTestSessions(prev => [...prev, session]);
-
-    // Update application test count and last tested date
     const appId = session.applicationId;
     updateApplication(appId, {
       lastTestedAt: session.startedAt,

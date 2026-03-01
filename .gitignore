@@ -30,5 +30,11 @@ dist-ssr
 ~.xlsx
 ~.xls
 
+# System crash dumps
+*.stackdump
+
+# Backup files
+*.bak
+
 # Embedded Promptfoo (separate git repo)
 guardrail/solution_promptfoo/promptfoo/

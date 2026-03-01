@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { ThreatProfile } from '../types';
 import { INITIAL_THREAT_PROFILES } from '../constants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface ThreatProfileState {
   threatProfiles: ThreatProfile[];
@@ -11,26 +12,11 @@ interface ThreatProfileState {
 
 const ThreatProfileContext = createContext<ThreatProfileState | undefined>(undefined);
 
-const THREAT_PROFILE_STORAGE_KEY = 'llmGuardrailThreatProfiles';
-
 export const ThreatProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [threatProfiles, setThreatProfiles] = useState<ThreatProfile[]>(() => {
-    try {
-      const storedData = localStorage.getItem(THREAT_PROFILE_STORAGE_KEY);
-      return storedData ? JSON.parse(storedData) : INITIAL_THREAT_PROFILES;
-    } catch (error) {
-      console.error("Failed to load threat profiles from localStorage", error);
-      return INITIAL_THREAT_PROFILES;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(THREAT_PROFILE_STORAGE_KEY, JSON.stringify(threatProfiles));
-    } catch (error) {
-      console.error("Failed to save threat profiles to localStorage", error);
-    }
-  }, [threatProfiles]);
+  const [threatProfiles, setThreatProfiles] = useLocalStorage<ThreatProfile[]>(
+    'llmGuardrailThreatProfiles',
+    INITIAL_THREAT_PROFILES
+  );
 
   const addThreatProfile = (profileName: string) => {
     const newThreat: ThreatProfile = {
