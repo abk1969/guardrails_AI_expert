@@ -9,9 +9,9 @@ services:
     ports:
       - "5435:5432"  # Port externe modifié pour éviter conflit
     environment:
-      POSTGRES_USER: airiskmgr
-      POSTGRES_PASSWORD: airiskmgr_dev_password
-      POSTGRES_DB: airiskmgr_db
+      POSTGRES_USER: ${POSTGRES_USER:-airiskmgr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airiskmgr_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-airiskmgr_db}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -31,11 +31,11 @@ services:
     restart: unless-stopped
     ports:
       - "6380:6379"  # Port externe modifié pour éviter conflit
-    command: redis-server --appendonly yes --requirepass redis_dev_password
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_dev_password}
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_dev_password}", "--no-auth-warning", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,10 +57,10 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      DATABASE_URL: postgresql://airiskmgr:airiskmgr_dev_password@postgres:5432/airiskmgr_db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-airiskmgr}:${POSTGRES_PASSWORD:-airiskmgr_dev_password}@postgres:5432/${POSTGRES_DB:-airiskmgr_db}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: redis_dev_password
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_dev_password}
       JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
       JWT_EXPIRATION: 15m
       JWT_REFRESH_EXPIRATION: 7d
@@ -69,6 +69,12 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3004}
       THROTTLE_TTL: 60000
       THROTTLE_LIMIT: 100
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/api/v1/system/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     # Volumes temporarily disabled for Windows compatibility - using image-baked code
     # volumes:
     #   - ./backend/apps:/app/apps
@@ -96,10 +102,10 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://airiskmgr:airiskmgr_dev_password@postgres:5432/airiskmgr_db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-airiskmgr}:${POSTGRES_PASSWORD:-airiskmgr_dev_password}@postgres:5432/${POSTGRES_DB:-airiskmgr_db}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: redis_dev_password
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_dev_password}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
@@ -132,13 +138,13 @@ services:
       VITE_WS_URL: ws://localhost:3003  # Pointe vers le nouveau port API
       VITE_MCP_API_URL: http://localhost:3003/api/v1/mcp  # Pointe vers le nouveau port API
       VITE_MCP_MOCK_MODE: "false"
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
     volumes:
       - .:/app
       - /app/node_modules
       - /app/backend  # Exclude backend dir to prevent ENOMEM on Vite scan
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_healthy
     networks:
       - airiskmgr-network
     command: npm run dev -- --config vite.config.docker.ts --host 0.0.0.0 --port 3000
@@ -166,7 +172,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      REDIS_HOSTS: local:redis:6379:0:redis_dev_password
+      REDIS_HOSTS: local:redis:6379:0:${REDIS_PASSWORD:-redis_dev_password}
     depends_on:
       - redis
     networks:
@@ -358,8 +364,8 @@ volumes:
 networks:
   airiskmgr-network:
     driver: bridge
-  # Isolated network for pentest tools
-  # Tools can communicate with each other and API Gateway, but not external services
+  # Network for pentest tools
+  # NOTE: internal=false to allow tools to reach external test targets (intentional)
   pentest-isolated-network:
     driver: bridge
-    internal: false  # Allow external communication for testing targets
+    internal: false

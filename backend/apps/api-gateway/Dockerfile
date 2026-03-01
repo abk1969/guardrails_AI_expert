@@ -5,13 +5,17 @@ FROM node:20-slim AS development
 
 WORKDIR /app
 
-# Install dependencies for building native modules and Prisma
+# Install dependencies for building native modules, Prisma, and Docker CLI
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
     openssl \
     ca-certificates \
+    curl \
+    && curl -fsSL https://get.docker.com -o get-docker.sh \
+    && sh get-docker.sh \
+    && rm get-docker.sh \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
@@ -111,9 +115,9 @@ RUN npx prisma generate
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+# Create non-root user (Debian syntax for node:20-slim)
+RUN groupadd --gid 1001 nodejs && \
+    useradd --uid 1001 --gid nodejs --shell /bin/false nodejs
 
 # Change ownership
 RUN chown -R nodejs:nodejs /app

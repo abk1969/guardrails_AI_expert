@@ -59,16 +59,35 @@ temp
 Thumbs.db
 .DS_Store
 
-# Backend specific
-backend/uploads
-backend/logs
+# Backend specific (exclude entire backend directory for frontend image)
+backend/
+
+# Guardrail solutions (can contain large node_modules)
+guardrail/solution_promptfoo/promptfoo/node_modules
+guardrail/solution_promptfoo/**/node_modules
+guardrail/**/node_modules
 
 # Frontend specific
 .cache
 .parcel-cache
+
+# Checkpoints (can be large and cause ENOMEM)
+.checkpoints
+
+# Scripts and tools not needed in frontend image
+*.ps1
+*.py
+strix_rate_limited.py
+strix-output/
+scripts/
+
+# Claude/Kiro config
+.claude
+.kiro
 
 # Misc
 .prettierrc
 .eslintrc*
 .editorconfig
 *.local
+bash.exe.stackdump
