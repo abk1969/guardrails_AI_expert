@@ -7,6 +7,7 @@ import { ScanConfigDto } from './dto/scan-config.dto';
 import { ScanResultDto } from './dto/scan-result.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '@prisma/client';
+import { DEV_DEFAULTS } from '../shared/constants';
 
 @ApiTags('Garak LLM Scanner')
 @Controller('garak')
@@ -32,8 +33,9 @@ export class GarakController {
     @CurrentUser() user: User,
     @Body() config: ScanConfigDto,
   ): Promise<ScanResultDto> {
-    // Default organization ID for public/development mode
-    const organizationId = user?.organizationId || '9b0b4913-3a4d-4511-9840-2d4ce87e53a9';
-    return this.garakService.startScan(organizationId, config);
+    const organizationId = user?.organizationId || DEV_DEFAULTS.ORGANIZATION_ID;
+    const userId = user?.id || DEV_DEFAULTS.USER_ID;
+    const targetId = DEV_DEFAULTS.TARGET_ID;
+    return this.garakService.startScan(organizationId, config, userId, targetId);
   }
 }

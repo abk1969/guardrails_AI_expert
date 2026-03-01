@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsArray, IsOptional, IsString, ValidateNested, ArrayNotEmpty } from 'class-validator';
+import { IsEnum, IsArray, IsOptional, IsString, IsNumber, IsBoolean, Min, Max, ValidateNested, ArrayNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -97,12 +97,19 @@ export class StrixConfigDto {
   attackMode: AttackMode;
 
   @ApiProperty({ example: 50, description: 'Maximum number of agent steps' })
+  @IsNumber()
+  @Min(1)
+  @Max(200)
   maxSteps: number;
 
   @ApiProperty({ example: 3600, description: 'Timeout in seconds' })
+  @IsNumber()
+  @Min(30)
+  @Max(7200)
   timeout: number;
 
   @ApiProperty({ example: true, description: 'Run in headless mode' })
+  @IsBoolean()
   headless: boolean;
 }
 

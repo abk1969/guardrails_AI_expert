@@ -7,13 +7,12 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { WS_CORS_CONFIG, WS_TRANSPORT_OPTIONS } from '../shared/constants';
 
 @WebSocketGateway({
-  namespace: 'strix',
-  cors: {
-    origin: '*',
-    credentials: true,
-  },
+  namespace: '/strix',
+  cors: WS_CORS_CONFIG,
+  ...WS_TRANSPORT_OPTIONS,
 })
 export class StrixGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect

@@ -8,13 +8,12 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { ExecutionMode, Framework } from './dto/unified-execution.dto';
+import { WS_CORS_CONFIG, WS_TRANSPORT_OPTIONS } from '../shared/constants';
 
 @WebSocketGateway({
-  namespace: 'unified',
-  cors: {
-    origin: '*',
-    credentials: true,
-  },
+  namespace: '/unified',
+  cors: WS_CORS_CONFIG,
+  ...WS_TRANSPORT_OPTIONS,
 })
 export class UnifiedGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
