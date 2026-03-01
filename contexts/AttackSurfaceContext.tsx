@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { AttackSurfaceVector, OrganizationalImpactConfig, NuclearDisasterScenario, ImpactLevelName } from '../types';
 import { INITIAL_ATTACK_SURFACE_VECTORS, INITIAL_ORGANIZATIONAL_IMPACT_CONFIG, INITIAL_NUCLEAR_DISASTER_SCENARIOS } from '../constants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+interface AttackSurfaceData {
+  attackVectors: AttackSurfaceVector[];
+  impactConfig: OrganizationalImpactConfig[];
+  nuclearScenarios: NuclearDisasterScenario[];
+}
 
 interface AttackSurfaceState {
   attackVectors: AttackSurfaceVector[];
@@ -13,66 +20,32 @@ interface AttackSurfaceState {
 
 const AttackSurfaceContext = createContext<AttackSurfaceState | undefined>(undefined);
 
-const ATTACK_SURFACE_STORAGE_KEY = 'llmGuardrailAttackSurface';
+const DEFAULTS: AttackSurfaceData = {
+  attackVectors: INITIAL_ATTACK_SURFACE_VECTORS,
+  impactConfig: INITIAL_ORGANIZATIONAL_IMPACT_CONFIG,
+  nuclearScenarios: INITIAL_NUCLEAR_DISASTER_SCENARIOS,
+};
 
 export const AttackSurfaceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [attackVectors, setAttackVectors] = useState<AttackSurfaceVector[]>(INITIAL_ATTACK_SURFACE_VECTORS);
-  const [impactConfig, setImpactConfig] = useState<OrganizationalImpactConfig[]>(INITIAL_ORGANIZATIONAL_IMPACT_CONFIG);
-  const [nuclearScenarios, setNuclearScenarios] = useState<NuclearDisasterScenario[]>(INITIAL_NUCLEAR_DISASTER_SCENARIOS);
-
-  useEffect(() => {
-    try {
-      const storedData = localStorage.getItem(ATTACK_SURFACE_STORAGE_KEY);
-      if (storedData) {
-        const parsed = JSON.parse(storedData);
-        setAttackVectors(parsed.attackVectors || INITIAL_ATTACK_SURFACE_VECTORS);
-        setImpactConfig(parsed.impactConfig || INITIAL_ORGANIZATIONAL_IMPACT_CONFIG);
-        setNuclearScenarios(parsed.nuclearScenarios || INITIAL_NUCLEAR_DISASTER_SCENARIOS);
-      } else {
-        setAttackVectors(INITIAL_ATTACK_SURFACE_VECTORS);
-        setImpactConfig(INITIAL_ORGANIZATIONAL_IMPACT_CONFIG);
-        setNuclearScenarios(INITIAL_NUCLEAR_DISASTER_SCENARIOS);
-      }
-    } catch (error) {
-      console.error("Failed to load attack surface data from localStorage", error);
-      setAttackVectors(INITIAL_ATTACK_SURFACE_VECTORS);
-      setImpactConfig(INITIAL_ORGANIZATIONAL_IMPACT_CONFIG);
-      setNuclearScenarios(INITIAL_NUCLEAR_DISASTER_SCENARIOS);
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      const dataToStore = JSON.stringify({ attackVectors, impactConfig, nuclearScenarios });
-      localStorage.setItem(ATTACK_SURFACE_STORAGE_KEY, dataToStore);
-    } catch (error) {
-      console.error("Failed to save attack surface data to localStorage", error);
-    }
-  }, [attackVectors, impactConfig, nuclearScenarios]);
+  const [data, setData] = useLocalStorage<AttackSurfaceData>('llmGuardrailAttackSurface', DEFAULTS);
 
   const updateAttackVector = (id: string, updatedData: Partial<AttackSurfaceVector>) => {
-    setAttackVectors(prev =>
-      prev.map(v => (v.id === id ? { ...v, ...updatedData } : v))
-    );
+    setData(prev => ({ ...prev, attackVectors: prev.attackVectors.map(v => (v.id === id ? { ...v, ...updatedData } : v)) }));
   };
 
   const updateImpactConfig = (level: ImpactLevelName, updatedData: Partial<OrganizationalImpactConfig>) => {
-    setImpactConfig(prev =>
-      prev.map(c => (c.level === level ? { ...c, ...updatedData } : c))
-    );
+    setData(prev => ({ ...prev, impactConfig: prev.impactConfig.map(c => (c.level === level ? { ...c, ...updatedData } : c)) }));
   };
 
   const updateNuclearScenario = (id: string, updatedData: Partial<NuclearDisasterScenario>) => {
-    setNuclearScenarios(prev =>
-      prev.map(s => (s.id === id ? { ...s, ...updatedData } : s))
-    );
+    setData(prev => ({ ...prev, nuclearScenarios: prev.nuclearScenarios.map(s => (s.id === id ? { ...s, ...updatedData } : s)) }));
   };
 
   return (
     <AttackSurfaceContext.Provider value={{
-      attackVectors,
-      impactConfig,
-      nuclearScenarios,
+      attackVectors: data.attackVectors,
+      impactConfig: data.impactConfig,
+      nuclearScenarios: data.nuclearScenarios,
       updateAttackVector,
       updateImpactConfig,
       updateNuclearScenario,

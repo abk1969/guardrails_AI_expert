@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { KnownVulnerability } from '../types';
 import { INITIAL_KNOWN_VULNERABILITIES } from '../constants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface KnownVulnerabilitiesState {
   vulnerabilities: KnownVulnerability[];
@@ -11,26 +12,11 @@ interface KnownVulnerabilitiesState {
 
 const KnownVulnerabilitiesContext = createContext<KnownVulnerabilitiesState | undefined>(undefined);
 
-const VULNERABILITIES_STORAGE_KEY = 'llmGuardrailKnownVulnerabilities';
-
 export const KnownVulnerabilitiesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [vulnerabilities, setVulnerabilities] = useState<KnownVulnerability[]>(() => {
-    try {
-      const storedData = localStorage.getItem(VULNERABILITIES_STORAGE_KEY);
-      return storedData ? JSON.parse(storedData) : INITIAL_KNOWN_VULNERABILITIES;
-    } catch (error) {
-      console.error("Failed to load known vulnerabilities from localStorage", error);
-      return INITIAL_KNOWN_VULNERABILITIES;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(VULNERABILITIES_STORAGE_KEY, JSON.stringify(vulnerabilities));
-    } catch (error) {
-      console.error("Failed to save known vulnerabilities to localStorage", error);
-    }
-  }, [vulnerabilities]);
+  const [vulnerabilities, setVulnerabilities] = useLocalStorage<KnownVulnerability[]>(
+    'llmGuardrailKnownVulnerabilities',
+    INITIAL_KNOWN_VULNERABILITIES
+  );
 
   const addVulnerability = (vulnerabilityData: Omit<KnownVulnerability, 'id'>) => {
     const newVulnerability: KnownVulnerability = {

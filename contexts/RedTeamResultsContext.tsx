@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { RedTeamResult, MitigationProfile, MitigationMapping, StrategyRoadmapItem } from '../types';
 import { INITIAL_RED_TEAM_RESULTS, INITIAL_MITIGATION_PROFILES, INITIAL_MITIGATION_MAPPINGS, INITIAL_STRATEGY_ROADMAP } from '../constants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+interface RedTeamResultsData {
+  results: RedTeamResult[];
+  mitigationMappings: MitigationMapping[];
+  strategyRoadmap: StrategyRoadmapItem[];
+}
 
 interface RedTeamResultsState {
   results: RedTeamResult[];
@@ -20,43 +27,15 @@ interface RedTeamResultsState {
 
 const RedTeamResultsContext = createContext<RedTeamResultsState | undefined>(undefined);
 
-const RESULTS_STORAGE_KEY = 'llmGuardrailRedTeamResults';
+const DEFAULTS: RedTeamResultsData = {
+  results: INITIAL_RED_TEAM_RESULTS,
+  mitigationMappings: INITIAL_MITIGATION_MAPPINGS,
+  strategyRoadmap: INITIAL_STRATEGY_ROADMAP,
+};
 
 export const RedTeamResultsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [results, setResults] = useState<RedTeamResult[]>(INITIAL_RED_TEAM_RESULTS);
+  const [data, setData] = useLocalStorage<RedTeamResultsData>('llmGuardrailRedTeamResults', DEFAULTS);
   const [mitigationProfiles] = useState<MitigationProfile[]>(INITIAL_MITIGATION_PROFILES);
-  const [mitigationMappings, setMitigationMappings] = useState<MitigationMapping[]>(INITIAL_MITIGATION_MAPPINGS);
-  const [strategyRoadmap, setStrategyRoadmap] = useState<StrategyRoadmapItem[]>(INITIAL_STRATEGY_ROADMAP);
-
-  useEffect(() => {
-    try {
-      const storedData = localStorage.getItem(RESULTS_STORAGE_KEY);
-      if (storedData) {
-        const parsed = JSON.parse(storedData);
-        setResults(parsed.results || INITIAL_RED_TEAM_RESULTS);
-        setMitigationMappings(parsed.mitigationMappings || INITIAL_MITIGATION_MAPPINGS);
-        setStrategyRoadmap(parsed.strategyRoadmap || INITIAL_STRATEGY_ROADMAP);
-      } else {
-        setResults(INITIAL_RED_TEAM_RESULTS);
-        setMitigationMappings(INITIAL_MITIGATION_MAPPINGS);
-        setStrategyRoadmap(INITIAL_STRATEGY_ROADMAP);
-      }
-    } catch (error) {
-      console.error("Failed to load Red Team results from localStorage", error);
-      setResults(INITIAL_RED_TEAM_RESULTS);
-      setMitigationMappings(INITIAL_MITIGATION_MAPPINGS);
-      setStrategyRoadmap(INITIAL_STRATEGY_ROADMAP);
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      const dataToStore = JSON.stringify({ results, mitigationMappings, strategyRoadmap });
-      localStorage.setItem(RESULTS_STORAGE_KEY, dataToStore);
-    } catch (error)      {
-      console.error("Failed to save Red Team results to localStorage", error);
-    }
-  }, [results, mitigationMappings, strategyRoadmap]);
 
   const addResult = () => {
     const newResult: RedTeamResult = {
@@ -68,42 +47,38 @@ export const RedTeamResultsProvider: React.FC<{ children: ReactNode }> = ({ chil
       rating: '',
       impact: '',
     };
-    setResults(prev => [...prev, newResult]);
+    setData(prev => ({ ...prev, results: [...prev.results, newResult] }));
   };
 
   const updateResult = (id: string, updatedData: Partial<Omit<RedTeamResult, 'id'>>) => {
-    setResults(prev =>
-      prev.map(r => (r.id === id ? { ...r, ...updatedData } : r))
-    );
+    setData(prev => ({ ...prev, results: prev.results.map(r => (r.id === id ? { ...r, ...updatedData } : r)) }));
   };
 
   const deleteResult = (id: string) => {
-    setResults(prev => prev.filter(r => r.id !== id));
+    setData(prev => ({ ...prev, results: prev.results.filter(r => r.id !== id) }));
   };
 
   const addMitigationMapping = (profileId: string) => {
     const newMapping: MitigationMapping = {
-        id: `map-custom-${crypto.randomUUID()}`,
-        profileId,
-        threatVulnerability: '',
-        description: '',
-        score: '',
-        defenseMitigation: '',
-        residualScore: '',
+      id: `map-custom-${crypto.randomUUID()}`,
+      profileId,
+      threatVulnerability: '',
+      description: '',
+      score: '',
+      defenseMitigation: '',
+      residualScore: '',
     };
-    setMitigationMappings(prev => [...prev, newMapping]);
+    setData(prev => ({ ...prev, mitigationMappings: [...prev.mitigationMappings, newMapping] }));
   };
-  
+
   const updateMitigationMapping = (id: string, updatedData: Partial<Omit<MitigationMapping, 'id' | 'profileId'>>) => {
-    setMitigationMappings(prev => 
-        prev.map(m => (m.id === id ? { ...m, ...updatedData } : m))
-    );
+    setData(prev => ({ ...prev, mitigationMappings: prev.mitigationMappings.map(m => (m.id === id ? { ...m, ...updatedData } : m)) }));
   };
 
   const deleteMitigationMapping = (id: string) => {
-    setMitigationMappings(prev => prev.filter(m => m.id !== id));
+    setData(prev => ({ ...prev, mitigationMappings: prev.mitigationMappings.filter(m => m.id !== id) }));
   };
-  
+
   const addStrategyItem = (category: string) => {
     const newItem: StrategyRoadmapItem = {
       id: `sr-custom-${crypto.randomUUID()}`,
@@ -114,34 +89,32 @@ export const RedTeamResultsProvider: React.FC<{ children: ReactNode }> = ({ chil
       timeline: '',
       status: 'Not Started',
     };
-    setStrategyRoadmap(prev => [...prev, newItem]);
+    setData(prev => ({ ...prev, strategyRoadmap: [...prev.strategyRoadmap, newItem] }));
   };
 
   const updateStrategyItem = (id: string, updatedData: Partial<Omit<StrategyRoadmapItem, 'id' | 'category'>>) => {
-    setStrategyRoadmap(prev => 
-      prev.map(item => (item.id === id ? { ...item, ...updatedData } : item))
-    );
+    setData(prev => ({ ...prev, strategyRoadmap: prev.strategyRoadmap.map(item => (item.id === id ? { ...item, ...updatedData } : item)) }));
   };
 
   const deleteStrategyItem = (id: string) => {
-    setStrategyRoadmap(prev => prev.filter(item => item.id !== id));
+    setData(prev => ({ ...prev, strategyRoadmap: prev.strategyRoadmap.filter(item => item.id !== id) }));
   };
 
   return (
-    <RedTeamResultsContext.Provider value={{ 
-        results, 
-        mitigationProfiles,
-        mitigationMappings,
-        strategyRoadmap,
-        addResult, 
-        updateResult, 
-        deleteResult,
-        addMitigationMapping,
-        updateMitigationMapping,
-        deleteMitigationMapping,
-        addStrategyItem,
-        updateStrategyItem,
-        deleteStrategyItem,
+    <RedTeamResultsContext.Provider value={{
+      results: data.results,
+      mitigationProfiles,
+      mitigationMappings: data.mitigationMappings,
+      strategyRoadmap: data.strategyRoadmap,
+      addResult,
+      updateResult,
+      deleteResult,
+      addMitigationMapping,
+      updateMitigationMapping,
+      deleteMitigationMapping,
+      addStrategyItem,
+      updateStrategyItem,
+      deleteStrategyItem,
     }}>
       {children}
     </RedTeamResultsContext.Provider>
