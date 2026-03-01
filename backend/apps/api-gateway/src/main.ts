@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -13,12 +13,18 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  // Security
-  app.use(helmet());
+  // Security - Configure Helmet to allow WebSocket connections
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Disable CSP to allow WebSocket connections
+      crossOriginEmbedderPolicy: false, // Disable COEP for WebSocket
+    }),
+  );
   app.enableCors({
     origin: [
       configService.get('CORS_ORIGIN', 'http://localhost:3004'),
       'http://localhost:5080', // Standalone mode
+      'http://localhost:5081', // Standalone mode (alternative port)
       'http://localhost:3000', // Alternative dev port
     ],
     credentials: true,
@@ -66,15 +72,14 @@ async function bootstrap() {
   const port = configService.get('PORT', 3001);
   await app.listen(port);
 
-  console.log(`
-    🚀 Application started successfully!
-
-    📡 API Gateway running on: http://localhost:${port}
-    📚 API Documentation: http://localhost:${port}/api/docs
-    🌍 Environment: ${configService.get('NODE_ENV')}
-
-    Ready to accept connections...
-  `);
+  const logger = new Logger('Bootstrap');
+  logger.log(`API Gateway running on: http://localhost:${port}`);
+  logger.log(`API Documentation: http://localhost:${port}/api/docs`);
+  logger.log(`Environment: ${configService.get('NODE_ENV')}`);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  const logger = new Logger('Bootstrap');
+  logger.error('Fatal error during startup', err);
+  process.exit(1);
+});
