@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { UseCase } from '../types';
 import { INITIAL_USE_CASES } from '../constants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface UseCaseState {
   useCases: UseCase[];
@@ -11,26 +12,11 @@ interface UseCaseState {
 
 const UseCaseContext = createContext<UseCaseState | undefined>(undefined);
 
-const USE_CASE_STORAGE_KEY = 'llmGuardrailUseCases';
-
 export const UseCaseProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [useCases, setUseCases] = useState<UseCase[]>(() => {
-    try {
-      const storedData = localStorage.getItem(USE_CASE_STORAGE_KEY);
-      return storedData ? JSON.parse(storedData) : INITIAL_USE_CASES;
-    } catch (error) {
-      console.error("Failed to load use cases from localStorage", error);
-      return INITIAL_USE_CASES;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(USE_CASE_STORAGE_KEY, JSON.stringify(useCases));
-    } catch (error) {
-      console.error("Failed to save use cases to localStorage", error);
-    }
-  }, [useCases]);
+  const [useCases, setUseCases] = useLocalStorage<UseCase[]>(
+    'llmGuardrailUseCases',
+    INITIAL_USE_CASES
+  );
 
   const addUseCase = (useCaseData: Omit<UseCase, 'id' | 'riskScore'>) => {
     const newUseCase: UseCase = {
@@ -42,7 +28,7 @@ export const UseCaseProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   const updateUseCase = (updatedUseCase: UseCase) => {
-    setUseCases(prev => prev.map(uc => 
+    setUseCases(prev => prev.map(uc =>
       uc.id === updatedUseCase.id ? { ...updatedUseCase, riskScore: updatedUseCase.impact * updatedUseCase.likelihood } : uc
     ));
   };

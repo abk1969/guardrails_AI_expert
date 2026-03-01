@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { RedTeamQuestion } from '../types';
 import { INITIAL_RED_TEAM_QUESTIONS, INITIAL_BUSINESS_OBJECTIVE } from '../constants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+interface RedTeamData {
+  questions: RedTeamQuestion[];
+  businessObjective: string;
+}
 
 interface RedTeamState {
   questions: RedTeamQuestion[];
@@ -13,38 +19,13 @@ interface RedTeamState {
 
 const RedTeamContext = createContext<RedTeamState | undefined>(undefined);
 
-const RED_TEAM_STORAGE_KEY = 'llmGuardrailRedTeamReview';
+const DEFAULTS: RedTeamData = {
+  questions: INITIAL_RED_TEAM_QUESTIONS,
+  businessObjective: INITIAL_BUSINESS_OBJECTIVE,
+};
 
 export const RedTeamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [questions, setQuestions] = useState<RedTeamQuestion[]>(INITIAL_RED_TEAM_QUESTIONS);
-  const [businessObjective, setBusinessObjective] = useState<string>(INITIAL_BUSINESS_OBJECTIVE);
-
-  useEffect(() => {
-    try {
-      const storedData = localStorage.getItem(RED_TEAM_STORAGE_KEY);
-      if (storedData) {
-        const parsed = JSON.parse(storedData);
-        setQuestions(parsed.questions || INITIAL_RED_TEAM_QUESTIONS);
-        setBusinessObjective(parsed.businessObjective || INITIAL_BUSINESS_OBJECTIVE);
-      } else {
-        setQuestions(INITIAL_RED_TEAM_QUESTIONS);
-        setBusinessObjective(INITIAL_BUSINESS_OBJECTIVE);
-      }
-    } catch (error) {
-      console.error("Failed to load Red Team review data from localStorage", error);
-      setQuestions(INITIAL_RED_TEAM_QUESTIONS);
-      setBusinessObjective(INITIAL_BUSINESS_OBJECTIVE);
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      const dataToStore = JSON.stringify({ questions, businessObjective });
-      localStorage.setItem(RED_TEAM_STORAGE_KEY, dataToStore);
-    } catch (error) {
-      console.error("Failed to save Red Team review data to localStorage", error);
-    }
-  }, [questions, businessObjective]);
+  const [data, setData] = useLocalStorage<RedTeamData>('llmGuardrailRedTeamReview', DEFAULTS);
 
   const addQuestion = (category: string) => {
     const newQuestion: RedTeamQuestion = {
@@ -54,25 +35,30 @@ export const RedTeamProvider: React.FC<{ children: ReactNode }> = ({ children })
       response: '',
       initialRating: '',
     };
-    setQuestions(prev => [...prev, newQuestion]);
+    setData(prev => ({ ...prev, questions: [...prev.questions, newQuestion] }));
   };
 
   const updateQuestion = (id: string, updatedData: Partial<Omit<RedTeamQuestion, 'id'>>) => {
-    setQuestions(prev =>
-      prev.map(q => (q.id === id ? { ...q, ...updatedData } : q))
-    );
+    setData(prev => ({ ...prev, questions: prev.questions.map(q => (q.id === id ? { ...q, ...updatedData } : q)) }));
   };
 
   const deleteQuestion = (id: string) => {
-    setQuestions(prev => prev.filter(q => q.id !== id));
+    setData(prev => ({ ...prev, questions: prev.questions.filter(q => q.id !== id) }));
   };
 
   const updateBusinessObjective = (text: string) => {
-    setBusinessObjective(text);
+    setData(prev => ({ ...prev, businessObjective: text }));
   };
 
   return (
-    <RedTeamContext.Provider value={{ questions, businessObjective, addQuestion, updateQuestion, deleteQuestion, updateBusinessObjective }}>
+    <RedTeamContext.Provider value={{
+      questions: data.questions,
+      businessObjective: data.businessObjective,
+      addQuestion,
+      updateQuestion,
+      deleteQuestion,
+      updateBusinessObjective
+    }}>
       {children}
     </RedTeamContext.Provider>
   );
