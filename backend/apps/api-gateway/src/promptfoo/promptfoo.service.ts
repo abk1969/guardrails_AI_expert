@@ -1,32 +1,36 @@
 import { Injectable, Logger, Inject, forwardRef, NotFoundException } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { PromptfooGateway } from './promptfoo.gateway';
 import { PrismaService } from '@app/database';
 import { TestRunStatus, TestStatus } from '@prisma/client';
+import { execAsync, execFileAsync, ensureDirectory } from '../shared/security-tool.utils';
+import { DEV_DEFAULTS } from '../shared/constants';
 
-const execAsync = promisify(exec);
+// Container name for Promptfoo runner
+const PROMPTFOO_CONTAINER = 'airiskmgr-promptfoo-runner';
 
 @Injectable()
 export class PromptfooService {
   private readonly logger = new Logger(PromptfooService.name);
-  private readonly promptfooDir = join(
-    process.cwd(),
-    'guardrail',
-    'solution_promptfoo',
-    'ai-risk-guardrails-tests',
-  );
+  private readonly localConfigDir = join(process.cwd(), 'promptfoo-configs');
+  private readonly containerConfigDir = '/app/configs';
+  private readonly containerOutputDir = '/app/output';
 
   constructor(
     @Inject(forwardRef(() => PromptfooGateway))
     private readonly gateway: PromptfooGateway,
     private readonly prisma: PrismaService,
-  ) {}
+  ) {
+    this.ensureLocalConfigDir();
+  }
+
+  private async ensureLocalConfigDir(): Promise<void> {
+    await ensureDirectory(this.localConfigDir, this.logger);
+  }
 
   /**
-   * Lance l'exécution de tests Promptfoo
+   * Lance l'exécution de tests Promptfoo via Docker container
    */
   async runTests(
     yamlContent: string,
@@ -34,61 +38,83 @@ export class PromptfooService {
     organizationId?: string,
     targetId?: string,
   ): Promise<{ testRunId: string; estimatedDuration: string }> {
-    const configPath = join(this.promptfooDir, `promptfooconfig-${Date.now()}.yaml`);
+    const timestamp = Date.now();
+    const configFileName = `promptfooconfig-${timestamp}.yaml`;
+    const localConfigPath = join(this.localConfigDir, configFileName);
+    const containerConfigPath = `${this.containerConfigDir}/${configFileName}`;
 
-    this.logger.log(`Création du fichier de configuration: ${configPath}`);
+    this.logger.log(`Creating Promptfoo configuration: ${configFileName}`);
 
     try {
-      // 1. Vérifier que le répertoire existe
-      await this.ensurePromptfooDirectoryExists();
+      // 1. Write YAML config locally
+      await fs.writeFile(localConfigPath, yamlContent, 'utf-8');
+      this.logger.log(`✅ YAML config written locally: ${localConfigPath}`);
 
-      // 2. Écrire le fichier YAML
-      await fs.writeFile(configPath, yamlContent, 'utf-8');
-      this.logger.log(`✅ Fichier YAML créé: ${configPath}`);
+      // 2. Copy config to container using docker cp
+      await this.copyConfigToContainer(localConfigPath, containerConfigPath);
+      this.logger.log(`✅ Config copied to container: ${containerConfigPath}`);
 
-      // 3. Créer un TestRun dans la base de données (si auth activée)
+      // 3. Create TestRun in database (if auth enabled)
       let testRun;
-      if (userId && organizationId && targetId) {
+
+      try {
         testRun = await this.prisma.testRun.create({
           data: {
-            createdById: userId,
-            organizationId,
-            targetId,
+            createdById: userId || DEV_DEFAULTS.USER_ID,
+            organizationId: organizationId || DEV_DEFAULTS.ORGANIZATION_ID,
+            targetId: targetId || DEV_DEFAULTS.TARGET_ID,
             status: TestRunStatus.QUEUED,
             configuration: { yamlContent },
-            totalTests: 0, // Sera mis à jour après parsing
-            metadata: { configPath, source: 'promptfoo' },
+            totalTests: 0,
+            metadata: { configPath: containerConfigPath, source: 'promptfoo' },
           },
         });
-        this.logger.log(`✅ TestRun créé dans la base: ${testRun.id}`);
+        this.logger.log(`✅ TestRun created in database: ${testRun.id}`);
+      } catch (dbError) {
+        this.logger.warn('Database unavailable, running in memory-only mode');
       }
 
-      const testRunId = testRun?.id || `run-${Date.now()}`;
+      const testRunId = testRun?.id || `run-${timestamp}`;
 
-      // 4. Lancer Promptfoo en background
-      this.runPromptfooAsync(configPath, testRunId);
+      // 4. Launch Promptfoo in background via docker exec
+      this.runPromptfooInDocker(containerConfigPath, testRunId);
 
       return {
         testRunId,
         estimatedDuration: '5-30 minutes',
       };
     } catch (error) {
-      this.logger.error(`Erreur lors de la création du test:`, error);
-      throw new Error(`Échec de la création du fichier de configuration: ${error.message}`);
+      this.logger.error(`Error creating test:`, error);
+      throw new Error(`Failed to create configuration: ${error.message}`);
     }
   }
 
   /**
-   * Lance Promptfoo en arrière-plan (ne bloque pas la réponse HTTP)
+   * Copy config file to Promptfoo container
    */
-  private async runPromptfooAsync(configPath: string, testRunId: string): Promise<void> {
-    this.logger.log(`🚀 Lancement de Promptfoo (run ID: ${testRunId})...`);
+  private async copyConfigToContainer(localPath: string, containerPath: string): Promise<void> {
+    const copyCommand = `docker cp "${localPath}" ${PROMPTFOO_CONTAINER}:${containerPath}`;
+    this.logger.debug(`Executing: ${copyCommand}`);
 
-    // Émettre événement de démarrage
+    try {
+      await execAsync(copyCommand, { timeout: 30000 });
+    } catch (error) {
+      this.logger.error('Failed to copy config to container:', error);
+      throw new Error(`Failed to copy config to container: ${error.message}`);
+    }
+  }
+
+  /**
+   * Run Promptfoo in Docker container (non-blocking)
+   */
+  private async runPromptfooInDocker(containerConfigPath: string, testRunId: string): Promise<void> {
+    this.logger.log(`🚀 Launching Promptfoo in Docker (run ID: ${testRunId})...`);
+
+    // Emit start event
     this.gateway.emitTestStarted(testRunId);
-    this.gateway.emitLog(testRunId, '🚀 Démarrage de l\'exécution Promptfoo...');
+    this.gateway.emitLog(testRunId, '🚀 Starting Promptfoo execution in container...');
 
-    // Mettre à jour le statut en RUNNING si c'est un TestRun en base
+    // Update status to RUNNING
     const isDbTestRun = !testRunId.startsWith('run-');
     if (isDbTestRun) {
       try {
@@ -97,41 +123,65 @@ export class PromptfooService {
           data: { status: TestRunStatus.RUNNING },
         });
       } catch (error) {
-        this.logger.warn(`Impossible de mettre à jour le TestRun ${testRunId}:`, error);
+        this.logger.warn(`Could not update TestRun ${testRunId}:`, error);
       }
     }
 
-    // Lancer en background sans attendre
+    // Run in background
     setTimeout(async () => {
       try {
-        // Simuler progression pendant l'exécution (en production, parser les logs Promptfoo)
+        // Simulate progress
         this.simulateProgress(testRunId);
 
-        // Exécuter Promptfoo avec output JSON
-        const { stdout, stderr } = await execAsync(
-          `cd "${this.promptfooDir}" && npx promptfoo@latest eval -c "${configPath}" --output json`,
-          {
-            timeout: 3600000, // 1 heure max
-          },
-        );
+        // Build docker exec command
+        const outputFile = `${this.containerOutputDir}/results-${testRunId}.json`;
+        const dockerArgs = [
+          'exec',
+          PROMPTFOO_CONTAINER,
+          'npx', 'promptfoo@latest', 'eval',
+          '-c', containerConfigPath,
+          '--output', outputFile,
+          '--no-progress-bar',
+        ];
 
-        this.logger.log(`✅ Tests Promptfoo terminés (${testRunId})`);
-        this.logger.debug(`STDOUT: ${stdout}`);
+        this.logger.log(`Executing: docker ${dockerArgs.join(' ')}`);
+        this.gateway.emitLog(testRunId, `Executing Promptfoo in container...`);
+        this.gateway.emitProgress(testRunId, 20, 'Running tests...');
+
+        // Execute via docker exec
+        const { stdout, stderr } = await execFileAsync('docker', dockerArgs, {
+          timeout: 3600000, // 1 hour max
+          maxBuffer: 10 * 1024 * 1024, // 10MB
+        });
+
+        this.logger.log(`✅ Promptfoo tests completed (${testRunId})`);
+        this.logger.debug(`STDOUT: ${stdout.substring(0, 500)}`);
 
         if (stderr) {
           this.logger.warn(`STDERR: ${stderr}`);
         }
 
-        // Parser et sauvegarder les résultats
-        await this.parseAndSaveResults(testRunId, stdout);
+        // Copy results from container
+        this.gateway.emitProgress(testRunId, 85, 'Copying results...');
+        const localOutputPath = join(this.localConfigDir, `results-${testRunId}.json`);
 
-        // Émettre événement de complétion
+        try {
+          await execAsync(`docker cp ${PROMPTFOO_CONTAINER}:${outputFile} "${localOutputPath}"`, { timeout: 30000 });
+          const resultsContent = await fs.readFile(localOutputPath, 'utf-8');
+          await this.parseAndSaveResults(testRunId, resultsContent);
+        } catch (copyError) {
+          this.logger.warn('Could not copy results file, parsing stdout instead');
+          await this.parseAndSaveResults(testRunId, stdout);
+        }
+
+        // Emit completion event
+        this.gateway.emitProgress(testRunId, 100, 'Completed!');
         this.gateway.emitTestCompleted(testRunId, { stdout, stderr });
-        this.gateway.emitLog(testRunId, '✅ Tests terminés avec succès!');
+        this.gateway.emitLog(testRunId, '✅ Tests completed successfully!');
       } catch (error) {
-        this.logger.error(`❌ Erreur Promptfoo (${testRunId}):`, error);
+        this.logger.error(`❌ Promptfoo error (${testRunId}):`, error);
 
-        // Mettre à jour le statut en FAILED
+        // Update status to FAILED
         if (isDbTestRun) {
           try {
             await this.prisma.testRun.update({
@@ -142,12 +192,12 @@ export class PromptfooService {
               },
             });
           } catch (dbError) {
-            this.logger.error(`Erreur lors de la mise à jour du statut FAILED:`, dbError);
+            this.logger.error(`Error updating FAILED status:`, dbError);
           }
         }
 
         this.gateway.emitTestFailed(testRunId, error.message);
-        this.gateway.emitLog(testRunId, `❌ Erreur: ${error.message}`);
+        this.gateway.emitLog(testRunId, `❌ Error: ${error.message}`);
       }
     }, 0);
   }
@@ -376,20 +426,17 @@ export class PromptfooService {
   }
 
   /**
-   * S'assure que le répertoire Promptfoo existe
+   * Check if Promptfoo container is running
    */
-  private async ensurePromptfooDirectoryExists(): Promise<void> {
+  private async checkContainerRunning(): Promise<boolean> {
     try {
-      await fs.access(this.promptfooDir);
-      this.logger.debug(`✅ Répertoire Promptfoo trouvé: ${this.promptfooDir}`);
+      const { stdout } = await execAsync(
+        `docker inspect --format='{{.State.Running}}' ${PROMPTFOO_CONTAINER}`,
+        { timeout: 5000 }
+      );
+      return stdout.trim() === 'true';
     } catch (error) {
-      this.logger.error(
-        `❌ Répertoire Promptfoo introuvable: ${this.promptfooDir}`,
-      );
-      throw new Error(
-        `Le répertoire Promptfoo n'existe pas: ${this.promptfooDir}. ` +
-          `Assurez-vous que guardrail/solution_promptfoo/ai-risk-guardrails-tests existe.`,
-      );
+      return false;
     }
   }
 
@@ -406,21 +453,32 @@ export class PromptfooService {
     const warnings: string[] = [];
 
     try {
-      // Vérifications de base sur le YAML
+      // Basic YAML validations
       if (!yamlContent || yamlContent.trim().length === 0) {
         errors.push('Configuration YAML vide');
         return { valid: false, errors, warnings };
       }
 
-      // Vérifier les sections requises
-      const requiredSections = ['prompts:', 'targets:', 'redteam:'];
-      for (const section of requiredSections) {
-        if (!yamlContent.includes(section)) {
-          errors.push(`Section manquante: ${section}`);
-        }
+      // Check for simple YAML structure (prompts-only mode for basic tests)
+      const hasPrompts = yamlContent.includes('prompts:');
+      const hasTargets = yamlContent.includes('targets:') || yamlContent.includes('providers:');
+      const hasRedteam = yamlContent.includes('redteam:');
+
+      // Minimal validation - at least prompts required
+      if (!hasPrompts) {
+        errors.push('Section manquante: prompts:');
       }
 
-      // Vérifier que numTests est défini et raisonnable
+      // Warn about missing sections but don't fail
+      if (!hasTargets) {
+        warnings.push('Section providers/targets manquante - tests simplifiés');
+      }
+
+      if (!hasRedteam) {
+        warnings.push('Section redteam manquante - mode de test basique');
+      }
+
+      // Check numTests if defined
       const numTestsMatch = yamlContent.match(/numTests:\s*(\d+)/);
       if (numTestsMatch) {
         const numTests = parseInt(numTestsMatch[1], 10);
@@ -430,29 +488,21 @@ export class PromptfooService {
         if (numTests > 100) {
           errors.push(`Nombre de tests trop élevé (${numTests}) - Maximum recommandé: 100`);
         }
-      } else {
-        warnings.push('numTests non spécifié - valeur par défaut sera utilisée');
       }
 
-      // Vérifier qu'au moins un plugin est défini
-      if (!yamlContent.includes('plugins:')) {
-        errors.push('Aucun plugin défini dans la section redteam');
-      }
-
-      // Vérifier que le répertoire Promptfoo existe
-      try {
-        await this.ensurePromptfooDirectoryExists();
-      } catch (error) {
-        errors.push(error.message);
+      // Check if container is running
+      const containerRunning = await this.checkContainerRunning();
+      if (!containerRunning) {
+        errors.push(`Container ${PROMPTFOO_CONTAINER} n'est pas en cours d'exécution. Démarrez-le avec: docker-compose up -d promptfoo-runner`);
       }
 
       const valid = errors.length === 0;
 
-      this.logger.log(`Validation YAML: ${valid ? 'Succès' : 'Échec'} (${errors.length} erreurs, ${warnings.length} warnings)`);
+      this.logger.log(`YAML Validation: ${valid ? 'Success' : 'Failed'} (${errors.length} errors, ${warnings.length} warnings)`);
 
       return { valid, errors, warnings };
     } catch (error) {
-      this.logger.error('Erreur lors de la validation YAML:', error);
+      this.logger.error('Error validating YAML:', error);
       errors.push(`Erreur de validation: ${error.message}`);
       return { valid: false, errors, warnings };
     }

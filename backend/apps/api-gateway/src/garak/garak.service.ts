@@ -1,14 +1,11 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '@app/database';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { ScanConfigDto } from './dto/scan-config.dto';
 import { ScanResultDto, VulnerabilityDto } from './dto/scan-result.dto';
 import { GarakGateway } from './garak.gateway';
-
-const execAsync = promisify(exec);
+import { execAsync, execFileAsync, severityToScore, ensureDirectory } from '../shared/security-tool.utils';
 
 @Injectable()
 export class GarakService {
@@ -21,63 +18,88 @@ export class GarakService {
     private readonly gateway: GarakGateway,
   ) {}
 
-  /**
-   * Ensure Garak output directory exists
-   */
   private async ensureGarakOutputDir(): Promise<void> {
-    try {
-      await fs.access(this.garakOutputDir);
-      this.logger.debug(`Garak output directory exists: ${this.garakOutputDir}`);
-    } catch {
-      this.logger.log(`Creating Garak output directory: ${this.garakOutputDir}`);
-      await fs.mkdir(this.garakOutputDir, { recursive: true });
-    }
+    await ensureDirectory(this.garakOutputDir, this.logger);
   }
 
   /**
-   * Build Garak CLI command
+   * Build Garak CLI command for Docker execution
+   * @returns Array of command arguments for docker exec
    */
-  private buildGarakCommand(config: ScanConfigDto, outputDir: string): string {
-    const parts: string[] = ['garak'];
+  private buildGarakCommand(config: ScanConfigDto, outputDir: string): string[] {
+    // Build docker exec command to run Garak in isolated container
+    const dockerArgs: string[] = [];
 
-    // Model configuration
-    const modelType = config.modelType || 'openai';
-    parts.push(`--model-type ${modelType}`);
-    parts.push(`--model-name "${config.model}"`);
-
-    // API Key (if provided)
+    // Pass environment variables for API keys if provided
     if (config.apiKey) {
-      parts.push(`--api-key ${config.apiKey}`);
+      // Determine which env var to use based on model type
+      const modelType = config.modelType || 'openai';
+      if (modelType === 'openai') {
+        dockerArgs.push('-e', `OPENAI_API_KEY=${config.apiKey}`);
+      } else if (modelType === 'google' || modelType === 'gemini') {
+        dockerArgs.push('-e', `GEMINI_API_KEY=${config.apiKey}`);
+      } else if (modelType === 'anthropic') {
+        dockerArgs.push('-e', `ANTHROPIC_API_KEY=${config.apiKey}`);
+      } else {
+        // Generic API key
+        dockerArgs.push('-e', `API_KEY=${config.apiKey}`);
+      }
     }
+
+    // Container name
+    dockerArgs.push('airiskmgr-garak-runner');
+
+    // Garak command
+    dockerArgs.push('garak');
+
+    // Model/Generator configuration - Garak uses generators, not model-type/model-name
+    // Map modelType to Garak generator format
+    const modelType = config.modelType || 'openai';
+    let generatorSpec = '';
+
+    switch (modelType.toLowerCase()) {
+      case 'openai':
+        generatorSpec = `openai.OpenAIGenerator`;
+        break;
+      case 'google':
+      case 'gemini':
+        generatorSpec = `google.GeminiGenerator`;
+        break;
+      case 'anthropic':
+        generatorSpec = `anthropic.AnthropicGenerator`;
+        break;
+      case 'huggingface':
+        generatorSpec = `huggingface.InferenceAPI`;
+        break;
+      default:
+        generatorSpec = `litellm.LiteLLMGenerator`;
+    }
+
+    // Use --model_type and --model_name (not --model-type and --model-name)
+    dockerArgs.push('--model_type', generatorSpec);
+    dockerArgs.push('--model_name', config.model);
 
     // Probes
     if (config.probes.includes('all')) {
-      parts.push('--probes all');
+      dockerArgs.push('--probes', 'all');
     } else {
-      parts.push(`--probes ${config.probes.join(',')}`);
+      dockerArgs.push('--probes', config.probes.join(','));
     }
 
     // Detectors (optional)
     if (config.detectors && config.detectors.length > 0) {
       if (config.detectors.includes('all')) {
-        parts.push('--detectors all');
+        dockerArgs.push('--detectors', 'all');
       } else {
-        parts.push(`--detectors ${config.detectors.join(',')}`);
+        dockerArgs.push('--detectors', config.detectors.join(','));
       }
     }
 
-    // Generators (optional)
-    if (config.generators && config.generators.length > 0) {
-      parts.push(`--generators ${config.generators.join(',')}`);
-    }
+    // Output configuration (use container's output directory with prefix)
+    dockerArgs.push('--report_prefix', '/app/output/garak-scan');
 
-    // Output configuration
-    parts.push(`--report_dir "${outputDir}"`);
-    parts.push('--output_format jsonl');
-
-    const command = parts.join(' ');
-    this.logger.debug(`Built Garak command: ${command}`);
-    return command;
+    this.logger.debug(`Built Garak Docker command: docker exec ${dockerArgs.join(' ')}`);
+    return dockerArgs;
   }
 
   /**
@@ -146,19 +168,19 @@ export class GarakService {
   }
 
   /**
-   * Run Garak CLI asynchronously
+   * Run Garak CLI asynchronously in Docker container
    */
   private async runGarakAsync(
     scanId: string,
     config: ScanConfigDto,
     outputPath: string,
   ): Promise<void> {
-    this.logger.log(`🚀 Launching Garak CLI (scan ID: ${scanId})...`);
+    this.logger.log(`🚀 Launching Garak CLI in Docker (scan ID: ${scanId})...`);
 
     try {
-      // Build command
-      const command = this.buildGarakCommand(config, outputPath);
-      this.gateway.emitLog(scanId, `Executing: ${command}`);
+      // Build command arguments
+      const commandArgs = this.buildGarakCommand(config, outputPath);
+      this.gateway.emitLog(scanId, `Executing: docker exec ${commandArgs.join(' ')}`);
       this.gateway.emitProgress(scanId, 10, 'Initializing Garak scanner...');
 
       // Update status to RUNNING
@@ -167,10 +189,10 @@ export class GarakService {
         data: { status: 'RUNNING' },
       });
 
-      // Execute Garak CLI (timeout: 1 hour, max buffer: 10MB)
+      // Execute Garak CLI in Docker container (timeout: 1 hour, max buffer: 10MB)
       this.gateway.emitProgress(scanId, 20, 'Running Garak probes...');
 
-      const { stdout, stderr } = await execAsync(command, {
+      const { stdout, stderr } = await execFileAsync('docker', ['exec', ...commandArgs], {
         timeout: 3600000, // 1 hour
         maxBuffer: 10 * 1024 * 1024, // 10MB
       });
@@ -182,6 +204,10 @@ export class GarakService {
         this.logger.warn(`STDERR: ${stderr}`);
         this.gateway.emitLog(scanId, `⚠️ Warnings: ${stderr}`);
       }
+
+      // Copy results from container to host
+      this.gateway.emitProgress(scanId, 85, 'Copying results from container...');
+      await this.copyResultsFromContainer(scanId, outputPath);
 
       // Parse and save results
       this.gateway.emitProgress(scanId, 90, 'Parsing results...');
@@ -211,6 +237,26 @@ export class GarakService {
 
       this.gateway.emitScanFailed(scanId, error.message);
       this.gateway.emitLog(scanId, `❌ Error: ${error.message}`);
+    }
+  }
+
+  /**
+   * Copy Garak results from container to host
+   */
+  private async copyResultsFromContainer(scanId: string, hostOutputPath: string): Promise<void> {
+    try {
+      // Ensure host output directory exists
+      await fs.mkdir(hostOutputPath, { recursive: true });
+
+      // Copy results from container's /app/output to host
+      const copyCommand = `docker cp airiskmgr-garak-runner:/app/output/. "${hostOutputPath}"`;
+      this.logger.log(`Copying results: ${copyCommand}`);
+
+      await execAsync(copyCommand, { timeout: 60000 }); // 1 minute timeout
+      this.logger.log(`✅ Results copied from container to ${hostOutputPath}`);
+    } catch (error) {
+      this.logger.error(`Failed to copy results from container:`, error);
+      throw new Error(`Failed to copy Garak results: ${error.message}`);
     }
   }
 
@@ -371,16 +417,4 @@ export class GarakService {
     return 'moderate';
   }
 
-  /**
-   * Convert severity to numeric score (0-1 scale)
-   */
-  private severityToScore(severity: string): number {
-    const scoreMap: Record<string, number> = {
-      critical: 0.1,
-      high: 0.3,
-      moderate: 0.5,
-      low: 0.7,
-    };
-    return scoreMap[severity] || 0.5;
-  }
 }

@@ -6,6 +6,7 @@ import { StrixGateway } from './strix.gateway';
 import { spawn, ChildProcess } from 'child_process';
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import { execAsync, severityToScore, ensureDirectory } from '../shared/security-tool.utils';
 
 @Injectable()
 export class StrixService {
@@ -22,16 +23,8 @@ export class StrixService {
     this.ensureStrixOutputDir();
   }
 
-  /**
-   * Ensure Strix output directory exists
-   */
   private async ensureStrixOutputDir(): Promise<void> {
-    try {
-      await fs.mkdir(this.strixOutputDir, { recursive: true });
-      this.logger.log(`Strix output directory: ${this.strixOutputDir}`);
-    } catch (error) {
-      this.logger.error('Failed to create Strix output directory', error);
-    }
+    await ensureDirectory(this.strixOutputDir, this.logger);
   }
 
   /**
@@ -40,36 +33,33 @@ export class StrixService {
   private buildStrixCommand(config: AgentConfigDto, outputDir: string): string[] {
     const args: string[] = [];
 
-    // Target URL
-    args.push('--target', config.targetUrl);
+    // Target URL (required)
+    args.push('-t', config.targetUrl);
 
-    // Attack mode
-    args.push('--mode', config.attackMode);
+    // Build custom instructions from config parameters
+    const instructions: string[] = [];
+    instructions.push(`Attack mode: ${config.attackMode}`);
+    instructions.push(`Max steps: ${config.maxSteps}`);
+    instructions.push(`Timeout: ${config.timeout} seconds`);
 
-    // Max steps
-    args.push('--max-steps', config.maxSteps.toString());
-
-    // Timeout
-    args.push('--timeout', config.timeout.toString());
-
-    // Headless mode
-    if (config.headless) {
-      args.push('--headless');
-    }
-
-    // API Key (if provided)
     if (config.apiKey) {
-      args.push('--api-key', config.apiKey);
+      instructions.push(`Use API key for authenticated testing`);
     }
 
-    // Output directory
-    args.push('--output', outputDir);
+    instructions.push(`Output directory: ${outputDir}`);
+    instructions.push(`Generate detailed JSON report with all findings`);
 
-    // JSON output format
-    args.push('--format', 'json');
+    // Pass instructions as single argument
+    args.push('--instruction', instructions.join('. '));
 
-    // Verbose logging
-    args.push('--verbose');
+    // Run name for tracking
+    const executionId = outputDir.split('/').pop() || 'strix-run';
+    args.push('--run-name', executionId);
+
+    // Non-interactive mode (headless)
+    if (config.headless) {
+      args.push('-n');
+    }
 
     return args;
   }
@@ -208,11 +198,42 @@ export class StrixService {
     const outputDir = join(this.strixOutputDir, executionId);
     await fs.mkdir(outputDir, { recursive: true });
 
-    const args = this.buildStrixCommand(config, outputDir);
-    this.logger.log(`Running Strix: strix ${args.join(' ')}`);
+    const strixArgs = this.buildStrixCommand(config, outputDir);
 
-    // Spawn Strix process
-    const strixProcess = spawn('strix', args, {
+    // Build docker exec command with optional LLM configuration
+    const dockerArgs = ['exec'];
+
+    // Override LLM configuration if provided by user
+    if (config.llmModel) {
+      dockerArgs.push('-e', `STRIX_LLM=${config.llmModel}`);
+      this.logger.log(`Using user-configured LLM: ${config.llmModel}`);
+    }
+
+    if (config.llmApiKey) {
+      dockerArgs.push('-e', `LLM_API_KEY=${config.llmApiKey}`);
+      // Also set GEMINI_API_KEY for compatibility if model is Gemini
+      if (config.llmModel?.startsWith('gemini')) {
+        dockerArgs.push('-e', `GEMINI_API_KEY=${config.llmApiKey}`);
+      }
+      this.logger.log(`Using user-provided LLM API key`);
+    }
+
+    // RATE LIMITING: Configure rate limiter wrapper
+    // Gemini Free Tier: 15 RPM for Flash-Lite, 10 RPM for Flash
+    // Safe rate: 10 RPM (1 request every 6 seconds) to avoid 429 errors
+    dockerArgs.push('-e', 'STRIX_MIN_REQUEST_INTERVAL=6'); // 6 seconds between requests = 10 RPM
+    dockerArgs.push('-e', 'STRIX_MAX_REQUESTS_PER_MINUTE=10'); // Max 10 requests per minute
+    this.logger.log(`Rate limiting enabled: 10 RPM max, 6s between requests`);
+
+    // Add container name and command
+    // Use rate-limited wrapper instead of direct strix command
+    // The script is installed in /usr/local/bin by the Dockerfile
+    dockerArgs.push('airiskmgr-strix-runner', '/usr/local/bin/strix-rate-limited', ...strixArgs);
+
+    this.logger.log(`Running Strix: docker ${dockerArgs.join(' ')}`);
+
+    // Spawn Docker exec process to run Strix in isolated container
+    const strixProcess = spawn('docker', dockerArgs, {
       cwd: process.cwd(),
       env: { ...process.env },
     });
@@ -250,6 +271,9 @@ export class StrixService {
     strixProcess.on('close', async (code) => {
       this.logger.log(`Strix process exited with code ${code}`);
       this.processes.delete(executionId);
+
+      // Cleanup Strix sandbox containers after execution
+      await this.cleanupStrixContainers(executionId);
 
       if (code === 0) {
         // Success - parse final results
@@ -298,6 +322,41 @@ export class StrixService {
       });
       this.gateway.emitExecutionFailed(executionId, error.message);
     });
+  }
+
+  /**
+   * Cleanup Strix sandbox containers after execution
+   */
+  private async cleanupStrixContainers(executionId: string): Promise<void> {
+    try {
+      // Strix creates containers with pattern: strix-scan-{executionId}
+      const containerName = `strix-scan-${executionId}`;
+      
+      // Check if container exists and stop it
+      try {
+        await execAsync(`docker stop ${containerName}`, { timeout: 5000 });
+        this.logger.log(`Stopped Strix container: ${containerName}`);
+      } catch (error: any) {
+        // Container might not exist or already stopped
+        if (!error.message.includes('No such container')) {
+          this.logger.warn(`Failed to stop container ${containerName}: ${error.message}`);
+        }
+      }
+
+      // Remove the container
+      try {
+        await execAsync(`docker rm ${containerName}`, { timeout: 5000 });
+        this.logger.log(`Removed Strix container: ${containerName}`);
+      } catch (error: any) {
+        // Container might not exist or already removed
+        if (!error.message.includes('No such container')) {
+          this.logger.warn(`Failed to remove container ${containerName}: ${error.message}`);
+        }
+      }
+    } catch (error: any) {
+      // Don't fail the execution if cleanup fails
+      this.logger.warn(`Failed to cleanup Strix containers for ${executionId}: ${error.message}`);
+    }
   }
 
   /**
@@ -387,7 +446,7 @@ export class StrixService {
               promptCategory: finding.type || 'UNKNOWN',
               promptComplexity: 'SOPHISTIQUE',
               response: finding.description || '',
-              score: this.severityToScore(finding.severity),
+              score: severityToScore(finding.severity),
               status: finding.type === 'vulnerability' ? 'FAILED' : 'PASSED',
               evaluationChain: {
                 steps: [
@@ -539,20 +598,6 @@ export class StrixService {
     });
   }
 
-
-  /**
-   * Convert severity to numeric score
-   */
-  private severityToScore(severity: string): number {
-    const scoreMap: Record<string, number> = {
-      critical: 0.1,
-      high: 0.3,
-      moderate: 0.5,
-      low: 0.7,
-      info: 1.0,
-    };
-    return scoreMap[severity] || 0.5;
-  }
 
   /**
    * Format time as HH:MM:SS

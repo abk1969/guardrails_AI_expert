@@ -7,6 +7,7 @@ import { AgentConfigDto } from './dto/agent-config.dto';
 import { AgentExecutionDto } from './dto/agent-execution.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '@prisma/client';
+import { DEV_DEFAULTS } from '../shared/constants';
 
 @ApiTags('Strix Agentic AI Testing')
 @Controller('strix')
@@ -33,12 +34,9 @@ export class StrixController {
     @CurrentUser() user: User,
     @Body() config: AgentConfigDto,
   ): Promise<AgentExecutionDto> {
-    // Default IDs for public/development mode
-    const organizationId = user?.organizationId || '9b0b4913-3a4d-4511-9840-2d4ce87e53a9';
-    const userId = user?.id || 'e6cf191e-5d9e-45f2-8d15-a0efbe05f9e8';
-    const targetId = '33faa86b-0bad-45e9-b372-0d174de49cc8';
-
-    console.log('[StrixController] Calling startExecution with:', { organizationId, userId, targetId });
+    const organizationId = user?.organizationId || DEV_DEFAULTS.ORGANIZATION_ID;
+    const userId = user?.id || DEV_DEFAULTS.USER_ID;
+    const targetId = DEV_DEFAULTS.TARGET_ID;
 
     return this.strixService.startExecution(organizationId, config, userId, targetId);
   }
@@ -61,7 +59,7 @@ export class StrixController {
     @CurrentUser() user: User,
     @Param('id') id: string,
   ): Promise<AgentExecutionDto> {
-    const organizationId = user?.organizationId || '9b0b4913-3a4d-4511-9840-2d4ce87e53a9';
+    const organizationId = user?.organizationId || DEV_DEFAULTS.ORGANIZATION_ID;
     return this.strixService.getExecution(organizationId, id);
   }
 
