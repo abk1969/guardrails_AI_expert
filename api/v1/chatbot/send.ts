@@ -57,12 +57,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!geminiResponse.ok) {
       const errText = await geminiResponse.text();
       console.error('Gemini API error:', errText);
+      // Distinguish rate limit from other errors
+      const isRateLimit = geminiResponse.status === 429;
+      const answer = isRateLimit
+        ? "Le quota API Gemini est temporairement epuise. Veuillez reessayer dans quelques instants. En attendant, voici une reponse locale:\n\n" + generateFallbackResponse(message)
+        : generateFallbackResponse(message);
       return res.status(200).json({
         sessionId: `session-${Date.now()}`,
-        answer: generateFallbackResponse(message),
+        answer,
         reasoning: [],
         toolsUsed: [],
-        mode: 'fallback',
+        mode: isRateLimit ? 'rate-limited' : 'fallback',
       });
     }
 
