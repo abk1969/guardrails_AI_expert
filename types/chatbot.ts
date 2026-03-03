@@ -40,8 +40,10 @@ export interface AgenticConversation {
 
 export interface ChatbotSendRequest {
   message: string;
-  conversationHistory: Array<{ role: string; content: string }>;
-  llmConfig: {
+  conversationHistory?: Array<{ role: string; content: string }>;
+  mode?: string;
+  /** Optional in serverless mode (LLM config is server-side via env vars) */
+  llmConfig?: {
     provider: string;
     model: string;
     apiKey?: string;
@@ -53,6 +55,11 @@ export interface ChatbotSendRequest {
 
 export interface ChatbotSendResponse {
   sessionId: string;
+  /** Direct answer returned by Vercel serverless (no WebSocket streaming) */
+  answer?: string;
+  reasoning?: Array<{ step: number; thought: string; action: string; result: string }>;
+  toolsUsed?: string[];
+  mode?: string;
 }
 
 // WebSocket event payloads

@@ -77,9 +77,9 @@ export function useAgenticChatWebSocket(
       return;
     }
 
-    // Skip WebSocket connection if backend is unavailable
-    if (!backendStatus.isAvailable()) {
-      log('Backend unavailable, skipping WebSocket connection');
+    // Skip WebSocket connection if backend is unavailable or serverless (no Socket.IO)
+    if (!backendStatus.isAvailable() || backendStatus.isServerless) {
+      log('Backend unavailable or serverless mode, skipping WebSocket connection');
       setIsConnected(false);
       setIsProcessing(false);
       return;
