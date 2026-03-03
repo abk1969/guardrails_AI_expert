@@ -64,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const geminiData = await geminiResponse.json();
+    const geminiData: any = await geminiResponse.json();
     const answer =
       geminiData.candidates?.[0]?.content?.parts?.[0]?.text ||
       generateFallbackResponse(message);
