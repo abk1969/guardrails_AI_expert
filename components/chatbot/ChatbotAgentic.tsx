@@ -7,6 +7,7 @@ import {
 import { sendAgenticMessage, isBackendAvailable, generateFallbackResponse } from '../../services/agenticChatService';
 import { useAgenticChatWebSocket } from '../../src/hooks/useAgenticChatWebSocket';
 import { useLLMConfig } from '../../contexts/LLMConfigContext';
+import { backendStatus } from '../../services/backendStatus';
 import type { AgenticMessage, AgenticConversation, ReasoningStep } from '../../types/chatbot';
 import ReasoningPanel from './ReasoningPanel';
 import './ChatbotModern.css';
@@ -219,8 +220,9 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
       enhancedMessage = `[MODE CONCIS] ${messageText}\n\nRéponds de manière brève et directe.`;
     }
 
-    if (backendAvailable && llmConfigured && llmConfig) {
-      // Backend mode: send via API, get sessionId, WS hook handles streaming
+    const useBackendApi = backendStatus.isServerless || (backendAvailable && llmConfigured && llmConfig);
+    if (useBackendApi) {
+      // Backend/serverless mode: send via API
       try {
         resetWs();
         setPendingUserMessage(messageText);
@@ -250,17 +252,38 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
         const response = await sendAgenticMessage({
           message: enhancedMessage + memoryContext,
           conversationHistory,
-          llmConfig: {
-            provider: llmConfig.provider,
-            model: llmConfig.model,
-            apiKey: llmConfig.apiKey,
-            baseUrl: llmConfig.baseUrl,
-            temperature: llmConfig.temperature,
-            maxTokens: llmConfig.maxTokens,
-          },
+          mode: chatMode !== 'normal' ? chatMode : undefined,
+          ...(llmConfig ? {
+            llmConfig: {
+              provider: llmConfig.provider,
+              model: llmConfig.model,
+              apiKey: llmConfig.apiKey,
+              baseUrl: llmConfig.baseUrl,
+              temperature: llmConfig.temperature,
+              maxTokens: llmConfig.maxTokens,
+            },
+          } : {}),
         });
 
-        setSessionId(response.sessionId);
+        // Serverless mode: REST returns answer directly (no WebSocket streaming)
+        if (backendStatus.isServerless && response.answer) {
+          const assistantMessage: AgenticMessage = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: response.answer,
+            timestamp: new Date(),
+            toolsUsed: response.toolsUsed,
+          };
+          const finalConv = { ...updatedConv, messages: [...updatedMessages, assistantMessage], lastUpdated: new Date() };
+          setCurrentConversation(finalConv);
+          const finalConvs = allConvs.map(c => c.id === finalConv.id ? finalConv : c);
+          saveConversations(finalConvs);
+          setIsTyping(false);
+          setPendingUserMessage(null);
+        } else {
+          // Full backend mode: set sessionId for WebSocket streaming
+          setSessionId(response.sessionId);
+        }
       } catch (error) {
         // API call failed, fall back to offline response
         const fallback = generateFallbackResponse(messageText);
@@ -447,16 +470,22 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {/* Offline Banner */}
-      {backendAvailable === false && (
+      {/* Offline / Serverless Banner */}
+      {backendAvailable === false && !backendStatus.isServerless && (
         <div className="offline-banner">
           <WifiOff size={14} />
           <span>Mode hors-ligne - Réponses limitées. Lancez le backend pour le raisonnement agentique.</span>
         </div>
       )}
+      {backendStatus.isServerless && (
+        <div className="offline-banner" style={{ background: 'rgba(34, 211, 238, 0.1)', borderColor: 'rgba(34, 211, 238, 0.3)' }}>
+          <Sparkles size={14} />
+          <span>Mode serverless — Réponses via API Gemini. Configurez GEMINI_API_KEY dans Vercel pour activer l'IA.</span>
+        </div>
+      )}
 
-      {/* LLM not configured banner */}
-      {backendAvailable && !llmConfigured && (
+      {/* LLM not configured banner (not needed in serverless — config is server-side) */}
+      {backendAvailable && !llmConfigured && !backendStatus.isServerless && (
         <div className="offline-banner">
           <Settings size={14} />
           <span>LLM non configuré - Allez dans Paramètres &gt; Configuration LLM.</span>
