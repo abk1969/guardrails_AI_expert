@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Call Gemini API
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,11 +83,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         {
           step: 1,
           thought: 'Analyse de la question utilisateur',
-          action: 'Gemini 2.0 Flash',
+          action: 'Gemini 3 Flash Preview',
           result: 'Reponse generee',
         },
       ],
-      toolsUsed: ['gemini-2.0-flash'],
+      toolsUsed: ['gemini-3-flash-preview'],
       mode: 'gemini',
     });
   } catch (error: any) {
