@@ -11,3 +11,4 @@ export * from './types/risk-repository';
 export * from './types/compass';
 export * from './types/applications';
 export * from './types/llm-config';
+export * from './types/agentic-security';

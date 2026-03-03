@@ -77,7 +77,7 @@ guardrail/**/node_modules
 # Scripts and tools not needed in frontend image
 *.ps1
 *.py
-strix_rate_limited.py
+!strix_rate_limited.py
 strix-output/
 scripts/
 
