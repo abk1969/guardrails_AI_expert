@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSQL, handleCors, json } from '../../lib/neon';
 
 const DEFAULT_METRICS = {
   totalTests: 0,
@@ -14,12 +13,19 @@ const DEFAULT_METRICS = {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (handleCors(req, res)) return;
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(204).end();
 
   try {
-    const sql = getSQL();
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) return res.status(200).json(DEFAULT_METRICS);
 
-    // Aggregate metrics from database
+    const { neon } = await import('@neondatabase/serverless');
+    const sql = neon(dbUrl);
+
     const [testStats] = await sql`
       SELECT
         COUNT(*)::int as total_tests,
@@ -51,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       LIMIT 10
     `;
 
-    json(res, {
+    res.status(200).json({
       totalTests: testStats?.total_tests || 0,
       vulnerabilitiesFound: resultStats?.vulnerabilities || 0,
       criticalFindings: resultStats?.critical || 0,
@@ -65,12 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         timestamp: a.timestamp,
       })),
     });
-  } catch (error: any) {
-    // Return default metrics if DB not available
-    if (error.message?.includes('DATABASE_URL')) {
-      return json(res, DEFAULT_METRICS);
-    }
-    // For other DB errors (tables don't exist yet, etc.), return defaults
-    return json(res, DEFAULT_METRICS);
+  } catch {
+    res.status(200).json(DEFAULT_METRICS);
   }
 }

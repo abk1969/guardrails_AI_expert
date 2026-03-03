@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleCors, json } from '../../lib/neon';
 
 /** Supported LLM provider endpoints for connection testing */
 const PROVIDER_ENDPOINTS: Record<string, { url: string; buildHeaders: (key: string) => Record<string, string> }> = {
@@ -26,25 +25,29 @@ const PROVIDER_ENDPOINTS: Record<string, { url: string; buildHeaders: (key: stri
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (handleCors(req, res)) return;
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(204).end();
 
   if (req.method !== 'POST') {
-    return json(res, { error: 'Method not allowed' }, 405);
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     const { provider, apiKey, model } = req.body || {};
 
     if (!provider || !apiKey) {
-      return json(res, {
+      return res.status(400).json({
         success: false,
         message: 'Provider et cle API requis',
-      }, 400);
+      });
     }
 
     const config = PROVIDER_ENDPOINTS[provider.toLowerCase()];
     if (!config) {
-      return json(res, {
+      return res.status(200).json({
         success: true,
         message: `Provider ${provider} enregistre (test non disponible cote serveur)`,
         provider,
@@ -64,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (testResponse.ok) {
-      json(res, {
+      res.status(200).json({
         success: true,
         message: `Connexion a ${provider} reussie`,
         provider,
@@ -72,14 +75,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     } else {
       const errBody = await testResponse.text().catch(() => '');
-      json(res, {
+      res.status(200).json({
         success: false,
         message: `Echec de connexion a ${provider}: ${testResponse.status}`,
         details: errBody.substring(0, 200),
       });
     }
   } catch (error: any) {
-    json(res, {
+    res.status(200).json({
       success: false,
       message: `Erreur de connexion: ${error.message}`,
     });

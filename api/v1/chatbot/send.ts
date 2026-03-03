@@ -1,25 +1,27 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleCors, json } from '../../lib/neon';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (handleCors(req, res)) return;
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(204).end();
 
   if (req.method !== 'POST') {
-    return json(res, { error: 'Method not allowed' }, 405);
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     const { message, mode, llmConfig } = req.body || {};
 
     if (!message) {
-      return json(res, { error: 'Message is required' }, 400);
+      return res.status(400).json({ error: 'Message is required' });
     }
 
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
     if (!geminiApiKey) {
-      // Fallback: return a helpful response without LLM
-      return json(res, {
+      return res.status(200).json({
         sessionId: `session-${Date.now()}`,
         answer: generateFallbackResponse(message),
         reasoning: [],
@@ -55,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!geminiResponse.ok) {
       const errText = await geminiResponse.text();
       console.error('Gemini API error:', errText);
-      return json(res, {
+      return res.status(200).json({
         sessionId: `session-${Date.now()}`,
         answer: generateFallbackResponse(message),
         reasoning: [],
@@ -69,7 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       geminiData.candidates?.[0]?.content?.parts?.[0]?.text ||
       generateFallbackResponse(message);
 
-    json(res, {
+    res.status(200).json({
       sessionId: `session-${Date.now()}`,
       answer,
       reasoning: [
@@ -85,14 +87,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error('Chatbot error:', error);
-    json(res, {
+    res.status(200).json({
       sessionId: `session-${Date.now()}`,
       answer: generateFallbackResponse(req.body?.message || ''),
       reasoning: [],
       toolsUsed: [],
       mode: 'fallback',
       error: error.message,
-    }, 200);
+    });
   }
 }
 
