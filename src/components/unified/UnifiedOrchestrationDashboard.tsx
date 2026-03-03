@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { backendStatus } from '../../../services/backendStatus';
 import {
   GitMerge,
   Play,
@@ -73,7 +74,7 @@ interface UnifiedExecution {
   };
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+const API_URL = backendStatus.apiUrl;
 
 const UnifiedOrchestrationDashboard: React.FC = () => {
   const [config, setConfig] = useState<UnifiedExecutionConfig>({
@@ -90,9 +91,18 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
 
   const [execution, setExecution] = useState<UnifiedExecution | null>(null);
   const [isStarting, setIsStarting] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState<boolean>(backendStatus.isAvailable());
+  const pollFailCount = useRef(0);
+
+  useEffect(() => {
+    backendStatus.check().then(setBackendAvailable);
+    const unsub = backendStatus.onChange(setBackendAvailable);
+    return unsub;
+  }, []);
 
   useEffect(() => {
     if (execution && execution.status === 'running') {
+      pollFailCount.current = 0;
       const interval = setInterval(fetchExecutionStatus, 2000);
       return () => clearInterval(interval);
     }
@@ -100,16 +110,21 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
 
   const fetchExecutionStatus = async () => {
     if (!execution) return;
+    if (pollFailCount.current >= 3) return;
 
     try {
       const response = await fetch(
         `${API_URL}/unified/orchestration/${execution.id}`
       );
       if (response.ok) {
+        pollFailCount.current = 0;
         const data = await response.json();
         setExecution(data);
+      } else {
+        pollFailCount.current++;
       }
     } catch (error) {
+      pollFailCount.current++;
       console.error('Failed to fetch execution status:', error);
     }
   };
@@ -208,6 +223,16 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Offline Warning Banner */}
+      {!backendAvailable && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-yellow-500/10 border border-yellow-500/50 rounded-lg">
+          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+          <span className="text-yellow-300 text-sm">
+            Mode autonome — Backend non disponible. L'orchestration necessite le backend Docker.
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white flex items-center gap-3">
@@ -304,6 +329,7 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
                 <button
                   onClick={startUnifiedExecution}
                   disabled={
+                    !backendAvailable ||
                     isStarting ||
                     config.frameworks.length === 0 ||
                     execution?.status === 'running'
