@@ -14,7 +14,7 @@ export class SystemController {
   @ApiOperation({
     summary: 'Check system dependencies health',
     description:
-      'Verifies that all required dependencies for the unified pentest platform are installed and functioning: Python 3.9+, pipx, Garak, Strix, Node.js 18+, Promptfoo, and Docker.',
+      'Verifies that all required dependencies for the unified pentest platform are installed and functioning: Python 3.9+, pipx, Garak, Node.js 18+, Promptfoo, and Docker.',
   })
   @ApiResponse({
     status: 200,

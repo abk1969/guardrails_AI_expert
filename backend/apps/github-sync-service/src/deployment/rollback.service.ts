@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as Docker from 'dockerode';
 
-type ToolName = 'promptfoo' | 'garak' | 'strix';
+type ToolName = 'promptfoo' | 'garak';
 
 interface RollbackHistory {
   tool: ToolName;

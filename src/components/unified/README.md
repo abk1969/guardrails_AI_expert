@@ -1,13 +1,12 @@
 # Composants Frontend Unifiés
 
-Interfaces React pour la plateforme unifiée de pentest AI (Promptfoo, Garak, Strix).
+Interfaces React pour la plateforme unifiée de pentest AI (Promptfoo, Garak).
 
 ## Vue d'ensemble
 
-Ces composants fournissent une interface utilisateur moderne et réactive pour interagir avec les trois outils de pentest:
+Ces composants fournissent une interface utilisateur moderne et réactive pour interagir avec les outils de pentest:
 - **UnifiedSecurityHub**: Tableau de bord central avec métriques globales
 - **GarakScannerUI**: Interface de scanning pour Garak (vulnérabilités LLM)
-- **StrixDashboard**: Contrôle et monitoring de l'agent Strix
 
 ## Composants
 
@@ -19,7 +18,7 @@ Ces composants fournissent une interface utilisateur moderne et réactive pour i
 
 **Fonctionnalités**:
 - Métriques globales (tests, vulnérabilités, statut)
-- Statut en temps réel des 3 outils
+- Statut en temps réel des outils
 - Activité récente avec historique
 - Actions rapides pour lancer chaque outil
 - Auto-refresh toutes les 10 secondes
@@ -36,8 +35,7 @@ Response: {
   lastScanTime: string,
   toolsStatus: {
     promptfoo: 'running' | 'idle' | 'error',
-    garak: 'running' | 'idle' | 'error',
-    strix: 'running' | 'idle' | 'error'
+    garak: 'running' | 'idle' | 'error'
   },
   recentActivity: Array<Activity>
 }
@@ -100,51 +98,6 @@ function ScannerPage() {
 }
 ```
 
-### 3. StrixDashboard
-
-**Fichier**: `StrixDashboard.tsx`
-
-**Description**: Dashboard de contrôle pour l'agent Strix (tests agentic AI).
-
-**Fonctionnalités**:
-- Configuration de l'agent (URL, mode, paramètres)
-- 3 modes d'attaque (light, moderate, aggressive)
-- Contrôles d'exécution (start, pause, resume, stop)
-- Barre de progression en temps réel
-- Affichage des découvertes avec sévérité
-- Logs en direct avec auto-scroll
-- Statistiques d'exécution (durée, étapes, découvertes)
-
-**Props**: Aucune (autonome)
-
-**API Endpoints**:
-```
-POST /api/v1/strix/execute
-Body: AgentConfig
-Response: { id: string, status: string }
-
-GET /api/v1/strix/execution/:id
-Response: AgentExecution
-
-POST /api/v1/strix/execution/:id/pause
-POST /api/v1/strix/execution/:id/resume
-POST /api/v1/strix/execution/:id/stop
-```
-
-**Modes d'Attaque**:
-- `light`: Reconnaissance uniquement (passive)
-- `moderate`: Tests standards (actif modéré)
-- `aggressive`: Tests avancés (actif complet)
-
-**Usage**:
-```tsx
-import StrixDashboard from '@/components/unified/StrixDashboard';
-
-function AgentPage() {
-  return <StrixDashboard />;
-}
-```
-
 ## Integration dans l'Application
 
 ### 1. Ajouter les Routes
@@ -154,7 +107,6 @@ Dans `App.tsx`, ajouter les routes pour les nouveaux composants:
 ```tsx
 import UnifiedSecurityHub from './components/unified/UnifiedSecurityHub';
 import GarakScannerUI from './components/unified/GarakScannerUI';
-import StrixDashboard from './components/unified/StrixDashboard';
 
 // Dans navItems:
 const navItems = [
@@ -171,13 +123,6 @@ const navItems = [
     label: 'Scanner Garak',
     icon: <AlertTriangle />,
     content: <GarakScannerUI />,
-    section: 'Sécurité Unifiée'
-  },
-  {
-    id: 'strix-agent',
-    label: 'Agent Strix',
-    icon: <Zap />,
-    content: <StrixDashboard />,
     section: 'Sécurité Unifiée'
   },
 ];
@@ -197,7 +142,7 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 export class UnifiedController {
   @Get('metrics')
   async getMetrics() {
-    // Agrégation des métriques des 3 outils
+    // Agrégation des métriques des outils
     return {
       totalTests: 150,
       vulnerabilitiesFound: 12,
@@ -205,8 +150,7 @@ export class UnifiedController {
       lastScanTime: new Date().toISOString(),
       toolsStatus: {
         promptfoo: 'idle',
-        garak: 'running',
-        strix: 'idle'
+        garak: 'running'
       },
       recentActivity: []
     };
@@ -219,21 +163,6 @@ export class GarakController {
   async startScan(@Body() config: ScanConfig) {
     // Lancer le scan Garak
     return { id: 'scan-123', status: 'running' };
-  }
-}
-
-@Controller('api/v1/strix')
-export class StrixController {
-  @Post('execute')
-  async startExecution(@Body() config: AgentConfig) {
-    // Lancer l'agent Strix
-    return { id: 'exec-456', status: 'running' };
-  }
-
-  @Get('execution/:id')
-  async getExecution(@Param('id') id: string) {
-    // Récupérer l'état de l'exécution
-    return { id, status: 'running', currentStep: 10, totalSteps: 50, ... };
   }
 }
 ```
@@ -257,7 +186,7 @@ export interface UnifiedMetrics {
   vulnerabilitiesFound: number;
   criticalFindings: number;
   lastScanTime: string;
-  toolsStatus: Record<'promptfoo' | 'garak' | 'strix', 'running' | 'idle' | 'error'>;
+  toolsStatus: Record<'promptfoo' | 'garak', 'running' | 'idle' | 'error'>;
   recentActivity: Activity[];
 }
 
@@ -267,14 +196,6 @@ export interface ScanConfig {
   probes: string[];
   generators: string[];
   detectors: string[];
-}
-
-export interface AgentConfig {
-  targetUrl: string;
-  attackMode: 'light' | 'moderate' | 'aggressive';
-  headless: boolean;
-  maxSteps: number;
-  timeout: number;
 }
 ```
 
@@ -288,7 +209,6 @@ Les composants utilisent le thème existant de l'application:
 - Accents:
   - Cyan: Actions principales (`bg-cyan-600`)
   - Orange: Garak (`bg-orange-600`)
-  - Purple: Strix (`bg-purple-600`)
   - Rouge: Erreurs critiques (`bg-red-600`)
   - Vert: Succès (`bg-green-600`)
 
@@ -398,7 +318,7 @@ npm run type-check
 
 ### Court Terme (Semaine 1-2)
 - [ ] Implémenter les endpoints backend
-- [ ] Tests unitaires pour les 3 composants
+- [ ] Tests unitaires pour les composants
 - [ ] Documentation API complète
 - [ ] Mode dark/light toggle
 

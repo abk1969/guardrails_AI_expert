@@ -24,8 +24,9 @@ import { GeminiModule } from './gemini/gemini.module';
 import { PromptfooModule } from './promptfoo/promptfoo.module';
 import { UnifiedModule } from './unified/unified.module';
 import { GarakModule } from './garak/garak.module';
-import { StrixModule } from './strix/strix.module';
 import { SystemModule } from './system/system.module';
+import { LLMModule } from './llm/llm.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -85,10 +86,11 @@ import { SystemModule } from './system/system.module';
     AnalyticsModule,
     UnifiedModule,
     GarakModule,
-    StrixModule,
     McpModule,
     GeminiModule,
     PromptfooModule,
+    LLMModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
 })

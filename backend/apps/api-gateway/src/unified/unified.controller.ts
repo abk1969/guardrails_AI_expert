@@ -16,7 +16,7 @@ export class UnifiedController {
   @Get('metrics')
   @ApiOperation({
     summary: 'Get unified metrics from all security tools',
-    description: 'Aggregates metrics from Promptfoo, Garak, and Strix tools',
+    description: 'Aggregates metrics from Promptfoo and Garak tools',
   })
   @ApiResponse({
     status: 200,

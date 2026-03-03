@@ -12,7 +12,6 @@ import { GuardrailCategory, PromptComplexity } from './dto/generate-prompts.dto'
  */
 describe('GeminiService (Integration Tests - No Mocks)', () => {
   let service: GeminiService;
-  let configService: ConfigService;
   let hasRealApiKey: boolean;
 
   beforeEach(async () => {
@@ -29,7 +28,6 @@ describe('GeminiService (Integration Tests - No Mocks)', () => {
       ],
     }).compile();
 
-    configService = module.get<ConfigService>(ConfigService);
     hasRealApiKey = !!process.env.GEMINI_API_KEY;
 
     // Only create service if API key is available (to avoid constructor error)

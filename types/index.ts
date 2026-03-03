@@ -9,3 +9,6 @@ export * from './risk-repository';
 export * from './compass';
 export * from './applications';
 export * from './llm-config';
+export * from './agentic-security';
+export * from './chatbot';
+export * from './garak';

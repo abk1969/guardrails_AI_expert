@@ -51,7 +51,7 @@ export class GeminiService {
       const responseSchema = this.buildResponseSchema(dto);
 
       const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: systemInstruction,
         config: {
           responseMimeType: 'application/json',
@@ -100,7 +100,7 @@ export class GeminiService {
       const fullMessage = `${dto.message}${systemContext}`;
 
       const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: fullMessage,
       });
 

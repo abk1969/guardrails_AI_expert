@@ -3,7 +3,7 @@ import * as Docker from 'dockerode';
 import { DockerfileGenerator } from './dockerfile-generator';
 import { ImageRegistryService } from './image-registry.service';
 
-type ToolName = 'promptfoo' | 'garak' | 'strix';
+type ToolName = 'promptfoo' | 'garak';
 
 interface BuildResult {
   success: boolean;

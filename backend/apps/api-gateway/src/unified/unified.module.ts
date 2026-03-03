@@ -6,13 +6,13 @@ import { UnifiedOrchestrationService } from './unified-orchestration.service';
 import { UnifiedGateway } from './unified.gateway';
 import { DatabaseModule } from '@app/database';
 import { GarakModule } from '../garak/garak.module';
-import { StrixModule } from '../strix/strix.module';
+import { PromptfooModule } from '../promptfoo/promptfoo.module';
 
 @Module({
   imports: [
     DatabaseModule,
     forwardRef(() => GarakModule),
-    forwardRef(() => StrixModule),
+    forwardRef(() => PromptfooModule),
   ],
   controllers: [UnifiedController, UnifiedOrchestrationController],
   providers: [UnifiedService, UnifiedOrchestrationService, UnifiedGateway],

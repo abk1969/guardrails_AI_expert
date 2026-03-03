@@ -38,7 +38,6 @@ export default defineConfig(({ mode }) => {
             '**/.git/**',
             '**/guardrail/**',
             '**/backend/**',
-            '**/strix-output/**',
             '**/*.log',
             '**/.cache/**',
             '**/.vite/**',
@@ -55,8 +54,10 @@ export default defineConfig(({ mode }) => {
           ],
         } : undefined,
         fs: {
-          // Don't scan the guardrail directory and other large directories
-          deny: ['**/guardrail/**', '**/node_modules/**', '**/.git/**'],
+          // Block large/sensitive directories from being served
+          // Note: Do NOT deny node_modules — Vite needs access to serve
+          // /@vite/client, pre-bundled deps, and other internal modules
+          deny: ['**/guardrail/**', '**/.git/**'],
           // Allow access to necessary directories
           allow: ['..'],
         },

@@ -101,31 +101,6 @@ export class SystemService {
   }
 
   /**
-   * Check Strix
-   */
-  private async checkStrix(): Promise<ToolCheckDto> {
-    try {
-      const { stdout, stderr } = await execAsync('strix --version');
-      const output = stdout || stderr;
-      const version = output.trim() || 'installed';
-
-      return {
-        version,
-        ok: true,
-        required: true,
-      };
-    } catch (error) {
-      this.logger.error('Strix check failed:', error.message);
-      return {
-        version: 'not found',
-        ok: false,
-        required: true,
-        error: 'Strix not found. Install with: pipx install strix-agent',
-      };
-    }
-  }
-
-  /**
    * Check Node.js version
    */
   private async checkNode(): Promise<ToolCheckDto> {
@@ -233,12 +208,11 @@ export class SystemService {
 
     try {
       // Run all checks in parallel
-      const [python, pipx, garak, strix, node, promptfoo, docker] =
+      const [python, pipx, garak, node, promptfoo, docker] =
         await Promise.all([
           this.checkPython(),
           this.checkPipx(),
           this.checkGarak(),
-          this.checkStrix(),
           this.checkNode(),
           this.checkPromptfoo(),
           this.checkDocker(),
@@ -246,7 +220,7 @@ export class SystemService {
 
       // Collect missing dependencies
       const missingDependencies: string[] = [];
-      const checks = { python, pipx, garak, strix, node, promptfoo, docker };
+      const checks = { python, pipx, garak, node, promptfoo, docker };
 
       for (const [tool, check] of Object.entries(checks)) {
         if (!check.ok) {
@@ -285,7 +259,6 @@ export class SystemService {
         python,
         pipx,
         garak,
-        strix,
         node,
         promptfoo,
         docker,

@@ -71,8 +71,6 @@ export class TestRunnerService {
           return await this.smokeTestPromptfoo(environment);
         case 'garak':
           return await this.smokeTestGarak(environment);
-        case 'strix':
-          return await this.smokeTestStrix(environment);
         default:
           throw new Error(`Unknown tool: ${tool}`);
       }
@@ -135,8 +133,6 @@ export class TestRunnerService {
         return ['npm', 'test'];
       case 'garak':
         return ['pytest', 'tests/', '-v'];
-      case 'strix':
-        return ['pytest', 'tests/', '-v', '--cov=strix'];
       default:
         return ['echo', 'No tests configured'];
     }
@@ -250,48 +246,4 @@ export class TestRunnerService {
     };
   }
 
-  /**
-   * Smoke test: Strix
-   */
-  private async smokeTestStrix(environment: string): Promise<TestResult> {
-    const errors: string[] = [];
-    let passed = 0;
-    let failed = 0;
-
-    // Test 1: Health check
-    try {
-      const { stdout } = await execAsync(
-        `curl -f http://${environment === 'staging' ? 'strix-service-staging' : 'strix-service'}:3000/health`,
-      );
-      if (stdout.includes('ok')) {
-        passed++;
-      } else {
-        failed++;
-        errors.push('Health check failed');
-      }
-    } catch (error) {
-      failed++;
-      errors.push(`Health check error: ${error.message}`);
-    }
-
-    // Test 2: Check Docker access
-    try {
-      await execAsync(
-        `curl -f http://${environment === 'staging' ? 'strix-service-staging' : 'strix-service'}:3000/docker/info`,
-      );
-      passed++;
-    } catch (error) {
-      failed++;
-      errors.push(`Docker access error: ${error.message}`);
-    }
-
-    return {
-      success: failed === 0,
-      errors,
-      duration: 10000,
-      testsRun: passed + failed,
-      testsPassed: passed,
-      testsFailed: failed,
-    };
-  }
 }

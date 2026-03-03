@@ -24,7 +24,6 @@ enum ExecutionMode {
 enum Framework {
   PROMPTFOO = 'promptfoo',
   GARAK = 'garak',
-  STRIX = 'strix',
 }
 
 // Types matching backend DTOs
@@ -43,13 +42,6 @@ interface UnifiedExecutionConfig {
     probes: string[];
     generators: string[];
     detectors: string[];
-  };
-  strix?: {
-    targetUrl: string;
-    attackMode: 'light' | 'moderate' | 'aggressive';
-    maxSteps: number;
-    timeout: number;
-    headless: boolean;
   };
 }
 
@@ -84,20 +76,13 @@ interface UnifiedExecution {
 const UnifiedOrchestrationDashboard: React.FC = () => {
   const [config, setConfig] = useState<UnifiedExecutionConfig>({
     mode: ExecutionMode.PARALLEL,
-    frameworks: [Framework.GARAK, Framework.STRIX],
+    frameworks: [Framework.GARAK, Framework.PROMPTFOO],
     garak: {
       model: 'gpt-4',
       modelType: 'openai',
       probes: ['injection', 'toxicity'],
       generators: ['default'],
       detectors: ['default'],
-    },
-    strix: {
-      targetUrl: 'https://example.com',
-      attackMode: 'moderate',
-      maxSteps: 50,
-      timeout: 300,
-      headless: true,
     },
   });
 
@@ -190,8 +175,6 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
         return '🎯';
       case Framework.GARAK:
         return '🔍';
-      case Framework.STRIX:
-        return '⚡';
     }
   };
 
@@ -230,7 +213,7 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
           Orchestration Unifiée - Plateforme Pentest AI
         </h1>
         <p className="text-gray-400 mt-1">
-          Exécution coordonnée de Promptfoo, Garak et Strix pour une couverture complète
+          Exécution coordonnée de Promptfoo et Garak pour une couverture complète
         </p>
       </div>
 
@@ -306,7 +289,6 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
                           'Tests de prompts LLM'}
                         {framework === Framework.GARAK &&
                           'Scanner de vulnérabilités'}
-                        {framework === Framework.STRIX && 'Agent autonome'}
                       </div>
                     </div>
                   </label>
