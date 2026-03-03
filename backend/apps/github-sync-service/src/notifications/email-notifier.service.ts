@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
-type ToolName = 'promptfoo' | 'garak' | 'strix';
+type ToolName = 'promptfoo' | 'garak';
 
 @Injectable()
 export class EmailNotifierService {

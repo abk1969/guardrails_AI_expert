@@ -53,12 +53,6 @@ scrape_configs:
       - targets: ['garak-service:3000']
     metrics_path: '/metrics'
 
-  # Strix Service
-  - job_name: 'strix-service'
-    static_configs:
-      - targets: ['strix-service:3000']
-    metrics_path: '/metrics'
-
   # PostgreSQL Exporter
   - job_name: 'postgres'
     static_configs:

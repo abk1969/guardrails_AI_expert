@@ -16,8 +16,10 @@ async function bootstrap() {
   // Security - Configure Helmet to allow WebSocket connections
   app.use(
     helmet({
-      contentSecurityPolicy: false, // Disable CSP to allow WebSocket connections
-      crossOriginEmbedderPolicy: false, // Disable COEP for WebSocket
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: false,
+      crossOriginOpenerPolicy: false,
     }),
   );
   app.enableCors({

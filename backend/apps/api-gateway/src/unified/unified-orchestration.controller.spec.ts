@@ -1,15 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnifiedOrchestrationController } from './unified-orchestration.controller';
 import { UnifiedOrchestrationService } from './unified-orchestration.service';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { ValidationPipe } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import {
   ExecutionMode,
   Framework,
   UnifiedExecutionConfigDto,
-  AttackMode,
   UnifiedExecutionDto,
   GarakConfigDto,
 } from './dto/unified-execution.dto';
@@ -120,20 +118,13 @@ describe('UnifiedOrchestrationController - TDD Strict', () => {
     it('should start unified execution with valid config', async () => {
       const config: UnifiedExecutionConfigDto = {
         mode: ExecutionMode.PARALLEL,
-        frameworks: [Framework.GARAK, Framework.STRIX],
+        frameworks: [Framework.GARAK],
         garak: {
           model: 'gpt-4',
           modelType: 'openai',
           probes: ['injection'],
           generators: ['default'],
           detectors: ['default'],
-        },
-        strix: {
-          targetUrl: 'https://example.com',
-          attackMode: AttackMode.MODERATE,
-          maxSteps: 50,
-          timeout: 300,
-          headless: true,
         },
       };
 
@@ -144,11 +135,6 @@ describe('UnifiedOrchestrationController - TDD Strict', () => {
         frameworks: [
           {
             framework: Framework.GARAK,
-            status: 'pending',
-            progress: 0,
-          },
-          {
-            framework: Framework.STRIX,
             status: 'pending',
             progress: 0,
           },
@@ -171,7 +157,7 @@ describe('UnifiedOrchestrationController - TDD Strict', () => {
         'org-123',
         config,
         'user-123',
-        '33faa86b-0bad-45e9-b372-0d174de49cc8', // Default target ID
+        expect.any(String), // DEV_DEFAULTS.TARGET_ID
       );
     });
 

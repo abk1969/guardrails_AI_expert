@@ -8,7 +8,7 @@ groups:
 
       # Service Down
       - alert: ServiceDown
-        expr: up{job=~"promptfoo-service|garak-service|strix-service|api-gateway|orchestrator"} == 0
+        expr: up{job=~"promptfoo-service|garak-service|api-gateway|orchestrator"} == 0
         for: 2m
         labels:
           severity: critical

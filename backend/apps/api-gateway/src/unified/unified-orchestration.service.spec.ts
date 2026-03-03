@@ -2,54 +2,47 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnifiedOrchestrationService } from './unified-orchestration.service';
 import { PrismaService } from '@app/database';
 import { GarakService } from '../garak/garak.service';
-import { StrixService } from '../strix/strix.service';
+import { PromptfooService } from '../promptfoo/promptfoo.service';
 import { UnifiedGateway } from './unified.gateway';
 import {
   ExecutionMode,
   Framework,
   UnifiedExecutionConfigDto,
-  AttackMode,
 } from './dto/unified-execution.dto';
 
-describe('UnifiedOrchestrationService - TDD Strict', () => {
+describe('UnifiedOrchestrationService', () => {
   let service: UnifiedOrchestrationService;
   let prismaService: PrismaService;
   let garakService: GarakService;
-  let strixService: StrixService;
+  let promptfooService: PromptfooService;
   let unifiedGateway: UnifiedGateway;
 
   beforeEach(async () => {
-    // Create minimal mocks to break circular dependencies
     const mockPrismaService = {
-      unifiedExecution: {
-        create: jest.fn(),
+      testRun: {
         findUnique: jest.fn(),
+        create: jest.fn(),
         update: jest.fn(),
       },
-      frameworkExecution: {
+      testResult: {
         create: jest.fn(),
-        update: jest.fn(),
       },
     };
 
     const mockGarakService = {
-      startScan: jest.fn().mockResolvedValue({ scanId: 'garak-scan-123' }),
-      stopScan: jest.fn().mockResolvedValue(undefined),
-      getScanStatus: jest.fn().mockResolvedValue({ status: 'running' }),
+      startScan: jest.fn().mockResolvedValue({ id: 'garak-scan-123' }),
+      checkContainerHealth: jest.fn().mockResolvedValue({ running: true, status: 'running' }),
     };
 
-    const mockStrixService = {
-      startExecution: jest.fn().mockResolvedValue({ executionId: 'strix-exec-123' }),
-      stopExecution: jest.fn().mockResolvedValue(undefined),
-      getExecutionStatus: jest.fn().mockResolvedValue({ status: 'running' }),
+    const mockPromptfooService = {
+      runTests: jest.fn().mockResolvedValue({ testRunId: 'promptfoo-run-123', estimatedDuration: '5-30 minutes' }),
+      checkContainerHealth: jest.fn().mockResolvedValue({ running: true, status: 'running' }),
     };
 
     const mockUnifiedGateway = {
       emitUnifiedStarted: jest.fn(),
-      emitUnifiedProgress: jest.fn(),
       emitUnifiedCompleted: jest.fn(),
       emitUnifiedStopped: jest.fn(),
-      emitUnifiedError: jest.fn(),
       emitUnifiedFailed: jest.fn(),
       emitFrameworkStarted: jest.fn(),
       emitFrameworkProgress: jest.fn(),
@@ -62,7 +55,7 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
         UnifiedOrchestrationService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: GarakService, useValue: mockGarakService },
-        { provide: StrixService, useValue: mockStrixService },
+        { provide: PromptfooService, useValue: mockPromptfooService },
         { provide: UnifiedGateway, useValue: mockUnifiedGateway },
       ],
     }).compile();
@@ -70,7 +63,7 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
     service = module.get<UnifiedOrchestrationService>(UnifiedOrchestrationService);
     prismaService = module.get<PrismaService>(PrismaService);
     garakService = module.get<GarakService>(GarakService);
-    strixService = module.get<StrixService>(StrixService);
+    promptfooService = module.get<PromptfooService>(PromptfooService);
     unifiedGateway = module.get<UnifiedGateway>(UnifiedGateway);
   });
 
@@ -82,20 +75,13 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
     it('should start execution with all frameworks in parallel', async () => {
       const config: UnifiedExecutionConfigDto = {
         mode: ExecutionMode.PARALLEL,
-        frameworks: [Framework.GARAK, Framework.STRIX],
+        frameworks: [Framework.GARAK],
         garak: {
           model: 'gpt-4',
           modelType: 'openai',
           probes: ['injection', 'toxicity'],
           generators: ['default'],
           detectors: ['default'],
-        },
-        strix: {
-          targetUrl: 'https://example.com',
-          attackMode: AttackMode.MODERATE,
-          maxSteps: 50,
-          timeout: 300,
-          headless: true,
         },
       };
 
@@ -106,16 +92,13 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
         'target-123',
       );
 
-      // Assertions - ces tests DOIVENT ÉCHOUER si pas d'implémentation réelle
       expect(result).toBeDefined();
       expect(result.id).toMatch(/^unified-/);
       expect(result.mode).toBe(ExecutionMode.PARALLEL);
       expect(result.status).toBe('running');
-      expect(result.frameworks).toHaveLength(2);
+      expect(result.frameworks).toHaveLength(1);
       expect(result.frameworks[0].framework).toBe(Framework.GARAK);
-      expect(result.frameworks[1].framework).toBe(Framework.STRIX);
       expect(result.frameworks[0].status).toBe('pending');
-      expect(result.frameworks[1].status).toBe('pending');
     });
 
     it('should emit WebSocket event when starting parallel execution', async () => {
@@ -147,19 +130,12 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
     it('should start execution with frameworks running one after another', async () => {
       const config: UnifiedExecutionConfigDto = {
         mode: ExecutionMode.SEQUENTIAL,
-        frameworks: [Framework.GARAK, Framework.STRIX],
+        frameworks: [Framework.GARAK],
         garak: {
           model: 'gpt-4',
           probes: ['injection'],
           generators: ['default'],
           detectors: ['default'],
-        },
-        strix: {
-          targetUrl: 'https://example.com',
-          attackMode: AttackMode.LIGHT,
-          maxSteps: 20,
-          timeout: 120,
-          headless: true,
         },
       };
 
@@ -184,16 +160,27 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
       ).rejects.toThrow('Garak selected but configuration missing');
     });
 
+    it('should validate Promptfoo config is present when Promptfoo is selected', async () => {
+      const config: UnifiedExecutionConfigDto = {
+        mode: ExecutionMode.SELECTIVE,
+        frameworks: [Framework.PROMPTFOO],
+        // Missing promptfoo config
+      };
+
+      await expect(
+        service.startUnifiedExecution('org-123', config),
+      ).rejects.toThrow('Promptfoo selected but configuration missing');
+    });
+
     it('should start execution when configurations are provided for selected frameworks', async () => {
       const config: UnifiedExecutionConfigDto = {
         mode: ExecutionMode.SELECTIVE,
-        frameworks: [Framework.STRIX],
-        strix: {
-          targetUrl: 'https://example.com',
-          attackMode: AttackMode.AGGRESSIVE,
-          maxSteps: 100,
-          timeout: 600,
-          headless: true,
+        frameworks: [Framework.GARAK],
+        garak: {
+          model: 'gpt-4',
+          probes: ['injection'],
+          generators: ['default'],
+          detectors: ['default'],
         },
       };
 
@@ -202,7 +189,7 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
       expect(result).toBeDefined();
       expect(result.mode).toBe(ExecutionMode.SELECTIVE);
       expect(result.frameworks).toHaveLength(1);
-      expect(result.frameworks[0].framework).toBe(Framework.STRIX);
+      expect(result.frameworks[0].framework).toBe(Framework.GARAK);
     });
   });
 
@@ -239,19 +226,12 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
     it('should stop all running frameworks', async () => {
       const config: UnifiedExecutionConfigDto = {
         mode: ExecutionMode.PARALLEL,
-        frameworks: [Framework.GARAK, Framework.STRIX],
+        frameworks: [Framework.GARAK],
         garak: {
           model: 'gpt-4',
           probes: ['injection'],
           generators: ['default'],
           detectors: ['default'],
-        },
-        strix: {
-          targetUrl: 'https://example.com',
-          attackMode: AttackMode.MODERATE,
-          maxSteps: 50,
-          timeout: 300,
-          headless: true,
         },
       };
 
@@ -262,6 +242,29 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
       await service.stopUnifiedExecution('org-123', execution.id);
 
       expect(stopSpy).toHaveBeenCalledWith(execution.id);
+    });
+
+    it('should mark pending/running frameworks as failed with user-stop message', async () => {
+      const config: UnifiedExecutionConfigDto = {
+        mode: ExecutionMode.PARALLEL,
+        frameworks: [Framework.GARAK],
+        garak: {
+          model: 'gpt-4',
+          probes: ['injection'],
+          generators: ['default'],
+          detectors: ['default'],
+        },
+      };
+
+      const execution = await service.startUnifiedExecution('org-123', config);
+      await service.stopUnifiedExecution('org-123', execution.id);
+
+      const stopped = await service.getUnifiedExecution('org-123', execution.id);
+      for (const fw of stopped.frameworks) {
+        if (fw.status === 'failed') {
+          expect(fw.error).toBe('Stopped by user');
+        }
+      }
     });
 
     it('should throw NotFoundException when stopping non-existent execution', async () => {
@@ -294,27 +297,25 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
       expect(startScanSpy).toHaveBeenCalled();
     });
 
-    it('should call StrixService.startExecution when Strix framework is selected', async () => {
+    it('should call PromptfooService.runTests when Promptfoo framework is selected', async () => {
       const config: UnifiedExecutionConfigDto = {
         mode: ExecutionMode.PARALLEL,
-        frameworks: [Framework.STRIX],
-        strix: {
-          targetUrl: 'https://example.com',
-          attackMode: AttackMode.MODERATE,
-          maxSteps: 50,
-          timeout: 300,
-          headless: true,
+        frameworks: [Framework.PROMPTFOO],
+        promptfoo: {
+          suiteName: 'test-suite',
+          providers: ['openai:gpt-4o-mini'],
+          testCategories: ['prompt-injection'],
         },
       };
 
-      const startExecutionSpy = jest.spyOn(strixService, 'startExecution');
+      const runTestsSpy = jest.spyOn(promptfooService, 'runTests');
 
       await service.startUnifiedExecution('org-123', config);
 
       // Wait for async execution to start
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(startExecutionSpy).toHaveBeenCalled();
+      expect(runTestsSpy).toHaveBeenCalled();
     });
   });
 
@@ -322,26 +323,18 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
     it('should aggregate results from all completed frameworks', async () => {
       const config: UnifiedExecutionConfigDto = {
         mode: ExecutionMode.PARALLEL,
-        frameworks: [Framework.GARAK, Framework.STRIX],
+        frameworks: [Framework.GARAK],
         garak: {
           model: 'gpt-4',
           probes: ['injection'],
           generators: ['default'],
           detectors: ['default'],
         },
-        strix: {
-          targetUrl: 'https://example.com',
-          attackMode: AttackMode.MODERATE,
-          maxSteps: 50,
-          timeout: 300,
-          headless: true,
-        },
       };
 
       const execution = await service.startUnifiedExecution('org-123', config);
 
-      // Wait for execution to complete (polling takes 60-90s in real implementation)
-      // For testing, we just verify the structure is correct
+      // Wait for execution to start
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       const completed = await service.getUnifiedExecution('org-123', execution.id);
@@ -353,9 +346,9 @@ describe('UnifiedOrchestrationService - TDD Strict', () => {
         expect(completed.aggregatedResults.completedFrameworks).toBeGreaterThanOrEqual(0);
         expect(completed.aggregatedResults.failedFrameworks).toBeGreaterThanOrEqual(0);
       } else {
-        // If not completed yet, that's also acceptable in tests
+        // If not completed yet, that's acceptable in tests
         expect(completed.status).toMatch(/running|pending/);
       }
-    }, 10000); // Increase timeout to 10s to allow for async execution
+    }, 10000);
   });
 });

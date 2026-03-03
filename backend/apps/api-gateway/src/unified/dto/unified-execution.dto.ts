@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsArray, IsOptional, IsString, IsNumber, IsBoolean, Min, Max, ValidateNested, ArrayNotEmpty } from 'class-validator';
+import { IsEnum, IsArray, IsOptional, IsString, ValidateNested, ArrayNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -12,12 +12,11 @@ export enum ExecutionMode {
 }
 
 /**
- * Framework selection
+ * Available security testing frameworks
  */
 export enum Framework {
   PROMPTFOO = 'promptfoo',
   GARAK = 'garak',
-  STRIX = 'strix',
 }
 
 /**
@@ -32,6 +31,11 @@ export class PromptfooConfigDto {
   @IsOptional()
   @IsString()
   configPath?: string;
+
+  @ApiProperty({ description: 'Raw YAML content for Promptfoo configuration' })
+  @IsOptional()
+  @IsString()
+  yamlContent?: string;
 
   @ApiProperty({ type: [String], example: ['provider-1', 'provider-2'], description: 'Providers to test' })
   @IsOptional()
@@ -76,51 +80,13 @@ export class GarakConfigDto {
 }
 
 /**
- * Strix attack mode enum
- */
-export enum AttackMode {
-  LIGHT = 'light',
-  MODERATE = 'moderate',
-  AGGRESSIVE = 'aggressive',
-}
-
-/**
- * Strix-specific configuration
- */
-export class StrixConfigDto {
-  @ApiProperty({ example: 'https://example.com/api/chat', description: 'Target URL to test' })
-  @IsString()
-  targetUrl: string;
-
-  @ApiProperty({ enum: AttackMode, example: AttackMode.MODERATE, description: 'Attack intensity' })
-  @IsEnum(AttackMode)
-  attackMode: AttackMode;
-
-  @ApiProperty({ example: 50, description: 'Maximum number of agent steps' })
-  @IsNumber()
-  @Min(1)
-  @Max(200)
-  maxSteps: number;
-
-  @ApiProperty({ example: 3600, description: 'Timeout in seconds' })
-  @IsNumber()
-  @Min(30)
-  @Max(7200)
-  timeout: number;
-
-  @ApiProperty({ example: true, description: 'Run in headless mode' })
-  @IsBoolean()
-  headless: boolean;
-}
-
-/**
  * Unified execution configuration
  */
 export class UnifiedExecutionConfigDto {
   @ApiProperty({
     enum: ExecutionMode,
     example: ExecutionMode.PARALLEL,
-    description: 'Execution mode (parallel, sequential, selective)'
+    description: 'Execution mode (parallel, sequential, selective)',
   })
   @IsEnum(ExecutionMode)
   mode: ExecutionMode;
@@ -128,8 +94,8 @@ export class UnifiedExecutionConfigDto {
   @ApiProperty({
     type: [String],
     enum: Framework,
-    example: [Framework.PROMPTFOO, Framework.GARAK, Framework.STRIX],
-    description: 'Frameworks to execute'
+    example: [Framework.PROMPTFOO, Framework.GARAK],
+    description: 'Frameworks to execute (promptfoo and/or garak)',
   })
   @IsArray()
   @ArrayNotEmpty()
@@ -147,12 +113,6 @@ export class UnifiedExecutionConfigDto {
   @ValidateNested()
   @Type(() => GarakConfigDto)
   garak?: GarakConfigDto;
-
-  @ApiProperty({ type: StrixConfigDto, required: false, description: 'Strix configuration' })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => StrixConfigDto)
-  strix?: StrixConfigDto;
 }
 
 /**
@@ -162,26 +122,66 @@ export class FrameworkExecutionStatusDto {
   @ApiProperty({ enum: Framework, example: Framework.GARAK, description: 'Framework name' })
   framework: Framework;
 
-  @ApiProperty({ enum: ['pending', 'running', 'completed', 'failed'], example: 'running', description: 'Execution status' })
+  @ApiProperty({
+    enum: ['pending', 'running', 'completed', 'failed'],
+    example: 'running',
+    description: 'Execution status',
+  })
   status: 'pending' | 'running' | 'completed' | 'failed';
 
-  @ApiProperty({ example: 'exec-123-456', description: 'Framework-specific execution ID' })
+  @ApiProperty({ example: 'exec-123-456', description: 'Framework-specific execution ID', required: false })
   executionId?: string;
 
   @ApiProperty({ example: 45, description: 'Progress percentage (0-100)' })
   progress: number;
 
-  @ApiProperty({ example: '2025-01-07T13:30:00Z', description: 'Start time' })
+  @ApiProperty({ example: '2025-01-07T13:30:00Z', description: 'Start time', required: false })
   startTime?: string;
 
-  @ApiProperty({ example: '2025-01-07T13:45:00Z', description: 'End time' })
+  @ApiProperty({ example: '2025-01-07T13:45:00Z', description: 'End time', required: false })
   endTime?: string;
 
-  @ApiProperty({ example: 'Scan failed: timeout', description: 'Error message if failed' })
+  @ApiProperty({ example: 'Scan failed: timeout', description: 'Error message if failed', required: false })
   error?: string;
 
-  @ApiProperty({ example: { vulnerabilities: 5, findings: 12 }, description: 'Framework-specific results summary' })
-  results?: any;
+  @ApiProperty({
+    example: { vulnerabilities: 5, findings: 12 },
+    description: 'Framework-specific results summary',
+    required: false,
+  })
+  results?: Record<string, any>;
+}
+
+/**
+ * Aggregated results with comparative analysis between Garak and Promptfoo
+ */
+export class AggregatedResultsDto {
+  @ApiProperty({ example: 15, description: 'Total vulnerabilities found across all frameworks' })
+  totalVulnerabilities: number;
+
+  @ApiProperty({ example: 45, description: 'Total findings across all frameworks' })
+  totalFindings: number;
+
+  @ApiProperty({ example: 2, description: 'Number of frameworks that completed successfully' })
+  completedFrameworks: number;
+
+  @ApiProperty({ example: 0, description: 'Number of frameworks that failed' })
+  failedFrameworks: number;
+
+  @ApiProperty({ description: 'Results breakdown by framework' })
+  byFramework: Record<string, Record<string, any>>;
+
+  @ApiProperty({
+    description: 'Comparative analysis between Garak and Promptfoo results',
+    required: false,
+  })
+  comparison?: {
+    garakVulnerabilities: number;
+    promptfooFailures: number;
+    overlapCategories: string[];
+    riskScore: number;
+    summary: string;
+  };
 }
 
 /**
@@ -197,7 +197,7 @@ export class UnifiedExecutionDto {
   @ApiProperty({
     enum: ['pending', 'running', 'completed', 'failed', 'partial'],
     example: 'running',
-    description: 'Overall execution status'
+    description: 'Overall execution status',
   })
   status: 'pending' | 'running' | 'completed' | 'failed' | 'partial';
 
@@ -207,12 +207,12 @@ export class UnifiedExecutionDto {
   @ApiProperty({ example: '2025-01-07T13:30:00Z', description: 'Start time' })
   startTime: string;
 
-  @ApiProperty({ example: '2025-01-07T14:00:00Z', description: 'End time' })
+  @ApiProperty({ example: '2025-01-07T14:00:00Z', description: 'End time', required: false })
   endTime?: string;
 
   @ApiProperty({ example: 1800, description: 'Total duration in seconds' })
   duration: number;
 
-  @ApiProperty({ example: { totalVulnerabilities: 15, totalFindings: 45 }, description: 'Aggregated results' })
-  aggregatedResults?: any;
+  @ApiProperty({ type: AggregatedResultsDto, description: 'Aggregated results', required: false })
+  aggregatedResults?: AggregatedResultsDto;
 }

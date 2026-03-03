@@ -26,14 +26,14 @@ const WikiRedTeamerView = lazy(() => import('./components/WikiRedTeamerView'));
 const AIPolicyView = lazy(() => import('./components/AIPolicyViewComplete'));
 const AIRiskRepositoryView = lazy(() => import('./components/AIRiskRepositoryView'));
 const CompassUseCasesView = lazy(() => import('./components/compass/CompassUseCasesView'));
-const ChatbotModern = lazy(() => import('./components/chatbot/ChatbotModern'));
+const ChatbotAgentic = lazy(() => import('./components/chatbot/ChatbotAgentic'));
 const ChatbotFab = lazy(() => import('./components/chatbot/ChatbotFab'));
 const ApplicationProfileManager = lazy(() => import('./components/ApplicationProfileManager'));
 // import PromptfooResultsView from './components/PromptfooResultsView'; // Temporairement désactivé
 const UnifiedSecurityHub = lazy(() => import('./src/components/unified/UnifiedSecurityHub'));
 const GarakScannerUI = lazy(() => import('./src/components/unified/GarakScannerUI'));
-const StrixDashboard = lazy(() => import('./src/components/unified/StrixDashboardEnriched'));
 const LLMConfigView = lazy(() => import('./components/LLMConfigView'));
+const AgenticSecurityView = lazy(() => import('./components/AgenticSecurityView'));
 import { TestRunProvider } from './contexts/TestRunContext';
 import { DatasetProvider } from './contexts/DatasetContext';
 import { UseCaseProvider } from './contexts/UseCaseContext';
@@ -55,12 +55,13 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { ApplicationProfileProvider } from './contexts/ApplicationProfileContext';
 import { LLMConfigProvider } from './contexts/LLMConfigContext';
+import { AgenticSecurityProvider } from './contexts/AgenticSecurityContext';
 import {
   ShieldCheck, LayoutDashboard, BarChart3, Database, FlaskConical, FileSpreadsheet,
   ShieldAlert, ClipboardCheck, SlidersHorizontal, ShieldQuestion, FileWarning, HeartPulse,
   SearchCheck, ClipboardPen, BookLock, ClipboardList, BookOpen, BookMarked, Lock,
   RefreshCw, MoreHorizontal, BookCopy, Compass, TestTube2, Settings, FileText, Play,
-  Target, Shield, BookOpenCheck, FileCode, Server, Zap, Wrench, Activity, AlertTriangle, Layers, Sparkles
+  Target, Shield, BookOpenCheck, FileCode, Server, Zap, Wrench, Activity, AlertTriangle, Layers, Sparkles, Bot
 } from 'lucide-react';
 
 // ============================================
@@ -194,11 +195,11 @@ const expertSection: NavSection = {
 };
 
 // ============================================
-// SECTION 1C : PLATEFORME UNIFIÉE (Promptfoo + Garak + Strix)
+// SECTION 1C : PLATEFORME UNIFIÉE (Promptfoo + Garak)
 // ============================================
 const unifiedPlatformSection: NavSection = {
   id: 'unified-platform',
-  label: '🛡️ Plateforme Unifiée (3 Outils)',
+  label: '🛡️ Plateforme Unifiée (2 Outils)',
   icon: <Layers size={20} />,
   defaultOpen: false,
   items: [
@@ -208,7 +209,7 @@ const unifiedPlatformSection: NavSection = {
       icon: <Activity size={18} />,
       content: <UnifiedSecurityHub />,
       section: 'Plateforme Unifiée',
-      description: 'Dashboard central - Vue d\'ensemble Promptfoo, Garak & Strix'
+      description: 'Dashboard central - Vue d\'ensemble Promptfoo & Garak'
     },
     {
       id: 'garak-scanner',
@@ -217,14 +218,6 @@ const unifiedPlatformSection: NavSection = {
       content: <GarakScannerUI />,
       section: 'Plateforme Unifiée',
       description: 'Scanner de vulnérabilités LLM (OWASP Top 10)'
-    },
-    {
-      id: 'strix-agent',
-      label: 'Agent Strix (Agentic AI)',
-      icon: <Zap size={18} />,
-      content: <StrixDashboard />,
-      section: 'Plateforme Unifiée',
-      description: 'Tests automatisés avec agent autonome'
     },
   ]
 };
@@ -327,6 +320,14 @@ const referencesSection: NavSection = {
       description: '31 scénarios de menaces'
     },
     {
+      id: 'agentic-security',
+      label: 'Sécurité IA Agentique',
+      icon: <Bot size={18} />,
+      content: <AgenticSecurityView />,
+      section: 'Référentiels',
+      description: '29 menaces OWASP ASI avec framework MAESTRO'
+    },
+    {
       id: 'ai-risk-repository',
       label: 'Base de Risques IA',
       icon: <BookCopy size={18} />,
@@ -400,7 +401,7 @@ const settingsSection: NavSection = {
       icon: <Sparkles size={18} />,
       content: <LLMConfigView />,
       section: 'Paramètres',
-      description: 'Configuration des modèles de langage pour Strix, Garak, Promptfoo et le chatbot'
+      description: 'Configuration des modèles de langage pour Garak, Promptfoo et le chatbot'
     },
   ]
 };
@@ -412,7 +413,7 @@ export const navSections: NavSection[] = [
   applicationsSection,
   beginnerSection,
   expertSection,
-  unifiedPlatformSection,  // ✨ NOUVEAU: Plateforme Unifiée (Promptfoo + Garak + Strix)
+  unifiedPlatformSection,  // Plateforme Unifiée (Promptfoo + Garak)
   governanceSection,
   redTeamSection,
   referencesSection,
@@ -445,6 +446,7 @@ const App: React.FC = () => {
           <AIPolicyProvider>
             <AIRiskRepositoryProvider>
               <CompassProvider>
+                <AgenticSecurityProvider>
                 <WikiProvider>
                   <DatasetProvider>
                     <TestRunProvider>
@@ -525,7 +527,7 @@ const App: React.FC = () => {
                                               </div>
                                               <Suspense fallback={null}>
                                                 {!isChatbotOpen && <ChatbotFab onClick={() => setIsChatbotOpen(true)} />}
-                                                {isChatbotOpen && <ChatbotModern onClose={() => setIsChatbotOpen(false)} />}
+                                                {isChatbotOpen && <ChatbotAgentic onClose={() => setIsChatbotOpen(false)} />}
                                               </Suspense>
                                             </AIThirdPartyQuestionsProvider>
                                           </DefensesMitigationsProvider>
@@ -542,6 +544,7 @@ const App: React.FC = () => {
                   </TestRunProvider>
                 </DatasetProvider>
               </WikiProvider>
+                </AgenticSecurityProvider>
             </CompassProvider>
           </AIRiskRepositoryProvider>
         </AIPolicyProvider>

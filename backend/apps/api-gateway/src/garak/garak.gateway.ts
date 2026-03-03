@@ -8,6 +8,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { WS_CORS_CONFIG, WS_TRANSPORT_OPTIONS } from '../shared/constants';
+import { SeverityBreakdownDto } from './dto/scan-result.dto';
 
 @WebSocketGateway({
   namespace: '/garak',
@@ -35,7 +36,8 @@ export class GarakGateway
   }
 
   /**
-   * Emit scan started event
+   * Emit scan started event.
+   * Event: garak:started:{scanId}
    */
   emitScanStarted(scanId: string): void {
     this.server.emit(`garak:started:${scanId}`, {
@@ -47,7 +49,8 @@ export class GarakGateway
   }
 
   /**
-   * Emit progress update
+   * Emit progress update.
+   * Event: garak:progress:{scanId}
    */
   emitProgress(scanId: string, progress: number, message: string): void {
     this.server.emit(`garak:progress:${scanId}`, {
@@ -60,7 +63,8 @@ export class GarakGateway
   }
 
   /**
-   * Emit log message
+   * Emit log message.
+   * Event: garak:log:{scanId}
    */
   emitLog(scanId: string, log: string): void {
     this.server.emit(`garak:log:${scanId}`, {
@@ -71,7 +75,8 @@ export class GarakGateway
   }
 
   /**
-   * Emit vulnerability found
+   * Emit vulnerability found.
+   * Event: garak:vulnerability:{scanId}
    */
   emitVulnerabilityFound(
     scanId: string,
@@ -92,7 +97,8 @@ export class GarakGateway
   }
 
   /**
-   * Emit scan completed event
+   * Emit scan completed event.
+   * Event: garak:completed:{scanId}
    */
   emitScanCompleted(
     scanId: string,
@@ -102,6 +108,8 @@ export class GarakGateway
       totalTests: number;
       passed: number;
       failed: number;
+      durationMs?: number;
+      severityBreakdown?: SeverityBreakdownDto;
     },
   ): void {
     this.server.emit(`garak:completed:${scanId}`, {
@@ -114,7 +122,8 @@ export class GarakGateway
   }
 
   /**
-   * Emit scan failed event
+   * Emit scan failed event.
+   * Event: garak:failed:{scanId}
    */
   emitScanFailed(scanId: string, error: string): void {
     this.server.emit(`garak:failed:${scanId}`, {

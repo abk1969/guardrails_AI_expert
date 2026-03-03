@@ -4,7 +4,7 @@ import { spawn, ChildProcess } from 'child_process';
 /**
  * Docker Executor Service
  * Executes commands inside isolated Docker containers for security testing tools
- * Supports: Garak, Strix, Promptfoo
+ * Supports: Garak, Promptfoo
  */
 @Injectable()
 export class DockerExecutorService {

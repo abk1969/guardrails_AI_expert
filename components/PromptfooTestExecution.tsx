@@ -1,15 +1,91 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
-import { Play, Pause, Square, Terminal, AlertCircle, CheckCircle2, Loader, Download, Copy, ExternalLink, Server, Command } from 'lucide-react';
+import {
+  Play,
+  Square,
+  Terminal,
+  AlertCircle,
+  CheckCircle2,
+  Loader,
+  Download,
+  Copy,
+  ExternalLink,
+  Server,
+  Command,
+  XCircle,
+  ArrowRight,
+  WifiOff,
+  RefreshCw,
+  Info,
+  Clock
+} from 'lucide-react';
 import { useNavigation } from '../contexts/NavigationContext';
 import { io, Socket } from 'socket.io-client';
 
 type ExecutionMode = 'auto' | 'manual' | 'checking';
-type TestStatus = 'idle' | 'running' | 'completed' | 'failed';
+type TestStatus = 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+/** Steps displayed during auto execution */
+const EXECUTION_STEPS = [
+  { id: 'connect', label: 'Connexion au backend', description: 'Etablissement de la connexion WebSocket' },
+  { id: 'validate', label: 'Validation de la configuration', description: 'Verification du YAML et des parametres' },
+  { id: 'init', label: 'Initialisation des tests', description: 'Preparation de l\'environnement de test' },
+  { id: 'execute', label: 'Execution des tests', description: 'Lancement des scenarios de securite' },
+  { id: 'analyze', label: 'Analyse des resultats', description: 'Traitement et scoring des reponses' },
+  { id: 'finalize', label: 'Finalisation', description: 'Sauvegarde des resultats et nettoyage' },
+];
+
+/** Actionable error suggestions in French */
+const ERROR_SUGGESTIONS: Record<string, { message: string; actions: string[] }> = {
+  'ECONNREFUSED': {
+    message: 'Le backend n\'est pas demarre ou n\'est pas accessible.',
+    actions: [
+      'Verifiez que Docker est en cours d\'execution',
+      'Lancez "docker-compose up -d" dans le terminal',
+      'Verifiez que le port 3003 n\'est pas utilise par un autre service',
+    ],
+  },
+  'TIMEOUT': {
+    message: 'Le backend ne repond pas dans le delai imparti.',
+    actions: [
+      'Verifiez la connexion reseau',
+      'Le backend est peut-etre surcharge, attendez quelques minutes',
+      'Consultez les logs avec "docker-compose logs -f api-gateway"',
+    ],
+  },
+  'UNAUTHORIZED': {
+    message: 'L\'authentification a echoue.',
+    actions: [
+      'Verifiez votre cle API dans la Configuration LLM',
+      'Reconnectez-vous a l\'application',
+    ],
+  },
+  'DEFAULT': {
+    message: 'Une erreur inattendue s\'est produite.',
+    actions: [
+      'Verifiez les logs du backend: "docker-compose logs -f api-gateway"',
+      'Essayez le mode manuel avec les instructions CLI ci-dessous',
+      'Redemarrez les services: "docker-compose restart"',
+    ],
+  },
+};
+
+function getErrorSuggestion(error: string): { message: string; actions: string[] } {
+  if (error.includes('ECONNREFUSED') || error.includes('fetch failed') || error.includes('NetworkError')) {
+    return ERROR_SUGGESTIONS['ECONNREFUSED'];
+  }
+  if (error.includes('timeout') || error.includes('Timeout') || error.includes('AbortError')) {
+    return ERROR_SUGGESTIONS['TIMEOUT'];
+  }
+  if (error.includes('401') || error.includes('Unauthorized') || error.includes('403')) {
+    return ERROR_SUGGESTIONS['UNAUTHORIZED'];
+  }
+  return ERROR_SUGGESTIONS['DEFAULT'];
+}
 
 /**
- * Composant pour lancer et suivre l'exécution des tests Promptfoo
+ * Composant pour lancer et suivre l'execution des tests Promptfoo
  *
  * MODE HYBRIDE:
  * 1. Essaie d'appeler le backend (mode auto)
@@ -17,49 +93,67 @@ type TestStatus = 'idle' | 'running' | 'completed' | 'failed';
  */
 const PromptfooTestExecution: React.FC = () => {
   const { setActiveNav } = useNavigation();
-  const [mode, setMode] = useState<ExecutionMode>('manual'); // Démarrer en mode manuel par défaut
+  const [mode, setMode] = useState<ExecutionMode>('manual');
   const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [progress, setProgress] = useState(0);
-  const [testsCompleted, setTestsCompleted] = useState(0);
-  const [totalTests, setTotalTests] = useState(0);
-  const [elapsedTime, setElapsedTime] = useState('0:00');
   const [logs, setLogs] = useState<string[]>([]);
   const [yamlContent, setYamlContent] = useState('');
   const [currentTestRunId, setCurrentTestRunId] = useState<string | null>(null);
   const [progressMessage, setProgressMessage] = useState('');
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedDisplay, setElapsedDisplay] = useState('0:00');
   const socketRef = useRef<Socket | null>(null);
+  const logsEndRef = useRef<HTMLDivElement>(null);
 
   const addLog = (message: string) => {
-    setLogs(prev => [...prev, message]);
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
   };
 
-  // Charger le YAML au démarrage, sans vérifier le backend automatiquement
+  // Auto-scroll logs
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [logs]);
+
+  // Elapsed time counter
+  useEffect(() => {
+    if (testStatus !== 'running' || !startTime) return;
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const mins = Math.floor(elapsed / 60);
+      const secs = elapsed % 60;
+      setElapsedDisplay(`${mins}:${secs.toString().padStart(2, '0')}`);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [testStatus, startTime]);
+
+  // Load YAML on mount
   useEffect(() => {
     loadYamlFromStorage();
-    addLog('ℹ️ Mode manuel activé par défaut');
-    addLog('📋 Suivez les instructions ci-dessous pour lancer Promptfoo en ligne de commande');
-    addLog('💡 Astuce: Cliquez sur "Activer Mode Automatique" si vous avez démarré le backend');
+    addLog('Mode manuel active par defaut');
+    addLog('Suivez les instructions ci-dessous pour lancer Promptfoo en ligne de commande');
+    addLog('Cliquez sur "Activer Mode Automatique" si vous avez demarre le backend');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Nettoyer la connexion WebSocket au démontage
+  // Cleanup WebSocket on unmount
   useEffect(() => {
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
-        addLog('🔌 Connexion WebSocket fermée');
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkBackendAvailability = async () => {
-    addLog('🔍 Vérification de la disponibilité du backend...');
+    addLog('Verification de la disponibilite du backend...');
     setMode('checking');
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 secondes max
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     try {
       const response = await fetch(`${API_URL}/health`, {
@@ -71,23 +165,19 @@ const PromptfooTestExecution: React.FC = () => {
       clearTimeout(timeoutId);
 
       if (response.ok && response.status === 200) {
-        // Backend disponible
         setMode('auto');
-        addLog('✅ Backend disponible - Mode automatique activé');
-        addLog('💡 Vous pouvez maintenant lancer les tests via le backend');
+        addLog('Backend disponible - Mode automatique active');
       } else {
-        throw new Error(`Backend retourné status ${response.status}`);
+        throw new Error(`Backend retourne status ${response.status}`);
       }
     } catch (error) {
       clearTimeout(timeoutId);
-
-      // Backend non disponible - rester en mode manuel
       setMode('manual');
-      addLog('❌ Backend non disponible (normal si non démarré)');
-      addLog('ℹ️ Restez en mode manuel pour utiliser Promptfoo en CLI');
+      addLog('Backend non disponible (normal si non demarre)');
+      addLog('Restez en mode manuel pour utiliser Promptfoo en CLI');
 
       if (error instanceof Error && error.name !== 'AbortError') {
-        addLog(`💡 Détails: ${error.message}`);
+        addLog(`Details: ${error.message}`);
       }
     }
   };
@@ -96,98 +186,94 @@ const PromptfooTestExecution: React.FC = () => {
     const stored = localStorage.getItem('promptfoo-yaml');
     if (stored) {
       setYamlContent(stored);
-      addLog('✅ Configuration YAML chargée depuis l\'étape précédente');
+      addLog('Configuration YAML chargee depuis l\'etape precedente');
     } else {
-      addLog('⚠️ Aucune configuration YAML trouvée. Retournez à l\'étape 2.');
+      addLog('Aucune configuration YAML trouvee. Retournez a l\'etape 2.');
     }
   };
 
-  /**
-   * Établit la connexion WebSocket et écoute les événements
-   */
   const setupWebSocket = (testRunId: string) => {
-    const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
+    const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3003';
 
-    addLog('🔌 Connexion au WebSocket...');
+    addLog('Connexion au WebSocket...');
+    setCurrentStepIndex(0);
 
-    // Créer la connexion WebSocket
     const socket = io(`${WS_URL}/promptfoo`, {
       transports: ['websocket', 'polling'],
     });
 
     socketRef.current = socket;
 
-    // Événement: connexion établie
     socket.on('connect', () => {
-      addLog('✅ WebSocket connecté');
-      // S'abonner au test run spécifique
+      addLog('WebSocket connecte');
       socket.emit('subscribe-test', { testRunId });
-      addLog(`📡 Abonné aux mises à jour du test ${testRunId}`);
+      addLog(`Abonne aux mises a jour du test ${testRunId}`);
+      setCurrentStepIndex(1);
     });
 
-    // Événement: test démarré
     socket.on('test-started', (data) => {
-      addLog(`🚀 Test démarré: ${data.testRunId}`);
+      addLog(`Test demarre: ${data.testRunId}`);
+      setCurrentStepIndex(2);
     });
 
-    // Événement: progression
     socket.on('test-progress', (data) => {
       setProgress(data.progress);
       setProgressMessage(data.message);
-      addLog(`⏳ ${data.progress}% - ${data.message}`);
+      addLog(`${data.progress}% - ${data.message}`);
+      // Advance step based on progress
+      if (data.progress < 20) setCurrentStepIndex(2);
+      else if (data.progress < 80) setCurrentStepIndex(3);
+      else if (data.progress < 95) setCurrentStepIndex(4);
+      else setCurrentStepIndex(5);
     });
 
-    // Événement: nouveau log
     socket.on('test-log', (data) => {
       addLog(data.log);
     });
 
-    // Événement: test terminé
-    socket.on('test-completed', (data) => {
+    socket.on('test-completed', () => {
       setTestStatus('completed');
       setProgress(100);
-      addLog('✅ Tests terminés avec succès!');
-      addLog('📊 Résultats disponibles dans l\'étape "Résultats"');
+      setCurrentStepIndex(5);
+      addLog('Tests termines avec succes!');
+      addLog('Resultats disponibles dans l\'etape "Resultats"');
 
-      // Sauvegarder le testRunId pour la page de résultats
       if (currentTestRunId) {
         localStorage.setItem('promptfoo_last_test_run_id', currentTestRunId);
-        addLog(`💾 Test Run ID sauvegardé: ${currentTestRunId}`);
+        addLog(`Test Run ID sauvegarde: ${currentTestRunId}`);
       }
 
-      // Déconnecter le WebSocket
       setTimeout(() => {
         socket.disconnect();
-        addLog('🔌 Connexion WebSocket fermée');
       }, 2000);
     });
 
-    // Événement: test échoué
     socket.on('test-failed', (data) => {
       setTestStatus('failed');
-      addLog(`❌ Échec du test: ${data.error}`);
+      setErrorDetails(data.error);
+      addLog(`Echec du test: ${data.error}`);
       socket.disconnect();
     });
 
-    // Événement: erreur de connexion
     socket.on('connect_error', (error) => {
-      addLog(`❌ Erreur WebSocket: ${error.message}`);
+      addLog(`Erreur WebSocket: ${error.message}`);
     });
 
-    // Événement: déconnexion
     socket.on('disconnect', () => {
-      addLog('🔌 WebSocket déconnecté');
+      addLog('WebSocket deconnecte');
     });
   };
 
-  // Mode Auto: Appeler le backend
   const handleStartTestAuto = async () => {
     setTestStatus('running');
     setProgress(0);
-    addLog('🚀 Lancement des tests via le backend...');
+    setCurrentStepIndex(0);
+    setErrorDetails(null);
+    setStartTime(Date.now());
+    addLog('Lancement des tests via le backend...');
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
       const response = await fetch(`${API_URL}/promptfoo/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -202,35 +288,38 @@ const PromptfooTestExecution: React.FC = () => {
       const result = await response.json();
 
       if (result.success && result.testRunId) {
-        addLog(`✅ Tests lancés avec succès (ID: ${result.testRunId})`);
-        addLog(`⏳ Durée estimée: ${result.estimatedDuration}`);
+        addLog(`Tests lances avec succes (ID: ${result.testRunId})`);
+        addLog(`Duree estimee: ${result.estimatedDuration}`);
 
         setCurrentTestRunId(result.testRunId);
-
-        // Établir la connexion WebSocket pour mises à jour temps réel
         setupWebSocket(result.testRunId);
       } else {
-        throw new Error('Réponse invalide du serveur');
+        throw new Error('Reponse invalide du serveur');
       }
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Echec de l\'execution';
       setTestStatus('failed');
-      addLog(`❌ Erreur: ${error instanceof Error ? error.message : 'Échec de l\'exécution'}`);
-      addLog('💡 Utilisez le mode manuel ci-dessous pour lancer Promptfoo en CLI');
+      setErrorDetails(errorMsg);
+      addLog(`Erreur: ${errorMsg}`);
+      addLog('Utilisez le mode manuel ci-dessous pour lancer Promptfoo en CLI');
     }
   };
 
   const handleStopTest = () => {
-    setTestStatus('idle');
+    setTestStatus('cancelled');
     setProgress(0);
     setProgressMessage('');
-    addLog('⏹️ Tests arrêtés par l\'utilisateur');
+    setStartTime(null);
+    addLog('Tests arretes par l\'utilisateur');
 
-    // Déconnecter le WebSocket
     if (socketRef.current) {
       socketRef.current.disconnect();
       socketRef.current = null;
     }
+
+    // Allow restart after cancellation
+    setTimeout(() => setTestStatus('idle'), 1000);
   };
 
   const handleDownloadYaml = () => {
@@ -241,16 +330,17 @@ const PromptfooTestExecution: React.FC = () => {
     link.download = `promptfoo-config-${Date.now()}.yaml`;
     link.click();
     URL.revokeObjectURL(url);
-    addLog('📥 Fichier YAML téléchargé');
+    addLog('Fichier YAML telecharge');
   };
 
   const handleCopyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
-    addLog('📋 Commande copiée dans le presse-papiers');
+    addLog('Commande copiee dans le presse-papiers');
   };
 
-  // Chemin relatif pour tous les utilisateurs
   const promptfooPath = './guardrail/solution_promptfoo/ai-risk-guardrails-tests';
+
+  const errorSuggestion = errorDetails ? getErrorSuggestion(errorDetails) : null;
 
   return (
     <div className="space-y-6">
@@ -277,47 +367,108 @@ const PromptfooTestExecution: React.FC = () => {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">
-                {mode === 'checking' && 'Vérification du Backend...'}
-                {mode === 'auto' && testStatus === 'idle' && 'Mode Automatique - Prêt à Lancer'}
-                {mode === 'auto' && testStatus === 'running' && 'Exécution Automatique en Cours...'}
-                {mode === 'auto' && testStatus === 'completed' && 'Tests Terminés!'}
-                {mode === 'auto' && testStatus === 'failed' && 'Échec de l\'Exécution'}
+                {mode === 'checking' && 'Verification du Backend...'}
+                {mode === 'auto' && testStatus === 'idle' && 'Mode Automatique - Pret a Lancer'}
+                {mode === 'auto' && testStatus === 'running' && 'Execution en Cours...'}
+                {mode === 'auto' && testStatus === 'completed' && 'Tests Termines !'}
+                {mode === 'auto' && testStatus === 'failed' && 'Echec de l\'Execution'}
+                {mode === 'auto' && testStatus === 'cancelled' && 'Tests Annules'}
                 {mode === 'manual' && 'Mode Manuel - Instructions CLI'}
               </h2>
               <p className="text-gray-300">
-                {mode === 'checking' && 'Détection de la disponibilité du backend...'}
-                {mode === 'auto' && testStatus === 'idle' && 'Le backend est prêt. Cliquez sur "Lancer les Tests" pour démarrer.'}
-                {mode === 'auto' && testStatus === 'running' && 'Les tests sont exécutés par le backend. Durée: 5-30 minutes.'}
-                {mode === 'auto' && testStatus === 'completed' && 'Tous les tests ont été exécutés avec succès.'}
-                {mode === 'auto' && testStatus === 'failed' && 'Une erreur s\'est produite. Essayez le mode manuel ci-dessous.'}
+                {mode === 'checking' && 'Detection de la disponibilite du backend...'}
+                {mode === 'auto' && testStatus === 'idle' && 'Le backend est pret. Cliquez sur "Lancer les Tests" pour demarrer.'}
+                {mode === 'auto' && testStatus === 'running' && `Execution en cours depuis ${elapsedDisplay}. Duree estimee: 5-30 minutes.`}
+                {mode === 'auto' && testStatus === 'completed' && 'Tous les tests ont ete executes avec succes.'}
+                {mode === 'auto' && testStatus === 'failed' && 'Une erreur s\'est produite. Consultez les details ci-dessous.'}
+                {mode === 'auto' && testStatus === 'cancelled' && 'L\'execution a ete annulee.'}
                 {mode === 'manual' && 'Le backend n\'est pas disponible. Suivez les instructions pour lancer Promptfoo manuellement.'}
               </p>
             </div>
           </div>
+
+          {/* Mode switcher */}
+          <div className="flex flex-col gap-2">
+            {mode === 'manual' && (
+              <Button variant="secondary" onClick={checkBackendAvailability} className="text-sm">
+                <Server size={16} className="mr-2" />
+                Activer Mode Auto
+              </Button>
+            )}
+            {mode === 'auto' && testStatus === 'idle' && (
+              <Button variant="secondary" onClick={() => setMode('manual')} className="text-sm">
+                <Command size={16} className="mr-2" />
+                Passer en Manuel
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
 
-      {/* Mode Auto: Barre de progression */}
+      {/* Mode Auto: Progress & Steps */}
       {mode === 'auto' && testStatus === 'running' && (
         <Card>
-          <h3 className="text-lg font-bold text-white mb-4">Progression</h3>
-          <div className="relative w-full h-8 bg-gray-700 rounded-lg overflow-hidden mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-white">Progression</h3>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Clock size={14} />
+                <span>{elapsedDisplay}</span>
+              </div>
+              <Button
+                variant="danger"
+                className="text-sm"
+                onClick={handleStopTest}
+              >
+                <Square size={14} className="mr-2" />
+                Arreter
+              </Button>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="relative w-full h-3 bg-gray-700 rounded-full overflow-hidden mb-6">
             <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-green-500 transition-all duration-500 flex items-center justify-center"
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-green-500 transition-all duration-500 rounded-full"
               style={{ width: `${progress}%` }}
-            >
-              {progress > 10 && (
-                <span className="text-sm font-bold text-white">{progress}%</span>
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              {progress > 15 && (
+                <span className="text-xs font-bold text-white drop-shadow">{progress}%</span>
               )}
             </div>
           </div>
-          <div className="mb-4">
+
+          {/* Current step message */}
+          <div className="mb-6 px-1">
             <p className="text-sm text-cyan-400 flex items-center gap-2">
-              <Loader size={16} className="animate-spin" />
-              {progressMessage || 'Exécution en cours...'}
+              <Loader size={14} className="animate-spin" />
+              {progressMessage || EXECUTION_STEPS[currentStepIndex]?.description || 'Execution en cours...'}
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
+
+          {/* Step indicators */}
+          <div className="grid grid-cols-6 gap-1">
+            {EXECUTION_STEPS.map((step, index) => (
+              <div key={step.id} className="text-center">
+                <div className={`w-full h-1.5 rounded-full mb-2 transition-colors ${
+                  index < currentStepIndex
+                    ? 'bg-green-500'
+                    : index === currentStepIndex
+                    ? 'bg-cyan-500 animate-pulse'
+                    : 'bg-gray-700'
+                }`} />
+                <p className={`text-xs ${
+                  index <= currentStepIndex ? 'text-white' : 'text-gray-600'
+                }`}>
+                  {step.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-3 gap-4 mt-6 text-center">
             <div className="bg-gray-700/50 p-3 rounded">
               <p className="text-sm text-gray-400">Progression</p>
               <p className="text-2xl font-bold text-cyan-400">{progress}%</p>
@@ -327,36 +478,112 @@ const PromptfooTestExecution: React.FC = () => {
               <p className="text-sm font-mono text-white truncate">{currentTestRunId || '-'}</p>
             </div>
             <div className="bg-gray-700/50 p-3 rounded">
-              <p className="text-sm text-gray-400">Statut</p>
-              <p className="text-sm font-bold text-white">En cours...</p>
+              <p className="text-sm text-gray-400">Temps ecoule</p>
+              <p className="text-2xl font-bold text-white">{elapsedDisplay}</p>
             </div>
           </div>
         </Card>
       )}
 
-      {/* Mode Manual: Instructions CLI */}
+      {/* Error display with actionable suggestions */}
+      {mode === 'auto' && testStatus === 'failed' && errorSuggestion && (
+        <Card className="bg-red-900/20 border-red-500/30">
+          <div className="flex items-start gap-4">
+            <XCircle size={24} className="text-red-400 flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-red-400 mb-2">Erreur d'Execution</h3>
+              <p className="text-sm text-red-300 mb-4">{errorSuggestion.message}</p>
+
+              {errorDetails && (
+                <div className="text-xs text-red-300/70 bg-red-950/30 p-3 rounded border border-red-500/20 mb-4 font-mono">
+                  {errorDetails}
+                </div>
+              )}
+
+              <h4 className="text-sm font-bold text-white mb-2">Actions recommandees :</h4>
+              <ul className="space-y-2">
+                {errorSuggestion.actions.map((action, i) => (
+                  <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                    <ArrowRight size={14} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+                    {action}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex gap-3 mt-4">
+                <Button onClick={() => { setTestStatus('idle'); setErrorDetails(null); }}>
+                  <RefreshCw size={14} className="mr-2" />
+                  Reessayer
+                </Button>
+                <Button variant="secondary" onClick={() => { setMode('manual'); setTestStatus('idle'); setErrorDetails(null); }}>
+                  <Command size={14} className="mr-2" />
+                  Mode Manuel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Success display */}
+      {mode === 'auto' && testStatus === 'completed' && (
+        <Card className="bg-green-900/20 border-green-500/30">
+          <div className="text-center py-6">
+            <CheckCircle2 size={48} className="text-green-400 mx-auto mb-3" />
+            <h3 className="text-xl font-bold text-white mb-2">Tests Termines avec Succes</h3>
+            <p className="text-gray-400 mb-1">Duree totale: {elapsedDisplay}</p>
+            {currentTestRunId && (
+              <p className="text-sm text-gray-500 mb-4">ID: {currentTestRunId}</p>
+            )}
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => setActiveNav('test-results')}>
+                Voir les Resultats
+              </Button>
+              <Button variant="secondary" onClick={() => { setTestStatus('idle'); setProgress(0); setStartTime(null); }}>
+                Relancer un Test
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Mode Manual: CLI Instructions */}
       {mode === 'manual' && (
         <Card className="bg-blue-900/20 border-blue-500/30">
-          <h3 className="text-lg font-bold text-white mb-4">📋 Instructions pour Exécution Manuelle</h3>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20">
+              <WifiOff size={16} className="text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">Instructions pour Execution Manuelle</h3>
+              <p className="text-xs text-gray-400">Le backend n'est pas detecte. Utilisez Promptfoo en ligne de commande.</p>
+            </div>
+          </div>
 
           <div className="space-y-4">
-            {/* Étape 1: Télécharger YAML */}
+            {/* Step 1: Download YAML */}
             <div className="bg-gray-700/50 p-4 rounded">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-bold text-white">1. Télécharger la Configuration YAML</h4>
+                <h4 className="font-bold text-white flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold">1</span>
+                  Telecharger la Configuration YAML
+                </h4>
                 <Button variant="secondary" className="text-sm" onClick={handleDownloadYaml}>
                   <Download size={16} className="mr-2" />
-                  Télécharger YAML
+                  Telecharger YAML
                 </Button>
               </div>
               <p className="text-sm text-gray-300">
-                Téléchargez le fichier <code className="bg-gray-800 px-2 py-1 rounded">promptfooconfig.yaml</code> et placez-le dans le dossier Promptfoo.
+                Telechargez le fichier <code className="bg-gray-800 px-2 py-1 rounded">promptfooconfig.yaml</code> et placez-le dans le dossier Promptfoo.
               </p>
             </div>
 
-            {/* Étape 2: Ouvrir terminal */}
+            {/* Step 2: Open terminal */}
             <div className="bg-gray-700/50 p-4 rounded">
-              <h4 className="font-bold text-white mb-2">2. Ouvrir un Terminal</h4>
+              <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold">2</span>
+                Ouvrir un Terminal
+              </h4>
               <p className="text-sm text-gray-300 mb-3">
                 Ouvrez un terminal (PowerShell, CMD, ou Git Bash) et naviguez vers le dossier Promptfoo:
               </p>
@@ -369,11 +596,14 @@ const PromptfooTestExecution: React.FC = () => {
               </div>
             </div>
 
-            {/* Étape 3: Lancer les tests */}
+            {/* Step 3: Run tests */}
             <div className="bg-gray-700/50 p-4 rounded">
-              <h4 className="font-bold text-white mb-2">3. Lancer les Tests</h4>
+              <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold">3</span>
+                Lancer les Tests
+              </h4>
               <p className="text-sm text-gray-300 mb-3">
-                Exécutez l'une des commandes suivantes:
+                Executez l'une des commandes suivantes:
               </p>
               <div className="space-y-2">
                 <div className="bg-gray-900 p-3 rounded font-mono text-sm text-gray-200 flex items-center justify-between">
@@ -383,7 +613,7 @@ const PromptfooTestExecution: React.FC = () => {
                     Copier
                   </Button>
                 </div>
-                <p className="text-xs text-gray-400 ml-3">💡 Test rapide (5 minutes, 15 tests)</p>
+                <p className="text-xs text-gray-400 ml-3">Test rapide (5 minutes, 15 tests)</p>
 
                 <div className="bg-gray-900 p-3 rounded font-mono text-sm text-gray-200 flex items-center justify-between">
                   <span>npm run test</span>
@@ -392,15 +622,18 @@ const PromptfooTestExecution: React.FC = () => {
                     Copier
                   </Button>
                 </div>
-                <p className="text-xs text-gray-400 ml-3">⏱️ Test complet (30-60 minutes)</p>
+                <p className="text-xs text-gray-400 ml-3">Test complet (30-60 minutes)</p>
               </div>
             </div>
 
-            {/* Étape 4: Voir les résultats */}
+            {/* Step 4: View results */}
             <div className="bg-gray-700/50 p-4 rounded">
-              <h4 className="font-bold text-white mb-2">4. Visualiser les Résultats</h4>
+              <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs flex items-center justify-center font-bold">4</span>
+                Visualiser les Resultats
+              </h4>
               <p className="text-sm text-gray-300 mb-3">
-                Une fois les tests terminés, lancez l'interface web Promptfoo:
+                Une fois les tests termines, lancez l'interface web Promptfoo:
               </p>
               <div className="bg-gray-900 p-3 rounded font-mono text-sm text-gray-200 flex items-center justify-between mb-2">
                 <span>npm run view</span>
@@ -410,7 +643,7 @@ const PromptfooTestExecution: React.FC = () => {
                 </Button>
               </div>
               <p className="text-xs text-gray-400 ml-3">
-                📊 Ouvre l'interface web sur <code>http://localhost:15500</code>
+                Ouvre l'interface web sur <code>http://localhost:15500</code>
               </p>
               <Button variant="secondary" className="mt-3 text-sm" onClick={() => window.open('http://localhost:15500', '_blank')}>
                 <ExternalLink size={16} className="mr-2" />
@@ -421,14 +654,15 @@ const PromptfooTestExecution: React.FC = () => {
         </Card>
       )}
 
-      {/* Contrôles */}
+      {/* Controls */}
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-white">Contrôles d'Exécution</h3>
+            <h3 className="text-lg font-bold text-white">Controles d'Execution</h3>
             <p className="text-sm text-gray-400 mt-1">
-              {mode === 'auto' && 'Gérez l\'exécution automatique via le backend'}
+              {mode === 'auto' && 'Gerez l\'execution automatique via le backend'}
               {mode === 'manual' && 'Suivez les instructions CLI ci-dessus'}
+              {mode === 'checking' && 'Verification en cours...'}
             </p>
           </div>
           <div className="flex gap-2">
@@ -439,50 +673,48 @@ const PromptfooTestExecution: React.FC = () => {
               </Button>
             )}
             {mode === 'auto' && testStatus === 'running' && (
-              <Button onClick={handleStopTest} variant="secondary" className="border-red-500 text-red-400 hover:bg-red-500/10">
+              <Button onClick={handleStopTest} variant="danger">
                 <Square size={16} className="mr-2" />
-                Arrêter
+                Arreter
               </Button>
             )}
             {mode === 'auto' && testStatus === 'completed' && (
               <Button onClick={() => setActiveNav('test-results')} className="px-6">
-                Voir les Résultats
-              </Button>
-            )}
-            {mode === 'manual' && (
-              <Button variant="secondary" onClick={checkBackendAvailability}>
-                <Server size={16} className="mr-2" />
-                Activer Mode Automatique
+                Voir les Resultats
               </Button>
             )}
             {mode === 'checking' && (
               <Button variant="secondary" disabled>
                 <Loader size={16} className="mr-2 animate-spin" />
-                Vérification...
+                Verification...
               </Button>
             )}
           </div>
         </div>
       </Card>
 
-      {/* Console de logs */}
+      {/* Console */}
       <Card>
-        <div className="flex items-center gap-2 mb-4">
-          <Terminal size={20} className="text-cyan-400" />
-          <h3 className="text-lg font-bold text-white">Console</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Terminal size={20} className="text-cyan-400" />
+            <h3 className="text-lg font-bold text-white">Console</h3>
+          </div>
+          <span className="text-xs text-gray-500">{logs.length} lignes</span>
         </div>
 
         <div className="bg-gray-900 rounded-lg p-4 h-64 overflow-y-auto font-mono text-sm">
           {logs.map((log, index) => (
             <div key={index} className="text-gray-300 mb-1">
-              <span className="text-gray-500">[{new Date().toLocaleTimeString()}]</span> {log}
+              {log}
             </div>
           ))}
           {mode === 'auto' && testStatus === 'running' && (
             <div className="text-cyan-400 animate-pulse">
-              <span className="text-gray-500">[{new Date().toLocaleTimeString()}]</span> ▓ En cours d'exécution...
+              En cours d'execution...
             </div>
           )}
+          <div ref={logsEndRef} />
         </div>
       </Card>
     </div>

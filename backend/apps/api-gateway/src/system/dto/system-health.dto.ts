@@ -31,9 +31,6 @@ export class SystemHealthDto {
   @ApiProperty({ type: ToolCheckDto, description: 'Garak LLM scanner check' })
   garak: ToolCheckDto;
 
-  @ApiProperty({ type: ToolCheckDto, description: 'Strix agent check' })
-  strix: ToolCheckDto;
-
   @ApiProperty({ type: ToolCheckDto, description: 'Node.js 18+ check' })
   node: ToolCheckDto;
 

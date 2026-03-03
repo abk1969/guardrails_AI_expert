@@ -27,107 +27,140 @@ export class PromptfooGateway implements OnGatewayConnection, OnGatewayDisconnec
    * Gestion de la connexion d'un client
    */
   handleConnection(client: Socket) {
-    this.logger.log(`Client connecté: ${client.id}`);
+    this.logger.log(`Client connected: ${client.id}`);
     this.connectedClients.set(client.id, client);
   }
 
   /**
-   * Gestion de la déconnexion d'un client
+   * Gestion de la deconnexion d'un client
    */
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client déconnecté: ${client.id}`);
+    this.logger.log(`Client disconnected: ${client.id}`);
     this.connectedClients.delete(client.id);
   }
 
   /**
-   * Abonnement à un test run spécifique
+   * Abonnement a un test run specifique
    */
-  @SubscribeMessage('subscribe-test')
+  @SubscribeMessage('promptfoo:subscribe')
   handleSubscribe(
     @MessageBody() data: { testRunId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    const room = `test-${data.testRunId}`;
+    const room = `promptfoo:${data.testRunId}`;
     client.join(room);
-    this.logger.log(`Client ${client.id} abonné à ${room}`);
+    this.logger.log(`Client ${client.id} subscribed to ${room}`);
     return { success: true, room };
   }
 
   /**
-   * Désabonnement d'un test run
+   * Desabonnement d'un test run
    */
-  @SubscribeMessage('unsubscribe-test')
+  @SubscribeMessage('promptfoo:unsubscribe')
   handleUnsubscribe(
     @MessageBody() data: { testRunId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    const room = `test-${data.testRunId}`;
+    const room = `promptfoo:${data.testRunId}`;
     client.leave(room);
-    this.logger.log(`Client ${client.id} désabonné de ${room}`);
+    this.logger.log(`Client ${client.id} unsubscribed from ${room}`);
     return { success: true };
   }
 
+  // --- Legacy event names for backward compatibility ---
+
   /**
-   * Émet un événement de démarrage de test
+   * Legacy subscribe handler (old event name)
    */
-  emitTestStarted(testRunId: string) {
-    const room = `test-${testRunId}`;
-    this.server.to(room).emit('test-started', {
-      testRunId,
-      timestamp: new Date().toISOString(),
-    });
-    this.logger.log(`Événement test-started émis pour ${room}`);
+  @SubscribeMessage('subscribe-test')
+  handleLegacySubscribe(
+    @MessageBody() data: { testRunId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    return this.handleSubscribe(data, client);
   }
 
   /**
-   * Émet une mise à jour de progression
+   * Legacy unsubscribe handler (old event name)
+   */
+  @SubscribeMessage('unsubscribe-test')
+  handleLegacyUnsubscribe(
+    @MessageBody() data: { testRunId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    return this.handleUnsubscribe(data, client);
+  }
+
+  // --- Emit methods ---
+
+  /**
+   * Emet un evenement de demarrage de test.
+   * Emits to both new and legacy room names.
+   */
+  emitTestStarted(testRunId: string) {
+    const payload = {
+      testRunId,
+      timestamp: new Date().toISOString(),
+    };
+    this.server.to(`promptfoo:${testRunId}`).emit('promptfoo:started', payload);
+    // Legacy event for backward compatibility
+    this.server.to(`test-${testRunId}`).emit('test-started', payload);
+    this.logger.log(`Event promptfoo:started emitted for ${testRunId}`);
+  }
+
+  /**
+   * Emet une mise a jour de progression
    */
   emitProgress(testRunId: string, progress: number, message: string) {
-    const room = `test-${testRunId}`;
-    this.server.to(room).emit('test-progress', {
+    const payload = {
       testRunId,
       progress,
       message,
       timestamp: new Date().toISOString(),
-    });
-    this.logger.debug(`Progression ${progress}% pour ${room}: ${message}`);
+    };
+    this.server.to(`promptfoo:${testRunId}`).emit('promptfoo:progress', payload);
+    this.server.to(`test-${testRunId}`).emit('test-progress', payload);
+    this.logger.debug(`Progress ${progress}% for ${testRunId}: ${message}`);
   }
 
   /**
-   * Émet un log en temps réel
+   * Emet un log en temps reel
    */
   emitLog(testRunId: string, log: string) {
-    const room = `test-${testRunId}`;
-    this.server.to(room).emit('test-log', {
+    const payload = {
       testRunId,
       log,
       timestamp: new Date().toISOString(),
-    });
+    };
+    this.server.to(`promptfoo:${testRunId}`).emit('promptfoo:log', payload);
+    this.server.to(`test-${testRunId}`).emit('test-log', payload);
   }
 
   /**
-   * Émet un événement de fin de test (succès)
+   * Emet un evenement de fin de test (succes)
    */
   emitTestCompleted(testRunId: string, results: any) {
-    const room = `test-${testRunId}`;
-    this.server.to(room).emit('test-completed', {
+    const payload = {
       testRunId,
       results,
       timestamp: new Date().toISOString(),
-    });
-    this.logger.log(`Événement test-completed émis pour ${room}`);
+    };
+    this.server.to(`promptfoo:${testRunId}`).emit('promptfoo:completed', payload);
+    this.server.to(`test-${testRunId}`).emit('test-completed', payload);
+    this.logger.log(`Event promptfoo:completed emitted for ${testRunId}`);
   }
 
   /**
-   * Émet un événement de fin de test (échec)
+   * Emet un evenement de fin de test (echec)
    */
   emitTestFailed(testRunId: string, error: string) {
-    const room = `test-${testRunId}`;
-    this.server.to(room).emit('test-failed', {
+    const payload = {
       testRunId,
       error,
       timestamp: new Date().toISOString(),
-    });
-    this.logger.error(`Événement test-failed émis pour ${room}: ${error}`);
+    };
+    this.server.to(`promptfoo:${testRunId}`).emit('promptfoo:failed', payload);
+    this.server.to(`test-${testRunId}`).emit('test-failed', payload);
+    this.logger.error(`Event promptfoo:failed emitted for ${testRunId}: ${error}`);
   }
 }

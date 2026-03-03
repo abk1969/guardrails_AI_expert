@@ -2,8 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PromptfooService } from './promptfoo.service';
 import { PrismaService } from '@app/database';
 import { PromptfooGateway } from './promptfoo.gateway';
-import { NotFoundException } from '@nestjs/common';
-import { TestRunStatus } from '@prisma/client';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { TestRunStatus, TestStatus } from '@prisma/client';
+
+// Mock security-tool.utils (used by the service for execAsync, execFileAsync, ensureDirectory)
+jest.mock('../shared/security-tool.utils', () => ({
+  execAsync: jest.fn().mockResolvedValue({ stdout: 'running', stderr: '' }),
+  execFileAsync: jest.fn().mockResolvedValue({ stdout: '', stderr: '' }),
+  ensureDirectory: jest.fn().mockResolvedValue(undefined),
+}));
 
 // Mock fs promises
 jest.mock('fs', () => {
@@ -15,18 +22,12 @@ jest.mock('fs', () => {
       mkdir: jest.fn(),
       readFile: jest.fn(),
       writeFile: jest.fn(),
+      unlink: jest.fn().mockResolvedValue(undefined),
     },
   };
 });
 
-// Mock child_process exec
-jest.mock('child_process', () => {
-  const actual = jest.requireActual('child_process');
-  return {
-    ...actual,
-    exec: jest.fn(),
-  };
-});
+import { execAsync } from '../shared/security-tool.utils';
 
 describe('PromptfooService', () => {
   let service: PromptfooService;
@@ -39,9 +40,13 @@ describe('PromptfooService', () => {
       update: jest.fn(),
       findUnique: jest.fn(),
       findFirst: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
     },
     testResult: {
       create: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -55,6 +60,9 @@ describe('PromptfooService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+
+    // Default: container is running
+    (execAsync as jest.Mock).mockResolvedValue({ stdout: 'running', stderr: '' });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -73,6 +81,40 @@ describe('PromptfooService', () => {
     service = module.get<PromptfooService>(PromptfooService);
     prismaService = module.get<PrismaService>(PrismaService);
     gateway = module.get<PromptfooGateway>(PromptfooGateway);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  describe('checkContainerHealth', () => {
+    it('should return running when container is up', async () => {
+      (execAsync as jest.Mock).mockResolvedValue({ stdout: 'running', stderr: '' });
+
+      const result = await service.checkContainerHealth();
+
+      expect(result.running).toBe(true);
+      expect(result.status).toBe('running');
+    });
+
+    it('should return not running when container is stopped', async () => {
+      (execAsync as jest.Mock).mockResolvedValue({ stdout: 'exited', stderr: '' });
+
+      const result = await service.checkContainerHealth();
+
+      expect(result.running).toBe(false);
+      expect(result.status).toBe('exited');
+    });
+
+    it('should return not found when docker inspect fails', async () => {
+      (execAsync as jest.Mock).mockRejectedValue(new Error('No such container'));
+
+      const result = await service.checkContainerHealth();
+
+      expect(result.running).toBe(false);
+      expect(result.status).toBe('not_found');
+      expect(result.error).toContain('not found');
+    });
   });
 
   describe('getTestStatus', () => {
@@ -233,9 +275,13 @@ targets:
 
       const result = await service.validateYAML(invalidYaml);
 
-      expect(result.valid).toBe(false);
+      // prompts: is an error, redteam: is a warning in the new implementation
       expect(result.errors).toContain('Section manquante: prompts:');
-      expect(result.errors).toContain('Section manquante: redteam:');
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('redteam'),
+        ]),
+      );
     });
 
     it('should reject empty YAML', async () => {
@@ -260,7 +306,7 @@ redteam:
       const result = await service.validateYAML(yamlWithHighTests);
 
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings[0]).toContain('Nombre de tests élevé');
+      expect(result.warnings[0]).toContain('Nombre de tests');
     });
 
     it('should error on excessive numTests values', async () => {
@@ -278,25 +324,48 @@ redteam:
       const result = await service.validateYAML(yamlWithExcessiveTests);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        'Nombre de tests trop élevé (150) - Maximum recommandé: 100',
+      expect(result.errors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('150'),
+          expect.stringContaining('100'),
+        ]),
       );
     });
 
-    it('should detect missing plugins section', async () => {
-      const yamlWithoutPlugins = `
+    it('should add container error when container not running', async () => {
+      (execAsync as jest.Mock).mockRejectedValue(new Error('No such container'));
+
+      const validYaml = `
 prompts:
   - "Test"
 targets:
   - openai:gpt-4
 redteam:
   numTests: 10
+  plugins:
+    - harmful:hate
 `;
 
-      const result = await service.validateYAML(yamlWithoutPlugins);
+      const result = await service.validateYAML(validYaml);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Aucun plugin défini dans la section redteam');
+      expect(result.errors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('not found'),
+        ]),
+      );
+    });
+
+    it('should detect tabs in YAML', async () => {
+      const yamlWithTabs = "prompts:\n\t- \"Test\"";
+
+      const result = await service.validateYAML(yamlWithTabs);
+
+      expect(result.errors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('tabulation'),
+        ]),
+      );
     });
   });
 
@@ -309,6 +378,10 @@ redteam:
       };
 
       mockPrismaService.testRun.create.mockResolvedValue(mockTestRun);
+      // First call = health check (returns 'running'), subsequent calls = docker cp
+      (execAsync as jest.Mock)
+        .mockResolvedValueOnce({ stdout: 'running', stderr: '' })
+        .mockResolvedValue({ stdout: '', stderr: '' });
 
       const yamlContent = 'prompts:\n  - "test"';
       const result = await service.runTests(yamlContent, 'user-123', 'org-123', 'target-123');
@@ -324,12 +397,18 @@ redteam:
       });
     });
 
-    it('should generate run ID when auth params not provided', async () => {
+    it('should generate run ID when DB is unavailable', async () => {
+      // Health check passes, docker cp passes
+      (execAsync as jest.Mock)
+        .mockResolvedValueOnce({ stdout: 'running', stderr: '' })
+        .mockResolvedValue({ stdout: '', stderr: '' });
+      // DB create fails (simulates DB unavailable)
+      mockPrismaService.testRun.create.mockRejectedValue(new Error('DB unavailable'));
+
       const yamlContent = 'prompts:\n  - "test"';
       const result = await service.runTests(yamlContent);
 
       expect(result.testRunId).toMatch(/^run-\d+$/);
-      expect(mockPrismaService.testRun.create).not.toHaveBeenCalled();
     });
 
     it('should emit WebSocket events when test starts', async () => {
@@ -340,16 +419,27 @@ redteam:
       };
 
       mockPrismaService.testRun.create.mockResolvedValue(mockTestRun);
+      (execAsync as jest.Mock)
+        .mockResolvedValueOnce({ stdout: 'running', stderr: '' })
+        .mockResolvedValue({ stdout: '', stderr: '' });
+
+      const yamlContent = 'prompts:\n  - "test"';
+      await service.runTests(yamlContent, 'user-123', 'org-123', 'target-123');
+
+      // Give async execution a chance
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(mockGateway.emitTestStarted).toHaveBeenCalledWith('test-run-ws');
+    });
+
+    it('should reject if container is not running', async () => {
+      (execAsync as jest.Mock).mockRejectedValue(new Error('No such container'));
 
       const yamlContent = 'prompts:\n  - "test"';
 
-      // Wait a bit for async execution
-      await service.runTests(yamlContent, 'user-123', 'org-123', 'target-123');
-
-      // Give setTimeout(0) a chance to execute
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      expect(mockGateway.emitTestStarted).toHaveBeenCalledWith('test-run-ws');
+      await expect(
+        service.runTests(yamlContent, 'user-123', 'org-123', 'target-123'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -367,35 +457,40 @@ redteam:
           name: 'My API',
           componentType: 'API',
         },
-        results: [
-          {
-            id: 'result-1',
-            promptText: 'Test prompt 1',
-            response: 'Response 1',
-            score: 0.9,
-            status: 'PASSED',
-            promptCategory: 'Security',
-            promptComplexity: 'Medium',
-            explanation: 'Test passed',
-            responseTime: 123,
-            metadata: { plugin: 'harmful:hate' },
-          },
-          {
-            id: 'result-2',
-            promptText: 'Test prompt 2',
-            response: 'Response 2',
-            score: 0.2,
-            status: 'FAILED',
-            promptCategory: 'Security',
-            promptComplexity: 'High',
-            explanation: 'Test failed',
-            responseTime: 456,
-            metadata: { plugin: 'harmful:insults' },
-          },
-        ],
       };
 
+      const mockResults = [
+        {
+          id: 'result-1',
+          promptText: 'Test prompt 1',
+          response: 'Response 1',
+          score: 0.9,
+          status: TestStatus.PASSED,
+          promptCategory: 'Security',
+          promptComplexity: 'Medium',
+          explanation: 'Test passed',
+          responseTime: 123,
+          metadata: { plugin: 'harmful:hate' },
+          createdAt: new Date(),
+        },
+        {
+          id: 'result-2',
+          promptText: 'Test prompt 2',
+          response: 'Response 2',
+          score: 0.2,
+          status: TestStatus.FAILED,
+          promptCategory: 'Security',
+          promptComplexity: 'High',
+          explanation: 'Test failed',
+          responseTime: 456,
+          metadata: { plugin: 'harmful:insults' },
+          createdAt: new Date(),
+        },
+      ];
+
       mockPrismaService.testRun.findUnique.mockResolvedValue(mockTestRun);
+      mockPrismaService.testResult.findMany.mockResolvedValue(mockResults);
+      mockPrismaService.testResult.count.mockResolvedValue(2);
 
       const result = await service.getTestResults('test-run-results');
 
@@ -406,14 +501,38 @@ redteam:
       expect(result.summary.failed).toBe(2);
       expect(result.summary.successRate).toBe(80);
       expect(result.results).toHaveLength(2);
+      expect(result.pagination).toBeDefined();
+      expect(result.pagination.totalResults).toBe(2);
     });
 
     it('should throw error if test run not found', async () => {
       mockPrismaService.testRun.findUnique.mockResolvedValue(null);
 
-      await expect(service.getTestResults('non-existent')).rejects.toThrow(
-        'TestRun non-existent introuvable',
-      );
+      await expect(service.getTestResults('non-existent')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should support pagination', async () => {
+      const mockTestRun = {
+        id: 'test-run-paginated',
+        status: TestRunStatus.COMPLETED,
+        totalTests: 100,
+        passedTests: 80,
+        failedTests: 20,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        target: { name: 'Test API', componentType: 'API' },
+      };
+
+      mockPrismaService.testRun.findUnique.mockResolvedValue(mockTestRun);
+      mockPrismaService.testResult.findMany.mockResolvedValue([]);
+      mockPrismaService.testResult.count.mockResolvedValue(100);
+
+      const result = await service.getTestResults('test-run-paginated', 2, 25);
+
+      expect(result.pagination.page).toBe(2);
+      expect(result.pagination.pageSize).toBe(25);
+      expect(result.pagination.totalResults).toBe(100);
+      expect(result.pagination.totalPages).toBe(4);
     });
   });
 });

@@ -33,7 +33,7 @@ export interface GitHubWebhookPayload {
   };
 }
 
-export type ToolName = 'promptfoo' | 'garak' | 'strix';
+export type ToolName = 'promptfoo' | 'garak';
 
 @Injectable()
 export class WebhookHandler {
@@ -217,7 +217,6 @@ export class WebhookHandler {
 
     if (lowerName.includes('promptfoo')) return 'promptfoo';
     if (lowerName.includes('garak')) return 'garak';
-    if (lowerName.includes('strix')) return 'strix';
 
     return null;
   }

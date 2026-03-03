@@ -4,7 +4,7 @@ import { promises as fs } from 'fs';
 import { Logger } from '@nestjs/common';
 
 /**
- * Shared utilities for security testing tools (Garak, Strix, Promptfoo)
+ * Shared utilities for security testing tools (Garak, Promptfoo)
  */
 
 // Promisified exec functions — import from here instead of declaring per-service
