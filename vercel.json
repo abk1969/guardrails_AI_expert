@@ -10,6 +10,12 @@
       "NODE_VERSION": "18"
     }
   },
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@3",
+      "maxDuration": 30
+    }
+  },
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -31,6 +37,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+    { "source": "/api/v1/:path*", "destination": "/api/v1/:path*" },
+    { "source": "/((?!api|assets).*)", "destination": "/index.html" }
   ]
 }

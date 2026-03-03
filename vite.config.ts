@@ -126,8 +126,9 @@ export default defineConfig(({ mode }) => {
       // Les appels à Gemini doivent passer par le backend
       define: {
         // Exposer uniquement l'URL du backend
-        'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://localhost:3001/api/v1'),
-        'import.meta.env.VITE_MCP_API_URL': JSON.stringify(env.VITE_MCP_API_URL || 'http://localhost:3001/api/v1/mcp'),
+        // En dev local: localhost:3001, en production Vercel: relative /api/v1 (same origin)
+        'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || (isDev ? 'http://localhost:3001/api/v1' : '/api/v1')),
+        'import.meta.env.VITE_MCP_API_URL': JSON.stringify(env.VITE_MCP_API_URL || (isDev ? 'http://localhost:3001/api/v1/mcp' : '/api/v1/mcp')),
         'import.meta.env.VITE_MCP_MOCK_MODE': JSON.stringify(env.VITE_MCP_MOCK_MODE || 'false'),
       },
       resolve: {
