@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Shield,
   Activity,
@@ -122,26 +122,48 @@ const UnifiedSecurityHub: React.FC = () => {
   const [metrics, setMetrics] = useState<UnifiedMetrics>(DEFAULT_METRICS);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(true);
+  const failCountRef = useRef(0);
+
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
 
   const fetchMetrics = useCallback(async (isManual = false) => {
-    if (isManual) setRefreshing(true);
+    if (isManual) {
+      setRefreshing(true);
+      // Manual refresh resets failure tracking
+      failCountRef.current = 0;
+      setBackendAvailable(true);
+    }
+
+    // Stop auto-polling after 3 consecutive failures
+    if (!isManual && failCountRef.current >= 3) return;
+
     try {
-      const response = await fetch('http://localhost:3003/api/v1/unified/metrics');
+      const response = await fetch(`${apiUrl}/unified/metrics`, {
+        signal: AbortSignal.timeout(5000),
+      });
       if (response.ok) {
         const data = await response.json();
         setMetrics(data);
+        failCountRef.current = 0;
+        setBackendAvailable(true);
+      } else {
+        failCountRef.current++;
       }
-    } catch (error) {
-      console.error('Failed to fetch metrics:', error);
+    } catch {
+      failCountRef.current++;
+      if (failCountRef.current >= 3) {
+        setBackendAvailable(false);
+      }
     } finally {
       setLoading(false);
       if (isManual) setRefreshing(false);
     }
-  }, []);
+  }, [apiUrl]);
 
   useEffect(() => {
     fetchMetrics();
-    const interval = setInterval(() => fetchMetrics(), 10000);
+    const interval = setInterval(() => fetchMetrics(), 15000);
     return () => clearInterval(interval);
   }, [fetchMetrics]);
 
@@ -158,6 +180,19 @@ const UnifiedSecurityHub: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Standalone mode banner */}
+      {!backendAvailable && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-yellow-300 font-medium text-sm">Mode autonome — Backend non disponible</p>
+            <p className="text-yellow-400/70 text-xs mt-0.5">
+              Les donnees affichees sont statiques. Lancez le backend Docker pour les donnees temps reel.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ----------------------------------------------------------------- */}
       {/* Header                                                            */}
       {/* ----------------------------------------------------------------- */}
