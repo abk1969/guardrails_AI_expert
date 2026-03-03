@@ -1,4 +1,5 @@
 import { neon, neonConfig } from '@neondatabase/serverless';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Enable connection caching for serverless
 neonConfig.fetchConnectionCache = true;
@@ -15,25 +16,20 @@ export function getSQL() {
   return neon(dbUrl);
 }
 
-/** CORS headers for all API responses */
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+/** Handle CORS preflight. Returns true if handled (OPTIONS request). */
+export function handleCors(req: VercelRequest, res: VercelResponse): boolean {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-/** Handle CORS preflight */
-export function handleCors(req: any, res: any): boolean {
   if (req.method === 'OPTIONS') {
-    res.writeHead(204, corsHeaders);
-    res.end();
+    res.status(204).end();
     return true;
   }
   return false;
 }
 
-/** Send JSON response with CORS headers */
-export function json(res: any, data: any, status = 200) {
-  res.writeHead(status, { ...corsHeaders, 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(data));
+/** Send JSON response (CORS headers already set by handleCors) */
+export function json(res: VercelResponse, data: any, status = 200) {
+  res.status(status).json(data);
 }
