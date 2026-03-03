@@ -3,7 +3,8 @@ import Card from '../components/ui/Card';
 import { WikiChecklistCategory, WikiTool, WikiDataset } from '../types';
 import WikiChecklist from '../components/wiki/WikiChecklist';
 import WikiToolsTable from '../components/wiki/WikiToolsTable';
-import { FileText, Zap, ShieldCheck, TestTubeDiagonal, BarChart3, Database, BookOpen } from 'lucide-react';
+import { FileText, Zap, ShieldCheck, TestTubeDiagonal, BarChart3, Database, BookOpen, Bot, Lock, ClipboardCheck } from 'lucide-react';
+import { pdfReferences } from './pdfReferences';
 
 const Highlight: React.FC<{ text: string; highlight: string }> = ({ text, highlight }) => {
     if (!highlight.trim()) {
@@ -192,10 +193,280 @@ const ToolsAndDatasetsContent: React.FC<ContentComponentProps> = ({ searchTerm =
 );
 
 
+// ─────────────────────────────────────────────────────────
+// NEW SECTIONS: Agentic Security, MCP Security, Red Team Evaluation
+// Source: OWASP GenAI Security Project PDF references
+// ─────────────────────────────────────────────────────────
+
+const AGENTIC_TOP10_REF = pdfReferences.find(r => r.id === 'owasp-agentic-top10')!;
+const SECURING_AGENTIC_REF = pdfReferences.find(r => r.id === 'securing-agentic-guide')!;
+const MCP_SERVER_REF = pdfReferences.find(r => r.id === 'mcp-server-security')!;
+const MCP_THIRD_PARTY_REF = pdfReferences.find(r => r.id === 'mcp-third-party-cheatsheet')!;
+const VENDOR_EVAL_REF = pdfReferences.find(r => r.id === 'vendor-eval-red-teaming')!;
+const COMPASS_RUNBOOK_REF = pdfReferences.find(r => r.id === 'compass-runbook')!;
+const IR_GUIDE_REF = pdfReferences.find(r => r.id === 'genai-ir-guide')!;
+
+const priorityColors: Record<string, string> = {
+    critical: 'bg-red-500/20 text-red-300 border-red-500/30',
+    high: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+    medium: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    low: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+};
+
+const priorityLabels: Record<string, string> = {
+    critical: 'Critique',
+    high: 'Haut',
+    medium: 'Moyen',
+    low: 'Faible',
+};
+
+const AgenticSecurityContent: React.FC<ContentComponentProps> = ({ searchTerm = '' }) => (
+    <Card>
+        <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+            <Bot size={24} className="mr-3 text-cyan-400" />
+            Sécurité IA Agentique
+        </h2>
+        <p className="text-gray-500 text-sm mb-6">
+            Source : OWASP GenAI Security Project - Agentic Security Initiative (CC BY-SA 4.0)
+        </p>
+
+        {/* OWASP Top 10 Agentic */}
+        <div className="mb-8">
+            <h3 className="text-xl font-semibold text-cyan-300 mb-2">
+                <Highlight text="OWASP Top 10 for Agentic Applications 2026" highlight={searchTerm} />
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+                <Highlight text={AGENTIC_TOP10_REF.summary} highlight={searchTerm} />
+            </p>
+            <div className="space-y-3">
+                {AGENTIC_TOP10_REF.keyItems.map((item) => (
+                    <div key={item.id} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-white">
+                                {item.code && <span className="text-cyan-400 mr-2">{item.code}</span>}
+                                <Highlight text={item.title} highlight={searchTerm} />
+                            </h4>
+                            {item.priority && (
+                                <span className={`text-xs px-2 py-1 rounded border ${priorityColors[item.priority]}`}>
+                                    {priorityLabels[item.priority]}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            <Highlight text={item.description} highlight={searchTerm} />
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Securing Agentic Applications */}
+        <div>
+            <h3 className="text-xl font-semibold text-cyan-300 mb-2">
+                <Highlight text="Guide de Sécurisation des Applications Agentiques" highlight={searchTerm} />
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+                <Highlight text={SECURING_AGENTIC_REF.summary} highlight={searchTerm} />
+            </p>
+            <div className="space-y-3">
+                {SECURING_AGENTIC_REF.keyItems.map((item) => (
+                    <div key={item.id} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-white">
+                                <Highlight text={item.title} highlight={searchTerm} />
+                            </h4>
+                            {item.priority && (
+                                <span className={`text-xs px-2 py-1 rounded border ${priorityColors[item.priority]}`}>
+                                    {priorityLabels[item.priority]}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            <Highlight text={item.description} highlight={searchTerm} />
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </Card>
+);
+
+const MCPSecurityContent: React.FC<ContentComponentProps> = ({ searchTerm = '' }) => (
+    <Card>
+        <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+            <Lock size={24} className="mr-3 text-cyan-400" />
+            Sécurité MCP (Model Context Protocol)
+        </h2>
+        <p className="text-gray-500 text-sm mb-6">
+            Source : OWASP GenAI Security Project (CC BY-SA 4.0)
+        </p>
+
+        {/* MCP Server Development Security */}
+        <div className="mb-8">
+            <h3 className="text-xl font-semibold text-cyan-300 mb-2">
+                <Highlight text="Développement Sécurisé de Serveurs MCP" highlight={searchTerm} />
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+                <Highlight text={MCP_SERVER_REF.summary} highlight={searchTerm} />
+            </p>
+            <div className="space-y-3">
+                {MCP_SERVER_REF.keyItems.map((item) => (
+                    <div key={item.id} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-white">
+                                <Highlight text={item.title} highlight={searchTerm} />
+                            </h4>
+                            {item.priority && (
+                                <span className={`text-xs px-2 py-1 rounded border ${priorityColors[item.priority]}`}>
+                                    {priorityLabels[item.priority]}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            <Highlight text={item.description} highlight={searchTerm} />
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* MCP Third-Party Cheat Sheet */}
+        <div>
+            <h3 className="text-xl font-semibold text-cyan-300 mb-2">
+                <Highlight text="Utilisation Sécurisée de Serveurs MCP Tiers" highlight={searchTerm} />
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+                <Highlight text={MCP_THIRD_PARTY_REF.summary} highlight={searchTerm} />
+            </p>
+            <div className="space-y-3">
+                {MCP_THIRD_PARTY_REF.keyItems.map((item) => (
+                    <div key={item.id} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-white">
+                                <Highlight text={item.title} highlight={searchTerm} />
+                            </h4>
+                            {item.priority && (
+                                <span className={`text-xs px-2 py-1 rounded border ${priorityColors[item.priority]}`}>
+                                    {priorityLabels[item.priority]}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            <Highlight text={item.description} highlight={searchTerm} />
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </Card>
+);
+
+const RedTeamEvalContent: React.FC<ContentComponentProps> = ({ searchTerm = '' }) => (
+    <Card>
+        <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+            <ClipboardCheck size={24} className="mr-3 text-cyan-400" />
+            Critères d'Évaluation Red Team
+        </h2>
+        <p className="text-gray-500 text-sm mb-6">
+            Source : OWASP GenAI Security Project (CC BY-SA 4.0)
+        </p>
+
+        {/* Vendor Evaluation */}
+        <div className="mb-8">
+            <h3 className="text-xl font-semibold text-cyan-300 mb-2">
+                <Highlight text="Évaluation des Fournisseurs de Red Teaming IA" highlight={searchTerm} />
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+                <Highlight text={VENDOR_EVAL_REF.summary} highlight={searchTerm} />
+            </p>
+            <div className="space-y-3">
+                {VENDOR_EVAL_REF.keyItems.map((item) => (
+                    <div key={item.id} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-white">
+                                <Highlight text={item.title} highlight={searchTerm} />
+                            </h4>
+                            {item.priority && (
+                                <span className={`text-xs px-2 py-1 rounded border ${priorityColors[item.priority]}`}>
+                                    {priorityLabels[item.priority]}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            <Highlight text={item.description} highlight={searchTerm} />
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* COMPASS Runbook */}
+        <div className="mb-8">
+            <h3 className="text-xl font-semibold text-cyan-300 mb-2">
+                <Highlight text="COMPASS PlayBook - Procédures OODA" highlight={searchTerm} />
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+                <Highlight text={COMPASS_RUNBOOK_REF.summary} highlight={searchTerm} />
+            </p>
+            <div className="space-y-3">
+                {COMPASS_RUNBOOK_REF.keyItems.map((item) => (
+                    <div key={item.id} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-white">
+                                <Highlight text={item.title} highlight={searchTerm} />
+                            </h4>
+                            {item.priority && (
+                                <span className={`text-xs px-2 py-1 rounded border ${priorityColors[item.priority]}`}>
+                                    {priorityLabels[item.priority]}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            <Highlight text={item.description} highlight={searchTerm} />
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Incident Response Guide */}
+        <div>
+            <h3 className="text-xl font-semibold text-cyan-300 mb-2">
+                <Highlight text="Guide de Réponse aux Incidents GenAI" highlight={searchTerm} />
+            </h3>
+            <p className="text-gray-400 text-sm mb-4">
+                <Highlight text={IR_GUIDE_REF.summary} highlight={searchTerm} />
+            </p>
+            <div className="space-y-3">
+                {IR_GUIDE_REF.keyItems.map((item) => (
+                    <div key={item.id} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-white">
+                                <Highlight text={item.title} highlight={searchTerm} />
+                            </h4>
+                            {item.priority && (
+                                <span className={`text-xs px-2 py-1 rounded border ${priorityColors[item.priority]}`}>
+                                    {priorityLabels[item.priority]}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            <Highlight text={item.description} highlight={searchTerm} />
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </Card>
+);
+
 export const WIKI_SECTIONS = [
     { id: 'quick-start', title: 'Démarrage Rapide', icon: <FileText size={18} />, content: <QuickStartContent /> },
     { id: 'blueprint', title: 'Blueprint (Checklists)', icon: <ShieldCheck size={18} />, content: <BlueprintContent /> },
     { id: 'techniques', title: 'Techniques Essentielles', icon: <Zap size={18} />, content: <TechniquesContent /> },
     { id: 'metrics', title: 'Métriques', icon: <BarChart3 size={18} />, content: <MetricsContent /> },
     { id: 'tools-datasets', title: 'Outils & Datasets', icon: <Database size={18} />, content: <ToolsAndDatasetsContent /> },
+    { id: 'agentic-security', title: 'Sécurité IA Agentique', icon: <Bot size={18} />, content: <AgenticSecurityContent /> },
+    { id: 'mcp-security', title: 'Sécurité MCP', icon: <Lock size={18} />, content: <MCPSecurityContent /> },
+    { id: 'red-team-eval', title: 'Évaluation Red Team', icon: <ClipboardCheck size={18} />, content: <RedTeamEvalContent /> },
 ];

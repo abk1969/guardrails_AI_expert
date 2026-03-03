@@ -14,7 +14,7 @@ console.log('📋 Headers found:', Object.keys(headers).length, 'columns');
 const COL = {
   title: "This page is not mobile-friendly; please access on a computer if you can.",
   quickRef: "Watch video\nView explainer\nGive feedback",
-  evId: "Updated: 26 March 2025",
+  evId: "Updated: 03 December 2025",
   paperId: "__EMPTY",
   catId: "__EMPTY_1",
   subCatId: "__EMPTY_2",
@@ -39,6 +39,9 @@ const TRANSLATIONS = {
     '0 - AI': 'IA',
     '1 - Human': 'Humain',
     '2 - Other': 'Autre',
+    '2 - AI': 'IA',
+    '3 - Other': 'Autre',
+    '4 - Not coded': 'Non codé',
     'AI': 'IA',
     'Human': 'Humain',
     'Other': 'Autre'
@@ -47,6 +50,7 @@ const TRANSLATIONS = {
     '1 - Intentional': 'Intentionnel',
     '2 - Unintentional': 'Non intentionnel',
     '3 - Other': 'Autre',
+    '4 - Not coded': 'Non codé',
     'Intentional': 'Intentionnel',
     'Unintentional': 'Non intentionnel',
     'Other': 'Autre'
@@ -55,6 +59,7 @@ const TRANSLATIONS = {
     '1 - Pre-deployment': 'Pré-déploiement',
     '2 - Post-deployment': 'Post-déploiement',
     '3 - Other': 'Autre',
+    '4 - Not coded': 'Non codé',
     'Pre-deployment': 'Pré-déploiement',
     'Post-deployment': 'Post-déploiement',
     'Other': 'Autre'
@@ -67,6 +72,7 @@ const TRANSLATIONS = {
     '5. Human-Computer Interaction Harms': 'Interaction Humain-Ordinateur',
     '6. Socioeconomic and Environmental': 'Socioéconomique et Environnemental',
     '7. AI System Safety, Failures, and Limitations': 'Sécurité du Système IA, Défaillances et Limitations',
+    '7. AI System Safety, Failures, & Limitations': 'Sécurité du Système IA, Défaillances et Limitations',
     '1. Discrimination & Toxicity': 'Discrimination et Toxicité',
     '2. Privacy & Security': 'Vie Privée et Sécurité',
     '3. Misinformation': 'Désinformation',
@@ -225,12 +231,13 @@ console.log(`   Domaine:`, stats.byDomain);
 // Sauvegarder
 const output = {
   metadata: {
-    version: '3.0',
-    lastUpdated: '2025-03-26',
+    version: '4.0',
+    lastUpdated: '2025-12-03',
     extractedAt: new Date().toISOString(),
     totalRisks: parsedRisks.length,
     language: 'fr',
-    source: 'AI Risk Repository V3_26_03_2025.xlsx',
+    source: 'Copy of The AI Risk Repository V4_03_12_2025.xlsx',
+    previousVersion: 'AI Risk Repository V3_26_03_2025.xlsx',
     license: 'CC BY 4.0'
   },
   statistics: stats,
