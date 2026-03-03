@@ -1,21 +1,35 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSQL, handleCors, json } from '../../lib/neon';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (handleCors(req, res)) return;
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(204).end();
 
   try {
-    const sql = getSQL();
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) {
+      return res.status(200).json({
+        status: 'ok',
+        database: 'not_configured',
+        timestamp: new Date().toISOString(),
+        environment: 'vercel-serverless',
+      });
+    }
+
+    const { neon } = await import('@neondatabase/serverless');
+    const sql = neon(dbUrl);
     const result = await sql`SELECT 1 as ok`;
-    json(res, {
+
+    res.status(200).json({
       status: 'ok',
       database: result?.[0]?.ok === 1 ? 'connected' : 'error',
       timestamp: new Date().toISOString(),
       environment: 'vercel-serverless',
     });
   } catch (error: any) {
-    // Even if DB is not configured, health endpoint should respond
-    json(res, {
+    res.status(200).json({
       status: 'ok',
       database: 'not_configured',
       error: error.message?.includes('DATABASE_URL') ? 'DATABASE_URL not set' : error.message,
