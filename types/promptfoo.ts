@@ -77,7 +77,7 @@ export const PROMPTFOO_TARGET_PRESETS: Record<PromptfooTargetPreset, {
     label: 'Google Gemini Flash (Rapide)',
     description: 'Modèle rapide et économique de Google',
     provider: 'vertex',
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-3-flash-preview',
     costPer1kTokens: 0.0001
   },
   'gemini-pro': {
@@ -85,7 +85,7 @@ export const PROMPTFOO_TARGET_PRESETS: Record<PromptfooTargetPreset, {
     label: 'Google Gemini Pro (Avancé)',
     description: 'Modèle avancé de Google avec meilleures performances',
     provider: 'vertex',
-    model: 'gemini-1.5-pro',
+    model: 'gemini-3.1-pro-preview',
     costPer1kTokens: 0.001
   },
   'openai-gpt4': {

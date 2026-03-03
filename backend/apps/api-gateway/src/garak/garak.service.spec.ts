@@ -2,13 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GarakService } from './garak.service';
 import { PrismaService } from '@app/database';
 import { GarakGateway } from './garak.gateway';
-import { NotFoundException } from '@nestjs/common';
-import { ScanConfigDto } from './dto/scan-config.dto';
-
-// Mock child_process exec
-jest.mock('child_process', () => ({
-  exec: jest.fn(),
-}));
+import { ScanConfigDto, GarakScanPreset } from './dto/scan-config.dto';
 
 // Mock fs promises (keep original fs methods for Prisma)
 jest.mock('fs', () => {
@@ -20,9 +14,17 @@ jest.mock('fs', () => {
       mkdir: jest.fn(),
       readFile: jest.fn(),
       readdir: jest.fn(),
+      rm: jest.fn().mockResolvedValue(undefined),
     },
   };
 });
+
+// Mock shared utils
+jest.mock('../shared/security-tool.utils', () => ({
+  execAsync: jest.fn().mockResolvedValue({ stdout: '', stderr: '' }),
+  execFileAsync: jest.fn().mockResolvedValue({ stdout: '', stderr: '' }),
+  ensureDirectory: jest.fn().mockResolvedValue(undefined),
+}));
 
 // Mock GarakGateway
 jest.mock('./garak.gateway', () => ({
@@ -40,12 +42,16 @@ describe('GarakService - TDD Strict', () => {
   let service: GarakService;
   let prismaService: PrismaService;
   let garakGateway: GarakGateway;
+  let execAsync: jest.Mock;
 
   const mockPrismaService = {
     testRun: {
       create: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+    },
+    testResult: {
+      create: jest.fn(),
     },
   };
 
@@ -62,12 +68,47 @@ describe('GarakService - TDD Strict', () => {
     prismaService = module.get<PrismaService>(PrismaService);
     garakGateway = module.get<GarakGateway>(GarakGateway);
 
+    // Get the mocked execAsync for health check tests
+    execAsync = require('../shared/security-tool.utils').execAsync;
+
     // Reset mocks
     jest.clearAllMocks();
+
+    // Default: container health check passes
+    execAsync.mockResolvedValue({ stdout: 'running\n', stderr: '' });
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('checkContainerHealth', () => {
+    it('should return running=true when container is running', async () => {
+      execAsync.mockResolvedValue({ stdout: 'running\n', stderr: '' });
+
+      const health = await service.checkContainerHealth();
+
+      expect(health.running).toBe(true);
+      expect(health.status).toBe('running');
+    });
+
+    it('should return running=false when container is stopped', async () => {
+      execAsync.mockResolvedValue({ stdout: 'exited\n', stderr: '' });
+
+      const health = await service.checkContainerHealth();
+
+      expect(health.running).toBe(false);
+      expect(health.status).toBe('exited');
+    });
+
+    it('should return not_found when docker inspect fails', async () => {
+      execAsync.mockRejectedValue(new Error('No such container'));
+
+      const health = await service.checkContainerHealth();
+
+      expect(health.running).toBe(false);
+      expect(health.status).toBe('not_found');
+    });
   });
 
   describe('startScan', () => {
@@ -163,7 +204,7 @@ describe('GarakService - TDD Strict', () => {
 
       expect(result.status).toBe('running');
       expect(result.model).toBe('gpt-3.5-turbo');
-      expect(result.totalTests).toBe(0); // Not known yet
+      expect(result.totalTests).toBe(0);
       expect(result.passed).toBe(0);
       expect(result.failed).toBe(0);
       expect(result.vulnerabilities).toEqual([]);
@@ -185,15 +226,26 @@ describe('GarakService - TDD Strict', () => {
         'Database connection failed',
       );
     });
+
+    it('should throw when container is not running', async () => {
+      execAsync.mockResolvedValue({ stdout: 'exited\n', stderr: '' });
+
+      const config: ScanConfigDto = {
+        model: 'gpt-4',
+        probes: ['injection'],
+        generators: ['default'],
+        detectors: ['default'],
+      };
+
+      await expect(service.startScan('org-123', config)).rejects.toThrow(
+        /not running/,
+      );
+    });
   });
 
   describe('Output Directory Management', () => {
-    it('should create output directory if it does not exist', async () => {
-      const fs = require('fs').promises;
-
-      // Directory does not exist initially
-      (fs.access as jest.Mock).mockRejectedValue(new Error('ENOENT'));
-      (fs.mkdir as jest.Mock).mockResolvedValue(undefined);
+    it('should ensure output directory exists before scan', async () => {
+      const { ensureDirectory } = require('../shared/security-tool.utils');
 
       const config: ScanConfigDto = {
         model: 'gpt-4',
@@ -208,31 +260,7 @@ describe('GarakService - TDD Strict', () => {
 
       await service.startScan('org-123', config);
 
-      // Should have attempted to create directory
-      expect(fs.mkdir).toHaveBeenCalled();
-    });
-
-    it('should not recreate directory if it already exists', async () => {
-      const fs = require('fs').promises;
-
-      // Directory exists
-      (fs.access as jest.Mock).mockResolvedValue(undefined);
-
-      const config: ScanConfigDto = {
-        model: 'gpt-4',
-        probes: ['injection'],
-        generators: ['default'],
-        detectors: ['default'],
-      };
-
-      (prismaService.testRun.create as jest.Mock).mockResolvedValue({
-        id: 'scan-456',
-      });
-
-      await service.startScan('org-123', config);
-
-      // Should NOT have attempted to create directory
-      expect(fs.mkdir).not.toHaveBeenCalled();
+      expect(ensureDirectory).toHaveBeenCalled();
     });
   });
 
@@ -246,56 +274,66 @@ describe('GarakService - TDD Strict', () => {
         detectors: ['default'],
       };
 
-      // Access private method via reflection for testing
-      const command = (service as any).buildGarakCommand(
-        config,
-        '/output/path',
-      );
+      const command = (service as any).buildGarakCommand(config, '/output/path');
 
       expect(command).toContain('garak');
-      expect(command).toContain('--model-type openai');
-      expect(command).toContain('--model-name "gpt-4"');
-      expect(command).toContain('--probes all');
-      expect(command).toContain('--report_dir "/output/path"');
-      expect(command).toContain('--output_format jsonl');
+      expect(command).toContain('--probes');
+      // Find the argument after --probes
+      const probesIdx = command.indexOf('--probes');
+      expect(command[probesIdx + 1]).toBe('all');
     });
 
     it('should build command with specific probes', () => {
       const config: ScanConfigDto = {
         model: 'claude-3',
         modelType: 'anthropic',
-        probes: ['injection', 'toxicity', 'xss'],
+        probes: ['injection', 'toxicity'],
         generators: ['custom'],
         detectors: ['advanced'],
       };
 
-      const command = (service as any).buildGarakCommand(
-        config,
-        '/custom/output',
-      );
+      const command = (service as any).buildGarakCommand(config, '/custom/output');
 
-      expect(command).toContain('--model-type anthropic');
-      expect(command).toContain('--model-name "claude-3"');
-      expect(command).toContain('--probes injection,toxicity,xss');
-      expect(command).toContain('--generators custom');
-      expect(command).toContain('--detectors advanced');
+      expect(command).toContain('--model_type');
+      expect(command).toContain('anthropic.AnthropicGenerator');
+      expect(command).toContain('--model_name');
+      expect(command).toContain('claude-3');
+      // Probes joined with commas
+      const probesIdx = command.indexOf('--probes');
+      expect(command[probesIdx + 1]).toBe('injection,toxicity');
     });
 
-    it('should include API key when provided', () => {
+    it('should include API key env var when provided', () => {
       const config: ScanConfigDto = {
         model: 'gpt-4',
+        modelType: 'openai',
         probes: ['injection'],
         generators: ['default'],
         detectors: ['default'],
         apiKey: 'sk-test-api-key-123',
       };
 
-      const command = (service as any).buildGarakCommand(
-        config,
-        '/output',
-      );
+      const command = (service as any).buildGarakCommand(config, '/output');
 
-      expect(command).toContain('sk-test-api-key-123');
+      expect(command).toContain('-e');
+      expect(command).toContain('OPENAI_API_KEY=sk-test-api-key-123');
+    });
+
+    it('should use preset probes when preset is specified', () => {
+      const config: ScanConfigDto = {
+        model: 'gpt-4',
+        modelType: 'openai',
+        probes: ['injection'], // Should be overridden by preset
+        generators: ['default'],
+        detectors: ['default'],
+        preset: GarakScanPreset.QUICK,
+      };
+
+      const command = (service as any).buildGarakCommand(config, '/output');
+
+      const probesIdx = command.indexOf('--probes');
+      // Quick preset = injection,jailbreak,toxicity
+      expect(command[probesIdx + 1]).toBe('injection,jailbreak,toxicity');
     });
   });
 
@@ -317,14 +355,9 @@ describe('GarakService - TDD Strict', () => {
       const result = await service.startScan('org-123', config);
 
       expect(result.status).toBe('running');
-      // The actual failure will be detected later in runGarakAsync
     });
 
     it('should emit scan failed event on execution error', async () => {
-      // This test verifies that gateway.emitScanFailed is called
-      // when Garak CLI execution fails
-      // Since execution is async, we can't test this directly in startScan
-      // This test will FAIL initially because the method isn't implemented yet
       expect(garakGateway.emitScanFailed).toBeDefined();
     });
   });
@@ -370,6 +403,77 @@ describe('GarakService - TDD Strict', () => {
           createdById: 'specific-user-id',
         }),
       });
+    });
+  });
+
+  describe('Severity Breakdown', () => {
+    it('should compute severity breakdown correctly', () => {
+      const vulnerabilities = [
+        { category: 'A', severity: 'critical' as const, description: '' },
+        { category: 'B', severity: 'critical' as const, description: '' },
+        { category: 'C', severity: 'high' as const, description: '' },
+        { category: 'D', severity: 'moderate' as const, description: '' },
+        { category: 'E', severity: 'low' as const, description: '' },
+      ];
+
+      const breakdown = (service as any).computeSeverityBreakdown(vulnerabilities);
+
+      expect(breakdown).toEqual({
+        critical: 2,
+        high: 1,
+        moderate: 1,
+        low: 1,
+      });
+    });
+
+    it('should return all zeros for empty vulnerabilities', () => {
+      const breakdown = (service as any).computeSeverityBreakdown([]);
+
+      expect(breakdown).toEqual({
+        critical: 0,
+        high: 0,
+        moderate: 0,
+        low: 0,
+      });
+    });
+  });
+
+  describe('determineSeverity', () => {
+    it('should use provided severity when available', () => {
+      const result = (service as any).determineSeverity({ severity: 'high' });
+      expect(result).toBe('high');
+    });
+
+    it('should map injection probes to critical', () => {
+      const result = (service as any).determineSeverity({ probe: 'injection.test' });
+      expect(result).toBe('critical');
+    });
+
+    it('should map toxicity probes to high', () => {
+      const result = (service as any).determineSeverity({ probe: 'toxicity.check' });
+      expect(result).toBe('high');
+    });
+
+    it('should default to moderate for unknown probes', () => {
+      const result = (service as any).determineSeverity({ probe: 'unknown_probe' });
+      expect(result).toBe('moderate');
+    });
+  });
+
+  describe('isTransientError', () => {
+    it('should identify timeout as transient', () => {
+      const result = (service as any).isTransientError(new Error('Command timeout'));
+      expect(result).toBe(true);
+    });
+
+    it('should identify connection refused as transient', () => {
+      const result = (service as any).isTransientError(new Error('connection refused'));
+      expect(result).toBe(true);
+    });
+
+    it('should not treat generic errors as transient', () => {
+      const result = (service as any).isTransientError(new Error('Invalid model name'));
+      expect(result).toBe(false);
     });
   });
 });

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-type ToolName = 'promptfoo' | 'garak' | 'strix';
+type ToolName = 'promptfoo' | 'garak';
 
 interface ChangelogEntry {
   version: string;

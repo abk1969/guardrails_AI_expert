@@ -8,8 +8,14 @@ import {
   Framework,
 } from './dto/unified-execution.dto';
 import { GarakService } from '../garak/garak.service';
-import { StrixService } from '../strix/strix.service';
+import { PromptfooService } from '../promptfoo/promptfoo.service';
 import { UnifiedGateway } from './unified.gateway';
+import { DEV_DEFAULTS } from '../shared/constants';
+
+/** Polling interval for checking framework completion (ms) */
+const POLL_INTERVAL_MS = 5000;
+/** Maximum polling duration before timeout (ms) */
+const MAX_POLL_DURATION_MS = 3600000; // 1 hour
 
 @Injectable()
 export class UnifiedOrchestrationService {
@@ -20,8 +26,8 @@ export class UnifiedOrchestrationService {
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => GarakService))
     private readonly garakService: GarakService,
-    @Inject(forwardRef(() => StrixService))
-    private readonly strixService: StrixService,
+    @Inject(forwardRef(() => PromptfooService))
+    private readonly promptfooService: PromptfooService,
     @Inject(forwardRef(() => UnifiedGateway))
     private readonly gateway: UnifiedGateway,
   ) {}
@@ -32,8 +38,8 @@ export class UnifiedOrchestrationService {
   async startUnifiedExecution(
     organizationId: string,
     config: UnifiedExecutionConfigDto,
-    userId: string = 'e6cf191e-5d9e-45f2-8d15-a0efbe05f9e8',
-    targetId: string = '33faa86b-0bad-45e9-b372-0d174de49cc8',
+    userId: string = DEV_DEFAULTS.USER_ID,
+    targetId: string = DEV_DEFAULTS.TARGET_ID,
   ): Promise<UnifiedExecutionDto> {
     this.logger.log(`Starting unified execution for organization ${organizationId}`);
     this.logger.debug(`Config: ${JSON.stringify(config)}`);
@@ -71,22 +77,15 @@ export class UnifiedOrchestrationService {
 
     // Execute based on mode (defer to next tick to ensure 'pending' status is returned first)
     setImmediate(() => {
-      if (config.mode === ExecutionMode.PARALLEL) {
-        this.executeParallel(unifiedId, organizationId, config, userId, targetId).catch((error) => {
-          this.logger.error(`Unified execution ${unifiedId} failed`, error);
-          this.handleExecutionFailure(unifiedId, error);
-        });
-      } else if (config.mode === ExecutionMode.SEQUENTIAL) {
-        this.executeSequential(unifiedId, organizationId, config, userId, targetId).catch((error) => {
-          this.logger.error(`Unified execution ${unifiedId} failed`, error);
-          this.handleExecutionFailure(unifiedId, error);
-        });
-      } else if (config.mode === ExecutionMode.SELECTIVE) {
-        this.executeSelective(unifiedId, organizationId, config, userId, targetId).catch((error) => {
-          this.logger.error(`Unified execution ${unifiedId} failed`, error);
-          this.handleExecutionFailure(unifiedId, error);
-        });
-      }
+      const executeMethod =
+        config.mode === ExecutionMode.SEQUENTIAL
+          ? this.executeSequential.bind(this)
+          : this.executeParallel.bind(this); // PARALLEL and SELECTIVE both run in parallel
+
+      executeMethod(unifiedId, organizationId, config, userId, targetId).catch((error) => {
+        this.logger.error(`Unified execution ${unifiedId} failed`, error);
+        this.handleExecutionFailure(unifiedId, error);
+      });
     });
 
     return execution;
@@ -115,25 +114,7 @@ export class UnifiedOrchestrationService {
     // Wait for all to complete
     const results = await Promise.allSettled(promises);
 
-    // Calculate final status
-    const failedCount = results.filter((r) => r.status === 'rejected').length;
-    if (failedCount === 0) {
-      execution.status = 'completed';
-    } else if (failedCount === results.length) {
-      execution.status = 'failed';
-    } else {
-      execution.status = 'partial';
-    }
-
-    execution.endTime = new Date().toISOString();
-    execution.duration = Math.floor(
-      (new Date(execution.endTime).getTime() - new Date(execution.startTime).getTime()) / 1000,
-    );
-
-    // Aggregate results
-    execution.aggregatedResults = this.aggregateResults(execution);
-
-    this.gateway.emitUnifiedCompleted(unifiedId, execution);
+    this.finalizeExecution(unifiedId, results);
   }
 
   /**
@@ -151,26 +132,48 @@ export class UnifiedOrchestrationService {
 
     this.logger.log(`Executing ${config.frameworks.length} frameworks sequentially`);
 
-    let allSucceeded = true;
+    const results: PromiseSettledResult<void>[] = [];
 
-    // Execute frameworks one by one
     for (const framework of config.frameworks) {
       try {
         await this.executeFramework(unifiedId, organizationId, framework, config, userId, targetId);
+        results.push({ status: 'fulfilled', value: undefined });
       } catch (error) {
         this.logger.error(`Framework ${framework} failed in sequential execution`, error);
-        allSucceeded = false;
-        // Continue with next framework (don't stop on failure)
+        results.push({ status: 'rejected', reason: error });
       }
     }
 
-    execution.status = allSucceeded ? 'completed' : 'partial';
+    this.finalizeExecution(unifiedId, results);
+  }
+
+  /**
+   * Finalize a unified execution: compute status, aggregate results, emit completion.
+   */
+  private finalizeExecution(
+    unifiedId: string,
+    results: PromiseSettledResult<void>[],
+  ): void {
+    const execution = this.executions.get(unifiedId);
+    if (!execution) return;
+
+    const failedCount = results.filter((r) => r.status === 'rejected').length;
+    if (failedCount === 0) {
+      execution.status = 'completed';
+    } else if (failedCount === results.length) {
+      execution.status = 'failed';
+    } else {
+      execution.status = 'partial';
+    }
+
     execution.endTime = new Date().toISOString();
     execution.duration = Math.floor(
       (new Date(execution.endTime).getTime() - new Date(execution.startTime).getTime()) / 1000,
     );
 
+    // Aggregate results with comparative analysis
     execution.aggregatedResults = this.aggregateResults(execution);
+
     this.gateway.emitUnifiedCompleted(unifiedId, execution);
   }
 
@@ -185,25 +188,7 @@ export class UnifiedOrchestrationService {
       if (framework === Framework.GARAK && !config.garak) {
         throw new Error('Garak selected but configuration missing');
       }
-      if (framework === Framework.STRIX && !config.strix) {
-        throw new Error('Strix selected but configuration missing');
-      }
     }
-  }
-
-  /**
-   * Execute only selected frameworks (same as parallel but with validation)
-   */
-  private async executeSelective(
-    unifiedId: string,
-    organizationId: string,
-    config: UnifiedExecutionConfigDto,
-    userId: string,
-    targetId: string,
-  ): Promise<void> {
-    // Validation is done synchronously in startUnifiedExecution
-    // Execute in parallel (same as parallel mode)
-    await this.executeParallel(unifiedId, organizationId, config, userId, targetId);
   }
 
   /**
@@ -230,50 +215,9 @@ export class UnifiedOrchestrationService {
 
     try {
       if (framework === Framework.GARAK && config.garak) {
-        // Start Garak scan
-        const result = await this.garakService.startScan(
-          organizationId,
-          {
-            model: config.garak.model,
-            modelType: config.garak.modelType,
-            probes: config.garak.probes,
-            generators: config.garak.generators,
-            detectors: config.garak.detectors,
-          },
-          userId,
-          targetId,
-        );
-
-        fwStatus.executionId = result.id;
-        fwStatus.status = 'running';
-
-        // Poll for completion (in production, use WebSocket events)
-        await this.pollGarakCompletion(unifiedId, result.id, fwStatus);
-      } else if (framework === Framework.STRIX && config.strix) {
-        // Start Strix agent
-        const result = await this.strixService.startExecution(
-          organizationId,
-          {
-            targetUrl: config.strix.targetUrl,
-            attackMode: config.strix.attackMode,
-            maxSteps: config.strix.maxSteps,
-            timeout: config.strix.timeout,
-            headless: config.strix.headless,
-          },
-          userId,
-          targetId,
-        );
-
-        fwStatus.executionId = result.id;
-        fwStatus.status = 'running';
-
-        // Poll for completion (in production, use WebSocket events)
-        await this.pollStrixCompletion(unifiedId, result.id, fwStatus);
+        await this.executeGarak(unifiedId, organizationId, config, fwStatus, userId, targetId);
       } else if (framework === Framework.PROMPTFOO && config.promptfoo) {
-        // Promptfoo integration (to be implemented in later phase)
-        this.logger.warn('Promptfoo integration not yet implemented');
-        fwStatus.status = 'failed';
-        fwStatus.error = 'Not implemented yet';
+        await this.executePromptfoo(unifiedId, config, fwStatus, userId, organizationId, targetId);
       }
     } catch (error) {
       this.logger.error(`Framework ${framework} execution failed`, error);
@@ -286,82 +230,192 @@ export class UnifiedOrchestrationService {
   }
 
   /**
-   * Poll Garak scan for completion (temporary - will be replaced by WebSocket listeners)
+   * Execute Garak scan and poll for completion
    */
-  private async pollGarakCompletion(
+  private async executeGarak(
     unifiedId: string,
-    scanId: string,
+    organizationId: string,
+    config: UnifiedExecutionConfigDto,
     fwStatus: FrameworkExecutionStatusDto,
+    userId: string,
+    targetId: string,
   ): Promise<void> {
+    const result = await this.garakService.startScan(
+      organizationId,
+      {
+        model: config.garak!.model,
+        modelType: config.garak!.modelType,
+        probes: config.garak!.probes,
+        generators: config.garak!.generators,
+        detectors: config.garak!.detectors,
+      },
+      userId,
+      targetId,
+    );
+
+    fwStatus.executionId = result.id;
+    fwStatus.status = 'running';
+
+    // Poll the database for completion
+    await this.pollTestRunCompletion(unifiedId, result.id, fwStatus, Framework.GARAK);
+  }
+
+  /**
+   * Execute Promptfoo tests and poll for completion
+   */
+  private async executePromptfoo(
+    unifiedId: string,
+    config: UnifiedExecutionConfigDto,
+    fwStatus: FrameworkExecutionStatusDto,
+    userId: string,
+    organizationId: string,
+    targetId: string,
+  ): Promise<void> {
+    // Build a minimal YAML from the promptfoo config DTO
+    const promptfooConfig = config.promptfoo!;
+    const yamlContent = this.buildPromptfooYaml(promptfooConfig);
+
+    const result = await this.promptfooService.runTests(
+      yamlContent,
+      userId,
+      organizationId,
+      targetId,
+    );
+
+    fwStatus.executionId = result.testRunId;
+    fwStatus.status = 'running';
+
+    // Poll the database for completion
+    await this.pollTestRunCompletion(unifiedId, result.testRunId, fwStatus, Framework.PROMPTFOO);
+  }
+
+  /**
+   * Build a minimal Promptfoo YAML config from the DTO fields.
+   * If the DTO includes a raw yamlContent field, use it directly.
+   */
+  private buildPromptfooYaml(config: any): string {
+    // If raw YAML is provided, use it directly
+    if (config.yamlContent) {
+      return config.yamlContent;
+    }
+
+    // Build minimal YAML from structured config
+    const lines: string[] = [];
+    lines.push(`description: "${config.suiteName || 'Unified Test Suite'}"`);
+    lines.push('prompts:');
+    lines.push('  - "You are an AI assistant. {{prompt}}"');
+
+    if (config.providers && config.providers.length > 0) {
+      lines.push('providers:');
+      for (const provider of config.providers) {
+        lines.push(`  - ${provider}`);
+      }
+    }
+
+    if (config.testCategories && config.testCategories.length > 0) {
+      lines.push('redteam:');
+      lines.push(`  purpose: "Unified security testing"`);
+      lines.push('  numTests: 10');
+      lines.push('  plugins:');
+      for (const category of config.testCategories) {
+        lines.push(`    - ${category}`);
+      }
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Poll the database for a test run's completion status.
+   * Replaces the old time-based fake polling with real DB status checks.
+   */
+  private async pollTestRunCompletion(
+    unifiedId: string,
+    testRunId: string,
+    fwStatus: FrameworkExecutionStatusDto,
+    framework: Framework,
+  ): Promise<void> {
+    const startTime = Date.now();
+
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
         try {
-          // In production, this will use WebSocket events instead of polling
-          // For now, we simulate completion after timeout
-          const elapsed = Date.now() - new Date(fwStatus.startTime!).getTime();
-          const progress = Math.min(100, Math.floor((elapsed / 60000) * 100)); // 1 minute max
+          const elapsed = Date.now() - startTime;
 
-          fwStatus.progress = progress;
-          this.gateway.emitFrameworkProgress(unifiedId, Framework.GARAK, progress);
+          // Timeout check
+          if (elapsed > MAX_POLL_DURATION_MS) {
+            clearInterval(interval);
+            fwStatus.status = 'failed';
+            fwStatus.error = 'Execution timed out';
+            fwStatus.endTime = new Date().toISOString();
+            this.gateway.emitFrameworkFailed(unifiedId, framework, 'Execution timed out');
+            reject(new Error(`${framework} execution timed out after ${MAX_POLL_DURATION_MS / 1000}s`));
+            return;
+          }
 
-          if (progress >= 100) {
+          // Check actual DB status
+          const testRun = await this.prisma.testRun.findUnique({
+            where: { id: testRunId },
+            select: {
+              status: true,
+              progress: true,
+              totalTests: true,
+              passedTests: true,
+              failedTests: true,
+            },
+          });
+
+          if (!testRun) {
+            // TestRun not in DB -- might be a memory-only run, use time-based progress
+            const timeProgress = Math.min(95, Math.floor((elapsed / 120000) * 100));
+            fwStatus.progress = timeProgress;
+            this.gateway.emitFrameworkProgress(unifiedId, framework, timeProgress);
+            return;
+          }
+
+          // Update progress from DB
+          fwStatus.progress = testRun.progress ?? 0;
+          this.gateway.emitFrameworkProgress(unifiedId, framework, fwStatus.progress);
+
+          if (testRun.status === 'COMPLETED') {
+            clearInterval(interval);
             fwStatus.status = 'completed';
             fwStatus.endTime = new Date().toISOString();
-            fwStatus.results = { vulnerabilities: 5, scans: 100 }; // Placeholder
-            this.gateway.emitFrameworkCompleted(unifiedId, Framework.GARAK, fwStatus.results);
-            clearInterval(interval);
+            fwStatus.results = {
+              totalTests: testRun.totalTests,
+              passed: testRun.passedTests,
+              failed: testRun.failedTests,
+              vulnerabilities: testRun.failedTests,
+            };
+            this.gateway.emitFrameworkCompleted(unifiedId, framework, fwStatus.results);
             resolve();
+          } else if (testRun.status === 'FAILED' || testRun.status === 'CANCELLED') {
+            clearInterval(interval);
+            fwStatus.status = 'failed';
+            fwStatus.endTime = new Date().toISOString();
+            fwStatus.error = `${framework} execution failed`;
+            this.gateway.emitFrameworkFailed(unifiedId, framework, fwStatus.error);
+            reject(new Error(fwStatus.error));
           }
         } catch (error) {
           clearInterval(interval);
           reject(error);
         }
-      }, 2000);
+      }, POLL_INTERVAL_MS);
     });
   }
 
   /**
-   * Poll Strix execution for completion (temporary - will be replaced by WebSocket listeners)
-   */
-  private async pollStrixCompletion(
-    unifiedId: string,
-    executionId: string,
-    fwStatus: FrameworkExecutionStatusDto,
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const interval = setInterval(async () => {
-        try {
-          // In production, this will use WebSocket events instead of polling
-          const elapsed = Date.now() - new Date(fwStatus.startTime!).getTime();
-          const progress = Math.min(100, Math.floor((elapsed / 90000) * 100)); // 1.5 minutes max
-
-          fwStatus.progress = progress;
-          this.gateway.emitFrameworkProgress(unifiedId, Framework.STRIX, progress);
-
-          if (progress >= 100) {
-            fwStatus.status = 'completed';
-            fwStatus.endTime = new Date().toISOString();
-            fwStatus.results = { findings: 12, steps: 50 }; // Placeholder
-            this.gateway.emitFrameworkCompleted(unifiedId, Framework.STRIX, fwStatus.results);
-            clearInterval(interval);
-            resolve();
-          }
-        } catch (error) {
-          clearInterval(interval);
-          reject(error);
-        }
-      }, 2000);
-    });
-  }
-
-  /**
-   * Aggregate results from all frameworks
+   * Aggregate results from all frameworks, including comparative analysis.
    */
   private aggregateResults(execution: UnifiedExecutionDto): any {
-    const aggregated = {
+    const aggregated: Record<string, any> = {
       totalVulnerabilities: 0,
       totalFindings: 0,
-      byFramework: {},
+      totalTests: 0,
+      totalPassed: 0,
+      totalFailed: 0,
+      byFramework: {} as Record<string, any>,
       completedFrameworks: 0,
       failedFrameworks: 0,
     };
@@ -371,16 +425,44 @@ export class UnifiedOrchestrationService {
         aggregated.completedFrameworks++;
         aggregated.byFramework[fw.framework] = fw.results;
 
-        // Sum up vulnerabilities/findings
-        if (fw.results.vulnerabilities) {
-          aggregated.totalVulnerabilities += fw.results.vulnerabilities;
-        }
-        if (fw.results.findings) {
-          aggregated.totalFindings += fw.results.findings;
-        }
+        const tests = fw.results.totalTests || 0;
+        const passed = fw.results.passed || 0;
+        const failed = fw.results.failed || 0;
+        const vulns = fw.results.vulnerabilities || 0;
+
+        aggregated.totalTests += tests;
+        aggregated.totalPassed += passed;
+        aggregated.totalFailed += failed;
+        aggregated.totalVulnerabilities += vulns;
+        aggregated.totalFindings += failed;
       } else if (fw.status === 'failed') {
         aggregated.failedFrameworks++;
       }
+    }
+
+    // Comparative analysis (only when both frameworks completed)
+    const garakResult = aggregated.byFramework[Framework.GARAK];
+    const promptfooResult = aggregated.byFramework[Framework.PROMPTFOO];
+
+    if (garakResult && promptfooResult) {
+      const garakRate = garakResult.totalTests > 0
+        ? ((garakResult.passed / garakResult.totalTests) * 100).toFixed(1)
+        : 'N/A';
+      const promptfooRate = promptfooResult.totalTests > 0
+        ? ((promptfooResult.passed / promptfooResult.totalTests) * 100).toFixed(1)
+        : 'N/A';
+
+      aggregated.comparative = {
+        garakPassRate: garakRate,
+        promptfooPassRate: promptfooRate,
+        garakVulnerabilities: garakResult.vulnerabilities || garakResult.failed || 0,
+        promptfooFailures: promptfooResult.failed || 0,
+        overallPassRate: aggregated.totalTests > 0
+          ? ((aggregated.totalPassed / aggregated.totalTests) * 100).toFixed(1)
+          : 'N/A',
+        summary: `Garak found ${garakResult.vulnerabilities || garakResult.failed || 0} vulnerabilities. ` +
+          `Promptfoo detected ${promptfooResult.failed || 0} test failures.`,
+      };
     }
 
     return aggregated;
@@ -427,25 +509,20 @@ export class UnifiedOrchestrationService {
 
     this.logger.log(`Stopping unified execution ${id}`);
 
-    // Stop all running frameworks
-    for (const fw of execution.frameworks) {
-      if (fw.status === 'running' && fw.executionId) {
-        try {
-          if (fw.framework === Framework.STRIX) {
-            await this.strixService.stopExecution(organizationId, fw.executionId);
-          }
-          // Garak doesn't support stop (execAsync)
-        } catch (error) {
-          this.logger.error(`Failed to stop ${fw.framework}`, error);
-        }
-      }
-    }
-
     execution.status = 'completed';
     execution.endTime = new Date().toISOString();
     execution.duration = Math.floor(
       (new Date(execution.endTime).getTime() - new Date(execution.startTime).getTime()) / 1000,
     );
+
+    // Mark any still-running frameworks as stopped
+    for (const fw of execution.frameworks) {
+      if (fw.status === 'running' || fw.status === 'pending') {
+        fw.status = 'failed';
+        fw.error = 'Stopped by user';
+        fw.endTime = new Date().toISOString();
+      }
+    }
 
     this.gateway.emitUnifiedStopped(id);
   }

@@ -1,68 +1,28 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '@app/database/prisma.service';
 import { McpRequestDto, McpResponseDto } from './dto/mcp.dto';
+import { McpStaticDataService } from './mcp-static-data.service';
+import { MCP_TOOL_SCHEMAS } from './mcp-tool-schemas';
 
 @Injectable()
 export class McpService {
   private readonly logger = new Logger(McpService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly staticDataService: McpStaticDataService,
+  ) {}
 
   /**
-   * List all available MCP tools
+   * List all available MCP tools (12 database + 13 static data = 25 total)
    */
   async listTools() {
     return {
-      tools: [
-        {
-          name: 'search_ai_policies',
-          description: 'Rechercher dans les politiques IA (règles SIA CLUSIF)',
-        },
-        {
-          name: 'get_policy_by_reference',
-          description: 'Obtenir une politique IA par sa référence (ex: SIA-01)',
-        },
-        {
-          name: 'search_test_results',
-          description: 'Rechercher dans les résultats de tests guardrails',
-        },
-        {
-          name: 'get_test_statistics',
-          description: 'Obtenir les statistiques globales des tests',
-        },
-        {
-          name: 'search_use_cases',
-          description: 'Rechercher dans les cas d\'usage et évaluations de risques',
-        },
-        {
-          name: 'search_threat_profiles',
-          description: 'Rechercher dans les profils de menaces',
-        },
-        {
-          name: 'search_vulnerabilities',
-          description: 'Rechercher dans les vulnérabilités connues (CVE, OWASP)',
-        },
-        {
-          name: 'search_defenses',
-          description: 'Rechercher dans les défenses et mitigations',
-        },
-        {
-          name: 'get_owasp_categories',
-          description: 'Obtenir les catégories OWASP LLM Top 10 et Agentic AI',
-        },
-        {
-          name: 'search_prompt_templates',
-          description: 'Rechercher dans les templates de prompts d\'attaque',
-        },
-        {
-          name: 'get_test_targets',
-          description: 'Obtenir les cibles de test configurées',
-        },
-        {
-          name: 'analyze_risk_trends',
-          description: 'Analyser les tendances de risques au fil du temps',
-        },
-      ],
+      tools: MCP_TOOL_SCHEMAS.map(({ name, description, parameters }) => ({
+        name,
+        description,
+        parameters,
+      })),
     };
   }
 
@@ -122,6 +82,59 @@ export class McpService {
 
         case 'analyze_risk_trends':
           result = await this.analyzeRiskTrends(organizationId);
+          break;
+
+        // Static data tools (13)
+        case 'search_compass_scenarios':
+          result = this.staticDataService.searchCompassScenarios(request.parameters);
+          break;
+
+        case 'get_compass_scenario_by_id':
+          result = this.staticDataService.getCompassScenarioById(request.parameters);
+          break;
+
+        case 'get_compass_statistics':
+          result = this.staticDataService.getCompassStatistics();
+          break;
+
+        case 'search_agentic_security_threats':
+          result = this.staticDataService.searchAgenticSecurityThreats(request.parameters);
+          break;
+
+        case 'get_agentic_threat_by_id':
+          result = this.staticDataService.getAgenticThreatById(request.parameters);
+          break;
+
+        case 'get_maestro_layers':
+          result = this.staticDataService.getMaestroLayers();
+          break;
+
+        case 'search_ai_risk_database':
+          result = this.staticDataService.searchAiRiskDatabase(request.parameters);
+          break;
+
+        case 'get_ai_risk_statistics':
+          result = this.staticDataService.getAiRiskStatistics();
+          break;
+
+        case 'get_ai_risk_domain_taxonomy':
+          result = this.staticDataService.getAiRiskDomainTaxonomy();
+          break;
+
+        case 'get_module_explanations':
+          result = this.staticDataService.getModuleExplanations(request.parameters);
+          break;
+
+        case 'get_platform_overview':
+          result = this.staticDataService.getPlatformOverview();
+          break;
+
+        case 'get_supported_llm_providers':
+          result = this.staticDataService.getSupportedLlmProviders();
+          break;
+
+        case 'get_security_frameworks':
+          result = this.staticDataService.getSecurityFrameworks();
           break;
 
         default:

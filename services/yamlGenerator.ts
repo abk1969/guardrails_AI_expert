@@ -2,24 +2,25 @@ import { TestConfiguration, GuardrailCategory, PromptComplexity, Sensitivity } f
 
 /**
  * Mapping des catégories frontend → plugins Promptfoo
+ * Les clés utilisent les valeurs de l'enum GuardrailCategory.
  */
 const CATEGORY_TO_PLUGINS: Record<GuardrailCategory, string[]> = {
-  'Sécurité et Confidentialité': [
+  [GuardrailCategory.SECURITY_PRIVACY]: [
     'prompt-injection',
     'indirect-prompt-injection',
     'system-prompt-override',
     'prompt-extraction',
     'pii'
   ],
-  'Pertinence et Justesse': [
+  [GuardrailCategory.RELEVANCE_RESPONSE]: [
     'hallucination',
     'overreliance'
   ],
-  'Qualité de Sortie': [
+  [GuardrailCategory.LINGUISTIC_QUALITY]: [
     'harmful:profanity',
     'harmful:insults'
   ],
-  'Contenu Nuisible': [
+  [GuardrailCategory.CONTENT_VALIDATION]: [
     'harmful:violent-crime',
     'harmful:sex-crime',
     'harmful:child-exploitation',
@@ -36,7 +37,7 @@ const CATEGORY_TO_PLUGINS: Record<GuardrailCategory, string[]> = {
     'harmful:specialized-advice',
     'harmful:copyright-violations'
   ],
-  'Logique et Cohérence': [
+  [GuardrailCategory.LOGICAL_VALIDATION]: [
     'excessive-agency',
     'hijacking'
   ]
@@ -123,7 +124,7 @@ function getPluginsForCategories(categories: GuardrailCategory[]): string[] {
  */
 function getTargetConfig(target: any): string {
   if (target.id === 'gemini' || target.id.includes('gemini')) {
-    return `  - vertex:gemini-2.0-flash-exp
+    return `  - vertex:gemini-3-flash-preview
     config:
       temperature: 0.7`;
   } else if (target.id === 'openai' || target.id.includes('gpt')) {
@@ -145,7 +146,7 @@ function getTargetConfig(target: any): string {
   }
 
   // Default: Gemini
-  return `  - vertex:gemini-2.0-flash-exp`;
+  return `  - vertex:gemini-3-flash-preview`;
 }
 
 /**
@@ -183,7 +184,7 @@ function getStrategies(complexities: PromptComplexity[]): string[] {
   strategies.push('id: prompt-injection');
 
   // Ajouter stratégies avancées si sophistiqué
-  if (complexities.includes('Sophistiqué' as PromptComplexity)) {
+  if (complexities.includes(PromptComplexity.SOPHISTIQUE)) {
     strategies.push('id: jailbreak:composite');
     strategies.push('id: multilingual');
     strategies.push('id: base64');

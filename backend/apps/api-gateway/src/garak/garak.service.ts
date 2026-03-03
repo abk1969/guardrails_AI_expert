@@ -2,10 +2,17 @@ import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '@app/database';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { ScanConfigDto } from './dto/scan-config.dto';
-import { ScanResultDto, VulnerabilityDto } from './dto/scan-result.dto';
+import { ScanConfigDto, SCAN_PRESET_PROBES } from './dto/scan-config.dto';
+import { ScanResultDto, SeverityBreakdownDto, VulnerabilityDto } from './dto/scan-result.dto';
 import { GarakGateway } from './garak.gateway';
-import { execAsync, execFileAsync, severityToScore, ensureDirectory } from '../shared/security-tool.utils';
+import { execAsync, execFileAsync, ensureDirectory } from '../shared/security-tool.utils';
+
+const CONTAINER_NAME = 'airiskmgr-garak-runner';
+const DEFAULT_TIMEOUT_MS = 3600000; // 1 hour
+const MAX_BUFFER_BYTES = 10 * 1024 * 1024; // 10MB
+const COPY_TIMEOUT_MS = 60000; // 1 minute
+const HEALTH_CHECK_TIMEOUT_MS = 10000; // 10 seconds
+const MAX_RETRIES = 2;
 
 @Injectable()
 export class GarakService {
@@ -23,16 +30,38 @@ export class GarakService {
   }
 
   /**
-   * Build Garak CLI command for Docker execution
+   * Check if the Garak Docker container is running and healthy.
+   * @throws Error if container is not available
+   */
+  async checkContainerHealth(): Promise<{ running: boolean; status: string }> {
+    try {
+      const { stdout } = await execAsync(
+        `docker inspect --format="{{.State.Status}}" ${CONTAINER_NAME}`,
+        { timeout: HEALTH_CHECK_TIMEOUT_MS },
+      );
+      const status = stdout.trim().replace(/"/g, '');
+      const running = status === 'running';
+
+      if (!running) {
+        this.logger.warn(`Garak container status: ${status} (expected: running)`);
+      }
+
+      return { running, status };
+    } catch (error) {
+      this.logger.error(`Garak container health check failed: ${error.message}`);
+      return { running: false, status: 'not_found' };
+    }
+  }
+
+  /**
+   * Build Garak CLI command for Docker execution.
    * @returns Array of command arguments for docker exec
    */
   private buildGarakCommand(config: ScanConfigDto, outputDir: string): string[] {
-    // Build docker exec command to run Garak in isolated container
     const dockerArgs: string[] = [];
 
     // Pass environment variables for API keys if provided
     if (config.apiKey) {
-      // Determine which env var to use based on model type
       const modelType = config.modelType || 'openai';
       if (modelType === 'openai') {
         dockerArgs.push('-e', `OPENAI_API_KEY=${config.apiKey}`);
@@ -41,49 +70,50 @@ export class GarakService {
       } else if (modelType === 'anthropic') {
         dockerArgs.push('-e', `ANTHROPIC_API_KEY=${config.apiKey}`);
       } else {
-        // Generic API key
         dockerArgs.push('-e', `API_KEY=${config.apiKey}`);
       }
     }
 
     // Container name
-    dockerArgs.push('airiskmgr-garak-runner');
+    dockerArgs.push(CONTAINER_NAME);
 
     // Garak command
     dockerArgs.push('garak');
 
-    // Model/Generator configuration - Garak uses generators, not model-type/model-name
-    // Map modelType to Garak generator format
+    // Model/Generator configuration
     const modelType = config.modelType || 'openai';
     let generatorSpec = '';
 
     switch (modelType.toLowerCase()) {
       case 'openai':
-        generatorSpec = `openai.OpenAIGenerator`;
+        generatorSpec = 'openai.OpenAIGenerator';
         break;
       case 'google':
       case 'gemini':
-        generatorSpec = `google.GeminiGenerator`;
+        generatorSpec = 'google.GeminiGenerator';
         break;
       case 'anthropic':
-        generatorSpec = `anthropic.AnthropicGenerator`;
+        generatorSpec = 'anthropic.AnthropicGenerator';
         break;
       case 'huggingface':
-        generatorSpec = `huggingface.InferenceAPI`;
+        generatorSpec = 'huggingface.InferenceAPI';
         break;
       default:
-        generatorSpec = `litellm.LiteLLMGenerator`;
+        generatorSpec = 'litellm.LiteLLMGenerator';
     }
 
-    // Use --model_type and --model_name (not --model-type and --model-name)
     dockerArgs.push('--model_type', generatorSpec);
     dockerArgs.push('--model_name', config.model);
 
-    // Probes
-    if (config.probes.includes('all')) {
+    // Resolve probes: preset overrides explicit probes
+    const resolvedProbes = config.preset
+      ? SCAN_PRESET_PROBES[config.preset]
+      : config.probes;
+
+    if (resolvedProbes.includes('all')) {
       dockerArgs.push('--probes', 'all');
     } else {
-      dockerArgs.push('--probes', config.probes.join(','));
+      dockerArgs.push('--probes', resolvedProbes.join(','));
     }
 
     // Detectors (optional)
@@ -95,7 +125,7 @@ export class GarakService {
       }
     }
 
-    // Output configuration (use container's output directory with prefix)
+    // Output configuration
     dockerArgs.push('--report_prefix', '/app/output/garak-scan');
 
     this.logger.debug(`Built Garak Docker command: docker exec ${dockerArgs.join(' ')}`);
@@ -103,7 +133,7 @@ export class GarakService {
   }
 
   /**
-   * Start a Garak LLM vulnerability scan
+   * Start a Garak LLM vulnerability scan.
    */
   async startScan(
     organizationId: string,
@@ -111,12 +141,21 @@ export class GarakService {
     userId: string = 'dev-user-id',
     targetId: string = 'dev-target-id',
   ): Promise<ScanResultDto> {
-    this.logger.log(`Starting REAL Garak scan for organization ${organizationId}`);
+    this.logger.log(`Starting Garak scan for organization ${organizationId}`);
     this.logger.debug(`Scan config: ${JSON.stringify(config)}`);
 
     try {
       // Ensure output directory exists
       await this.ensureGarakOutputDir();
+
+      // Check container health before starting
+      const health = await this.checkContainerHealth();
+      if (!health.running) {
+        throw new Error(
+          `Garak container is not running (status: ${health.status}). ` +
+          `Start it with: docker-compose up -d garak`,
+        );
+      }
 
       // Create test run in database
       const testRun = await this.prisma.testRun.create({
@@ -125,15 +164,17 @@ export class GarakService {
           organizationId,
           targetId,
           status: 'RUNNING',
-          totalTests: 0, // Will be updated after scan completes
+          totalTests: 0,
           configuration: JSON.parse(JSON.stringify(config)),
           metadata: {
             tool: 'garak',
             model: config.model,
             modelType: config.modelType || 'openai',
             probes: config.probes,
+            preset: config.preset || null,
             generators: config.generators,
             detectors: config.detectors,
+            startedAt: new Date().toISOString(),
           },
         },
       });
@@ -143,9 +184,12 @@ export class GarakService {
 
       // Emit started event
       this.gateway.emitScanStarted(scanId);
-      this.gateway.emitLog(scanId, '🚀 Starting Garak LLM vulnerability scan...');
+      this.gateway.emitLog(scanId, 'Starting Garak LLM vulnerability scan...');
       this.gateway.emitLog(scanId, `Model: ${config.model}`);
-      this.gateway.emitLog(scanId, `Probes: ${config.probes.join(', ')}`);
+      this.gateway.emitLog(
+        scanId,
+        `Probes: ${config.preset ? `preset "${config.preset}"` : config.probes.join(', ')}`,
+      );
 
       // Run Garak asynchronously (non-blocking)
       this.runGarakAsync(scanId, config, outputPath);
@@ -168,92 +212,153 @@ export class GarakService {
   }
 
   /**
-   * Run Garak CLI asynchronously in Docker container
+   * Determine if an error is transient (worth retrying).
+   */
+  private isTransientError(error: any): boolean {
+    const message = (error.message || '').toLowerCase();
+    return (
+      message.includes('connection refused') ||
+      message.includes('timeout') ||
+      message.includes('econnreset') ||
+      message.includes('is not running') ||
+      message.includes('no such container') ||
+      message.includes('container is restarting')
+    );
+  }
+
+  /**
+   * Run Garak CLI asynchronously in Docker container with retry logic.
    */
   private async runGarakAsync(
     scanId: string,
     config: ScanConfigDto,
     outputPath: string,
   ): Promise<void> {
-    this.logger.log(`🚀 Launching Garak CLI in Docker (scan ID: ${scanId})...`);
+    const startTime = Date.now();
+    this.logger.log(`Launching Garak CLI in Docker (scan ID: ${scanId})...`);
 
-    try {
-      // Build command arguments
-      const commandArgs = this.buildGarakCommand(config, outputPath);
-      this.gateway.emitLog(scanId, `Executing: docker exec ${commandArgs.join(' ')}`);
-      this.gateway.emitProgress(scanId, 10, 'Initializing Garak scanner...');
+    let lastError: Error | null = null;
 
-      // Update status to RUNNING
-      await this.prisma.testRun.update({
-        where: { id: scanId },
-        data: { status: 'RUNNING' },
-      });
+    for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
+      try {
+        if (attempt > 1) {
+          this.logger.log(`Retry attempt ${attempt - 1}/${MAX_RETRIES} for scan ${scanId}`);
+          this.gateway.emitLog(scanId, `Retry attempt ${attempt - 1}/${MAX_RETRIES}...`);
+          // Brief delay before retry
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
 
-      // Execute Garak CLI in Docker container (timeout: 1 hour, max buffer: 10MB)
-      this.gateway.emitProgress(scanId, 20, 'Running Garak probes...');
+        // Build command arguments
+        const commandArgs = this.buildGarakCommand(config, outputPath);
+        this.gateway.emitLog(scanId, `Executing: docker exec ${commandArgs.join(' ')}`);
+        this.gateway.emitProgress(scanId, 10, 'Initializing Garak scanner...');
 
-      const { stdout, stderr } = await execFileAsync('docker', ['exec', ...commandArgs], {
-        timeout: 3600000, // 1 hour
-        maxBuffer: 10 * 1024 * 1024, // 10MB
-      });
+        // Update status to RUNNING
+        await this.prisma.testRun.update({
+          where: { id: scanId },
+          data: { status: 'RUNNING' },
+        });
 
-      this.logger.log(`✅ Garak scan completed (${scanId})`);
-      this.logger.debug(`STDOUT: ${stdout.substring(0, 500)}...`);
+        // Execute Garak CLI in Docker container
+        this.gateway.emitProgress(scanId, 20, 'Running Garak probes...');
 
-      if (stderr) {
-        this.logger.warn(`STDERR: ${stderr}`);
-        this.gateway.emitLog(scanId, `⚠️ Warnings: ${stderr}`);
+        const timeout = config.timeoutMs || DEFAULT_TIMEOUT_MS;
+        const { stdout, stderr } = await execFileAsync('docker', ['exec', ...commandArgs], {
+          timeout,
+          maxBuffer: MAX_BUFFER_BYTES,
+        });
+
+        this.logger.log(`Garak scan completed (${scanId})`);
+        this.logger.debug(`STDOUT: ${stdout.substring(0, 500)}...`);
+
+        if (stderr) {
+          this.logger.warn(`STDERR: ${stderr}`);
+          this.gateway.emitLog(scanId, `Warnings: ${stderr}`);
+        }
+
+        // Copy results from container to host
+        this.gateway.emitProgress(scanId, 85, 'Copying results from container...');
+        await this.copyResultsFromContainer(scanId, outputPath);
+
+        // Parse and save results
+        this.gateway.emitProgress(scanId, 90, 'Parsing results...');
+        const { passedCount, failedCount, vulnerabilities } =
+          await this.parseAndSaveResults(scanId, outputPath);
+
+        const durationMs = Date.now() - startTime;
+        const severityBreakdown = this.computeSeverityBreakdown(vulnerabilities);
+
+        // Emit completion
+        this.gateway.emitProgress(scanId, 100, 'Scan completed!');
+        this.gateway.emitScanCompleted(scanId, {
+          stdout: stdout.substring(0, 1000),
+          stderr: stderr ? stderr.substring(0, 1000) : undefined,
+          totalTests: passedCount + failedCount,
+          passed: passedCount,
+          failed: failedCount,
+          durationMs,
+          severityBreakdown,
+        });
+        this.gateway.emitLog(scanId, 'Garak scan completed successfully!');
+
+        // Cleanup temporary files
+        await this.cleanupScanFiles(scanId, outputPath);
+
+        return; // Success - exit retry loop
+      } catch (error) {
+        lastError = error;
+        this.logger.error(`Garak scan attempt ${attempt} failed (${scanId}):`, error);
+
+        // Only retry on transient errors
+        if (attempt <= MAX_RETRIES && this.isTransientError(error)) {
+          this.gateway.emitLog(
+            scanId,
+            `Transient error (${error.message}), will retry...`,
+          );
+          continue;
+        }
+
+        // Non-transient error or out of retries - fail permanently
+        break;
       }
-
-      // Copy results from container to host
-      this.gateway.emitProgress(scanId, 85, 'Copying results from container...');
-      await this.copyResultsFromContainer(scanId, outputPath);
-
-      // Parse and save results
-      this.gateway.emitProgress(scanId, 90, 'Parsing results...');
-      await this.parseAndSaveResults(scanId, outputPath);
-
-      // Emit completion
-      this.gateway.emitProgress(scanId, 100, 'Scan completed!');
-      this.gateway.emitScanCompleted(scanId, {
-        stdout: stdout.substring(0, 1000),
-        stderr: stderr ? stderr.substring(0, 1000) : undefined,
-        totalTests: 0, // Will be filled by parseAndSaveResults
-        passed: 0,
-        failed: 0,
-      });
-      this.gateway.emitLog(scanId, '✅ Garak scan completed successfully!');
-    } catch (error) {
-      this.logger.error(`❌ Garak scan failed (${scanId}):`, error);
-
-      // Update status to FAILED
-      await this.prisma.testRun.update({
-        where: { id: scanId },
-        data: {
-          status: 'FAILED',
-          completedAt: new Date(),
-        },
-      });
-
-      this.gateway.emitScanFailed(scanId, error.message);
-      this.gateway.emitLog(scanId, `❌ Error: ${error.message}`);
     }
+
+    // All attempts exhausted - mark as failed
+    const durationMs = Date.now() - startTime;
+    this.logger.error(`Garak scan failed after all attempts (${scanId}):`, lastError);
+
+    await this.prisma.testRun.update({
+      where: { id: scanId },
+      data: {
+        status: 'FAILED',
+        completedAt: new Date(),
+        metadata: {
+          tool: 'garak',
+          error: lastError?.message,
+          durationMs,
+        },
+      },
+    });
+
+    this.gateway.emitScanFailed(scanId, lastError?.message || 'Unknown error');
+    this.gateway.emitLog(scanId, `Error: ${lastError?.message}`);
+
+    // Cleanup even on failure
+    await this.cleanupScanFiles(scanId, join(this.garakOutputDir, scanId));
   }
 
   /**
-   * Copy Garak results from container to host
+   * Copy Garak results from container to host.
    */
   private async copyResultsFromContainer(scanId: string, hostOutputPath: string): Promise<void> {
     try {
-      // Ensure host output directory exists
       await fs.mkdir(hostOutputPath, { recursive: true });
 
-      // Copy results from container's /app/output to host
-      const copyCommand = `docker cp airiskmgr-garak-runner:/app/output/. "${hostOutputPath}"`;
+      const copyCommand = `docker cp ${CONTAINER_NAME}:/app/output/. "${hostOutputPath}"`;
       this.logger.log(`Copying results: ${copyCommand}`);
 
-      await execAsync(copyCommand, { timeout: 60000 }); // 1 minute timeout
-      this.logger.log(`✅ Results copied from container to ${hostOutputPath}`);
+      await execAsync(copyCommand, { timeout: COPY_TIMEOUT_MS });
+      this.logger.log(`Results copied from container to ${hostOutputPath}`);
     } catch (error) {
       this.logger.error(`Failed to copy results from container:`, error);
       throw new Error(`Failed to copy Garak results: ${error.message}`);
@@ -261,135 +366,163 @@ export class GarakService {
   }
 
   /**
-   * Parse Garak JSONL results and save to database
+   * Parse Garak JSONL results and save to database.
+   * Returns parsed counts for the caller.
    */
   private async parseAndSaveResults(
     scanId: string,
     outputPath: string,
-  ): Promise<void> {
+  ): Promise<{ passedCount: number; failedCount: number; vulnerabilities: VulnerabilityDto[] }> {
+    this.logger.log(`Parsing Garak results for scan ${scanId}...`);
+
+    // Find JSONL report file in output directory
+    let reportFiles: string[] = [];
     try {
-      this.logger.log(`Parsing Garak results for scan ${scanId}...`);
+      const files = await fs.readdir(outputPath);
+      reportFiles = files.filter((f) => f.endsWith('.jsonl'));
+    } catch (error) {
+      this.logger.error(`Output directory not found: ${outputPath}`, error);
+      throw new Error(`Garak output directory not found: ${outputPath}`);
+    }
 
-      // Find JSONL report file in output directory
-      let reportFiles: string[] = [];
-      try {
-        const files = await fs.readdir(outputPath);
-        reportFiles = files.filter((f) => f.endsWith('.jsonl'));
-      } catch (error) {
-        this.logger.error(`Output directory not found: ${outputPath}`, error);
-        throw new Error(`Garak output directory not found: ${outputPath}`);
-      }
-
-      if (reportFiles.length === 0) {
-        this.logger.error(`No JSONL report found in ${outputPath}`);
-        throw new Error('No Garak report file found');
-      }
-
-      const reportFile = join(outputPath, reportFiles[0]);
-      this.logger.log(`Reading Garak report: ${reportFile}`);
-
-      const content = await fs.readFile(reportFile, 'utf-8');
-      const lines = content.split('\n').filter((line) => line.trim());
-
-      this.logger.log(`Parsing ${lines.length} result lines from Garak...`);
-      this.gateway.emitLog(scanId, `Processing ${lines.length} test results...`);
-
-      let passedCount = 0;
-      let failedCount = 0;
-      const vulnerabilities: VulnerabilityDto[] = [];
-
-      for (const line of lines) {
-        try {
-          const result = JSON.parse(line);
-
-          // Garak JSONL format: { probe: string, detector: string, status: number, ... }
-          // status: 0 = fail (vulnerability found), 1 = pass (no vulnerability)
-          const failed = result.status === 0 || result.passed === false;
-
-          if (failed) {
-            failedCount++;
-
-            // Extract vulnerability information
-            const vuln: VulnerabilityDto = {
-              category: result.probe || result.attack_type || 'Unknown',
-              severity: this.determineSeverity(result),
-              description:
-                result.msg ||
-                result.description ||
-                `Vulnerability detected by ${result.detector || 'Garak'}`,
-            };
-
-            vulnerabilities.push(vuln);
-
-            // Emit vulnerability found event
-            this.gateway.emitVulnerabilityFound(scanId, vuln);
-
-            // Save to database
-            await this.prisma.testResult.create({
-              data: {
-                testRunId: scanId,
-                promptId: `garak-${result.probe || 'test'}-${Date.now()}`,
-                promptText: result.input || result.prompt || 'N/A',
-                promptCategory: result.probe || 'Security',
-                promptComplexity: 'MOYEN',
-                response: result.output || result.response || 'N/A',
-                score: 0.0,
-                status: 'FAILED',
-                evaluationChain: {
-                  steps: [
-                    {
-                      name: 'Garak Probe',
-                      description: `Probe: ${result.probe}, Detector: ${result.detector}`,
-                      result: 'fail',
-                      timestamp: new Date().toISOString(),
-                    },
-                  ],
-                },
-                metadata: {
-                  probe: result.probe,
-                  detector: result.detector,
-                  severity: vuln.severity,
-                  garakResult: result,
-                },
-              },
-            });
-          } else {
-            passedCount++;
-          }
-        } catch (parseError) {
-          this.logger.error(`Failed to parse line: ${line}`, parseError);
-          this.gateway.emitLog(scanId, `⚠️ Failed to parse result line`);
-        }
-      }
-
-      // Update test run with final statistics
+    if (reportFiles.length === 0) {
+      this.logger.warn(`No JSONL report found in ${outputPath}, treating as 0 results`);
       await this.prisma.testRun.update({
         where: { id: scanId },
         data: {
           status: 'COMPLETED',
-          totalTests: passedCount + failedCount,
-          passedTests: passedCount,
-          failedTests: failedCount,
+          totalTests: 0,
+          passedTests: 0,
+          failedTests: 0,
           progress: 100,
           completedAt: new Date(),
         },
       });
-
-      this.logger.log(
-        `✅ Garak results saved: ${passedCount} passed, ${failedCount} failed, ${vulnerabilities.length} vulnerabilities`,
-      );
-      this.gateway.emitLog(
-        scanId,
-        `📊 Final stats: ${passedCount} passed, ${failedCount} failed`,
-      );
-    } catch (error) {
-      this.logger.error('Error parsing Garak results:', error);
-      throw error;
+      return { passedCount: 0, failedCount: 0, vulnerabilities: [] };
     }
+
+    const reportFile = join(outputPath, reportFiles[0]);
+    this.logger.log(`Reading Garak report: ${reportFile}`);
+
+    const content = await fs.readFile(reportFile, 'utf-8');
+    const lines = content.split('\n').filter((line) => line.trim());
+
+    this.logger.log(`Parsing ${lines.length} result lines from Garak...`);
+    this.gateway.emitLog(scanId, `Processing ${lines.length} test results...`);
+
+    let passedCount = 0;
+    let failedCount = 0;
+    let parseErrorCount = 0;
+    const vulnerabilities: VulnerabilityDto[] = [];
+
+    for (const line of lines) {
+      try {
+        const result = JSON.parse(line);
+
+        // Garak JSONL format: { probe: string, detector: string, status: number, ... }
+        // status: 0 = fail (vulnerability found), 1 = pass (no vulnerability)
+        const failed = result.status === 0 || result.passed === false;
+
+        if (failed) {
+          failedCount++;
+
+          const vuln: VulnerabilityDto = {
+            category: result.probe || result.attack_type || 'Unknown',
+            severity: this.determineSeverity(result),
+            description:
+              result.msg ||
+              result.description ||
+              `Vulnerability detected by ${result.detector || 'Garak'}`,
+          };
+
+          vulnerabilities.push(vuln);
+
+          // Emit vulnerability found event
+          this.gateway.emitVulnerabilityFound(scanId, vuln);
+
+          // Save to database
+          await this.prisma.testResult.create({
+            data: {
+              testRunId: scanId,
+              promptId: `garak-${result.probe || 'test'}-${Date.now()}`,
+              promptText: result.input || result.prompt || 'N/A',
+              promptCategory: result.probe || 'Security',
+              promptComplexity: 'MOYEN',
+              response: result.output || result.response || 'N/A',
+              score: 0.0,
+              status: 'FAILED',
+              evaluationChain: {
+                steps: [
+                  {
+                    name: 'Garak Probe',
+                    description: `Probe: ${result.probe}, Detector: ${result.detector}`,
+                    result: 'fail',
+                    timestamp: new Date().toISOString(),
+                  },
+                ],
+              },
+              metadata: {
+                probe: result.probe,
+                detector: result.detector,
+                severity: vuln.severity,
+                garakResult: result,
+              },
+            },
+          });
+        } else {
+          passedCount++;
+        }
+      } catch (parseError) {
+        parseErrorCount++;
+        if (parseErrorCount <= 5) {
+          this.logger.warn(`Failed to parse JSONL line (${parseErrorCount}): ${line.substring(0, 100)}`);
+        }
+      }
+    }
+
+    if (parseErrorCount > 0) {
+      this.gateway.emitLog(scanId, `${parseErrorCount} result lines could not be parsed`);
+    }
+
+    // Update test run with final statistics
+    await this.prisma.testRun.update({
+      where: { id: scanId },
+      data: {
+        status: 'COMPLETED',
+        totalTests: passedCount + failedCount,
+        passedTests: passedCount,
+        failedTests: failedCount,
+        progress: 100,
+        completedAt: new Date(),
+      },
+    });
+
+    this.logger.log(
+      `Garak results saved: ${passedCount} passed, ${failedCount} failed, ${vulnerabilities.length} vulnerabilities`,
+    );
+    this.gateway.emitLog(
+      scanId,
+      `Final stats: ${passedCount} passed, ${failedCount} failed`,
+    );
+
+    return { passedCount, failedCount, vulnerabilities };
   }
 
   /**
-   * Determine vulnerability severity from Garak result
+   * Compute severity breakdown from a list of vulnerabilities.
+   */
+  private computeSeverityBreakdown(vulnerabilities: VulnerabilityDto[]): SeverityBreakdownDto {
+    const breakdown: SeverityBreakdownDto = { critical: 0, high: 0, moderate: 0, low: 0 };
+    for (const vuln of vulnerabilities) {
+      if (vuln.severity in breakdown) {
+        breakdown[vuln.severity]++;
+      }
+    }
+    return breakdown;
+  }
+
+  /**
+   * Determine vulnerability severity from Garak result.
    */
   private determineSeverity(result: any): 'critical' | 'high' | 'moderate' | 'low' {
     // If Garak provides severity directly
@@ -417,4 +550,16 @@ export class GarakService {
     return 'moderate';
   }
 
+  /**
+   * Cleanup temporary scan output files from host.
+   */
+  private async cleanupScanFiles(scanId: string, outputPath: string): Promise<void> {
+    try {
+      await fs.rm(outputPath, { recursive: true, force: true });
+      this.logger.debug(`Cleaned up scan output files: ${outputPath}`);
+    } catch (error) {
+      // Non-critical: log but don't throw
+      this.logger.warn(`Failed to cleanup scan files for ${scanId}: ${error.message}`);
+    }
+  }
 }

@@ -58,7 +58,7 @@ export class GitHubSyncController {
   @ApiOperation({ summary: 'Rollback to previous version' })
   @ApiResponse({ status: 200, description: 'Rollback successful' })
   async rollback(@Body() body: { tool: string }) {
-    const tool = body.tool as 'promptfoo' | 'garak' | 'strix';
+    const tool = body.tool as 'promptfoo' | 'garak';
     return await this.rollbackService.rollback(tool);
   }
 

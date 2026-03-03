@@ -114,6 +114,19 @@ describe('TestsService (Integration Tests)', () => {
     ...overrides,
   });
 
+  // Helper to create valid test result data matching Prisma TestResult schema
+  const createTestResultData = (overrides: Partial<any> = {}) => ({
+    promptId: 'prompt-template-001',
+    promptText: 'Test prompt',
+    promptCategory: 'SECURITY_PRIVACY',
+    promptComplexity: 'SIMPLE',
+    response: 'Test response',
+    status: TestStatus.PASSED,
+    score: 0.9,
+    evaluationChain: [],
+    ...overrides,
+  });
+
   describe('createTestRun', () => {
     it('should create a new test run', async () => {
       const dto = createTestRunDto({
@@ -317,19 +330,20 @@ describe('TestsService (Integration Tests)', () => {
       );
 
       // Add test results
-      await service.addTestResult(testRun.id, {
-        prompt: 'Test prompt 1',
+      await service.addTestResult(testRun.id, createTestResultData({
+        promptText: 'Test prompt 1',
         response: 'Test response 1',
         status: TestStatus.PASSED,
         score: 0.95,
-      });
+      }));
 
-      await service.addTestResult(testRun.id, {
-        prompt: 'Test prompt 2',
+      await service.addTestResult(testRun.id, createTestResultData({
+        promptId: 'prompt-template-002',
+        promptText: 'Test prompt 2',
         response: 'Test response 2',
         status: TestStatus.FAILED,
         score: 0.45,
-      });
+      }));
 
       const result = await service.getTestResults(testRun.id, testOrgId, 1, 50);
 
@@ -426,19 +440,20 @@ describe('TestsService (Integration Tests)', () => {
       );
 
       // Add failed test results
-      await service.addTestResult(originalRun.id, {
-        prompt: 'Failed test 1',
+      await service.addTestResult(originalRun.id, createTestResultData({
+        promptText: 'Failed test 1',
         response: 'Response 1',
         status: TestStatus.FAILED,
         score: 0.3,
-      });
+      }));
 
-      await service.addTestResult(originalRun.id, {
-        prompt: 'Failed test 2',
+      await service.addTestResult(originalRun.id, createTestResultData({
+        promptId: 'prompt-template-002',
+        promptText: 'Failed test 2',
         response: 'Response 2',
         status: TestStatus.FAILED,
         score: 0.2,
-      });
+      }));
 
       const retryRun = await service.retryFailedTests(originalRun.id, testOrgId);
 
@@ -464,23 +479,24 @@ describe('TestsService (Integration Tests)', () => {
         testOrgId,
       );
 
-      await service.addTestResult(originalRun.id, {
-        prompt: 'Failed test',
+      await service.addTestResult(originalRun.id, createTestResultData({
+        promptText: 'Failed test',
         response: 'Response',
         status: TestStatus.FAILED,
         score: 0.3,
-      });
+      }));
 
       const retry1 = await service.retryFailedTests(originalRun.id, testOrgId);
       expect(retry1.metadata?.retryAttempt).toBe(1);
 
       // Add failed result to first retry
-      await service.addTestResult(retry1.id, {
-        prompt: 'Still failing',
+      await service.addTestResult(retry1.id, createTestResultData({
+        promptId: 'prompt-template-002',
+        promptText: 'Still failing',
         response: 'Response',
         status: TestStatus.FAILED,
         score: 0.25,
-      });
+      }));
 
       const retry2 = await service.retryFailedTests(retry1.id, testOrgId);
       expect(retry2.metadata?.retryAttempt).toBe(2);
@@ -583,12 +599,12 @@ describe('TestsService (Integration Tests)', () => {
       );
 
       // Add some results to create progress
-      await service.addTestResult(testRun.id, {
-        prompt: 'Test',
+      await service.addTestResult(testRun.id, createTestResultData({
+        promptText: 'Test',
         response: 'Response',
         status: TestStatus.PASSED,
         score: 0.9,
-      });
+      }));
 
       await service.emitTestProgress(testRun.id);
 
@@ -619,13 +635,13 @@ describe('TestsService (Integration Tests)', () => {
         testOrgId,
       );
 
-      const result = await service.addTestResult(testRun.id, {
-        prompt: 'Security test prompt',
+      const result = await service.addTestResult(testRun.id, createTestResultData({
+        promptText: 'Security test prompt',
+        promptCategory: 'SECURITY_PRIVACY',
         response: 'Blocked response',
         status: TestStatus.PASSED,
         score: 0.95,
-        category: 'SECURITY_PRIVACY',
-      });
+      }));
 
       expect(result).toBeDefined();
       expect(result.testRunId).toBe(testRun.id);
@@ -653,12 +669,12 @@ describe('TestsService (Integration Tests)', () => {
         testOrgId,
       );
 
-      await service.addTestResult(testRun.id, {
-        prompt: 'Test',
+      await service.addTestResult(testRun.id, createTestResultData({
+        promptText: 'Test',
         response: 'Response',
         status: TestStatus.FAILED,
         score: 0.2,
-      });
+      }));
 
       const updatedRun = await service.getTestRunById(testRun.id, testOrgId);
       expect(updatedRun.failedTests).toBe(1);
@@ -677,12 +693,12 @@ describe('TestsService (Integration Tests)', () => {
         testOrgId,
       );
 
-      await service.addTestResult(testRun.id, {
-        prompt: 'Test',
+      await service.addTestResult(testRun.id, createTestResultData({
+        promptText: 'Test',
         response: 'Response',
         status: TestStatus.SKIPPED,
         score: 0,
-      });
+      }));
 
       const updatedRun = await service.getTestRunById(testRun.id, testOrgId);
       expect(updatedRun.blockedTests).toBe(1);
@@ -731,8 +747,11 @@ describe('TestsService (Integration Tests)', () => {
         testOrgId,
       );
 
-      // Wait a bit
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Set startedAt to 5 seconds ago so duration calculation produces > 0
+      await prisma.testRun.update({
+        where: { id: testRun.id },
+        data: { startedAt: new Date(Date.now() - 5000) },
+      });
 
       await service.completeTestRun(testRun.id);
 

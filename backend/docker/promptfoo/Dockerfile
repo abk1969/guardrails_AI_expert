@@ -4,41 +4,48 @@
 # Purpose: Run Promptfoo CLI in complete isolation for prompt testing
 # Base: Node.js 20 slim (Debian-based for compatibility)
 # Security: Non-root user, resource limits via docker-compose
+# Execution: Long-running container, invoked via docker exec from API Gateway
 # ========================================
 
 FROM node:20-slim
 
+# Version pinning for reproducible builds
+ARG PROMPTFOO_VERSION=0.120.26
+
+LABEL maintainer="AI Risk Manager <airiskmgr@globacom3000.com>"
+LABEL description="Promptfoo LLM Testing Framework - Isolated pentest container"
+LABEL version="${PROMPTFOO_VERSION}"
+LABEL org.opencontainers.image.source="https://github.com/promptfoo/promptfoo"
+LABEL org.opencontainers.image.title="airiskmgr-promptfoo-runner"
+
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    # SSL/TLS certificates
+# Install system dependencies and clean up in single layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     openssl \
-    # Network tools for debugging
     curl \
     wget \
-    # Process management
     procps \
-    # Git (Promptfoo may need it for remote configs)
     git \
-    # Clean up
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install Promptfoo globally
-RUN npm install -g promptfoo
+# Install pinned Promptfoo version globally
+RUN npm install -g promptfoo@${PROMPTFOO_VERSION} && \
+    npm cache clean --force
 
 # Verify Promptfoo installation
 RUN promptfoo --version
 
-# Create output directory
+# Create output and config directories
 RUN mkdir -p /app/output && \
     mkdir -p /app/configs && \
     chmod 755 /app/output /app/configs
 
 # Create non-root user for security
-RUN groupadd -r promptfoo && useradd -r -g promptfoo promptfoo
+RUN groupadd -r promptfoo && useradd -r -g promptfoo -m -d /home/promptfoo promptfoo
 
 # Change ownership of app directory
 RUN chown -R promptfoo:promptfoo /app
@@ -53,8 +60,8 @@ ENV PROMPTFOO_CONFIG_DIR=/app/configs
 
 # Expose no ports (internal service only)
 
-# Health check - verify Promptfoo is accessible
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+# Health check - verify Promptfoo CLI responds (--version is fast and validates the install)
+HEALTHCHECK --interval=60s --timeout=10s --start-period=15s --retries=3 \
   CMD promptfoo --version > /dev/null 2>&1 || exit 1
 
 # Default command: keep container running for exec commands

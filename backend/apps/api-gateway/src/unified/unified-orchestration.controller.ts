@@ -8,7 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@app/auth/decorators/current-user.decorator';
 import { UnifiedOrchestrationService } from './unified-orchestration.service';
@@ -16,6 +16,7 @@ import {
   UnifiedExecutionConfigDto,
   UnifiedExecutionDto,
 } from './dto/unified-execution.dto';
+import { DEV_DEFAULTS } from '../shared/constants';
 
 @ApiTags('Unified Orchestration')
 @Controller('unified/orchestration')
@@ -34,13 +35,15 @@ export class UnifiedOrchestrationController {
   @ApiOperation({
     summary: 'Start unified execution',
     description:
-      'Start a unified execution across Promptfoo, Garak, and Strix frameworks in parallel, sequential, or selective mode',
+      'Start a unified execution across Promptfoo and Garak frameworks in parallel, sequential, or selective mode',
   })
   @ApiResponse({
     status: 202,
     description: 'Unified execution started successfully',
     type: UnifiedExecutionDto,
   })
+  @ApiResponse({ status: 400, description: 'Invalid configuration' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async startExecution(
     @CurrentUser()
     user: {
@@ -55,7 +58,7 @@ export class UnifiedOrchestrationController {
       user.organizationId,
       config,
       user.id,
-      '33faa86b-0bad-45e9-b372-0d174de49cc8', // Default target ID
+      DEV_DEFAULTS.TARGET_ID,
     );
   }
 
@@ -67,6 +70,7 @@ export class UnifiedOrchestrationController {
     summary: 'Get unified execution status',
     description: 'Get the status of a unified execution by ID',
   })
+  @ApiParam({ name: 'id', description: 'Unified execution ID' })
   @ApiResponse({
     status: 200,
     description: 'Unified execution status',
@@ -95,6 +99,7 @@ export class UnifiedOrchestrationController {
     summary: 'Stop unified execution',
     description: 'Stop a running unified execution and all its framework executions',
   })
+  @ApiParam({ name: 'id', description: 'Unified execution ID' })
   @ApiResponse({ status: 204, description: 'Execution stopped successfully' })
   @ApiResponse({ status: 404, description: 'Execution not found' })
   async stopExecution(

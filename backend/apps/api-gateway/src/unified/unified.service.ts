@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@app/database';
-import { UnifiedMetricsDto, ActivityDto } from './dto/unified-metrics.dto';
+import { UnifiedMetricsDto, ComparativeMetricsDto, ActivityDto } from './dto/unified-metrics.dto';
 
 @Injectable()
 export class UnifiedService {
@@ -9,10 +9,8 @@ export class UnifiedService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Aggregate metrics from all three security tools
-   * - Promptfoo: LLM prompt testing
-   * - Garak: LLM vulnerability scanning
-   * - Strix: Agentic AI testing
+   * Aggregate metrics from both security tools (Promptfoo + Garak),
+   * including comparative analysis between the two.
    */
   async getAggregatedMetrics(): Promise<UnifiedMetricsDto> {
     try {
@@ -26,13 +24,11 @@ export class UnifiedService {
         },
       });
 
-      // Get critical findings (score < 0.3 or status = FAILED with high severity)
+      // Get critical findings (score < 0.3)
       const criticalFindings = await this.prisma.testResult.count({
         where: {
-          OR: [
-            { score: { lt: 0.3 } },
-            { status: 'FAILED' },
-          ],
+          score: { lt: 0.3 },
+          status: 'FAILED',
         },
       });
 
@@ -58,8 +54,10 @@ export class UnifiedService {
       const toolsStatus = {
         promptfoo: this.determineToolStatus(recentRuns, 'promptfoo'),
         garak: this.determineToolStatus(recentRuns, 'garak'),
-        strix: this.determineToolStatus(recentRuns, 'strix'),
       };
+
+      // Build comparative metrics between Garak and Promptfoo
+      const comparativeMetrics = await this.buildComparativeMetrics();
 
       // Get recent activity (last 10 test runs)
       const recentTestRuns = await this.prisma.testRun.findMany({
@@ -92,12 +90,57 @@ export class UnifiedService {
         criticalFindings,
         lastScanTime: lastRun?.createdAt.toISOString() || '',
         toolsStatus,
+        comparativeMetrics,
         recentActivity,
       };
     } catch (error) {
       this.logger.error('Failed to get aggregated metrics', error);
       throw error;
     }
+  }
+
+  /**
+   * Build comparative metrics between Garak and Promptfoo from the database.
+   */
+  private async buildComparativeMetrics(): Promise<ComparativeMetricsDto> {
+    // Get all test runs grouped by tool
+    const allRuns = await this.prisma.testRun.findMany({
+      select: {
+        metadata: true,
+        totalTests: true,
+        passedTests: true,
+        failedTests: true,
+      },
+    });
+
+    let garakScans = 0;
+    let garakTotalTests = 0;
+    let garakVulnerabilities = 0;
+    let promptfooRuns = 0;
+    let promptfooTotalTests = 0;
+    let promptfooFailures = 0;
+
+    for (const run of allRuns) {
+      const tool = this.detectToolFromMetadata(run.metadata);
+      if (tool === 'garak') {
+        garakScans++;
+        garakTotalTests += run.totalTests;
+        garakVulnerabilities += run.failedTests;
+      } else {
+        promptfooRuns++;
+        promptfooTotalTests += run.totalTests;
+        promptfooFailures += run.failedTests;
+      }
+    }
+
+    return {
+      garakVulnerabilities,
+      promptfooFailures,
+      garakScans,
+      promptfooRuns,
+      garakVulnerabilityRate: garakTotalTests > 0 ? garakVulnerabilities / garakTotalTests : 0,
+      promptfooFailureRate: promptfooTotalTests > 0 ? promptfooFailures / promptfooTotalTests : 0,
+    };
   }
 
   /**
@@ -109,7 +152,8 @@ export class UnifiedService {
   ): 'running' | 'idle' | 'error' {
     const toolRuns = recentRuns.filter((run) => {
       const metadata = run.metadata as Record<string, any>;
-      return metadata?.tool === toolName;
+      // Check both 'tool' and 'source' keys since Promptfoo uses 'source' and Garak uses 'tool'
+      return metadata?.tool === toolName || metadata?.source === toolName;
     });
 
     if (toolRuns.length === 0) {
@@ -130,14 +174,17 @@ export class UnifiedService {
   }
 
   /**
-   * Detect which tool was used based on metadata
+   * Detect which tool was used based on metadata.
+   * Checks both 'tool' (Garak) and 'source' (Promptfoo) keys.
    */
-  private detectToolFromMetadata(metadata: any): 'promptfoo' | 'garak' | 'strix' {
+  private detectToolFromMetadata(metadata: any): 'promptfoo' | 'garak' {
     const meta = metadata as Record<string, any>;
-    if (meta?.tool) {
-      return meta.tool;
+    if (meta?.tool === 'garak' || meta?.source === 'garak') {
+      return 'garak';
     }
-
+    if (meta?.tool === 'promptfoo' || meta?.source === 'promptfoo') {
+      return 'promptfoo';
+    }
     // Default to promptfoo if not specified
     return 'promptfoo';
   }

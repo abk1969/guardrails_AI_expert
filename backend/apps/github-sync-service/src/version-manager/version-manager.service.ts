@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SemverParser } from './semver-parser';
 import { ChangelogGenerator } from './changelog-generator';
 
-type ToolName = 'promptfoo' | 'garak' | 'strix';
+type ToolName = 'promptfoo' | 'garak';
 
 interface VersionInfo {
   tool: ToolName;

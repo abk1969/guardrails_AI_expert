@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import {
@@ -16,7 +16,11 @@ import {
   ExternalLink,
   AlertTriangle,
   CheckSquare,
-  Square
+  Square,
+  Sparkles,
+  Search,
+  ShieldAlert,
+  ListChecks
 } from 'lucide-react';
 import {
   PromptfooWizardConfig,
@@ -34,18 +38,69 @@ import { useNavigation } from '../contexts/NavigationContext';
 
 type WizardStep = 1 | 2 | 3;
 
+/** Preset configurations for quick setup */
+interface WizardPreset {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  targetPreset: PromptfooTargetPreset;
+  testDepth: PromptfooTestDepth;
+  selectedRiskCategories: string[];
+  badgeColor: string;
+}
+
+const WIZARD_PRESETS: WizardPreset[] = [
+  {
+    id: 'quick-check',
+    label: 'Verification Rapide',
+    description: 'Test rapide des vulnerabilites critiques (injection, jailbreak). Ideal pour un premier diagnostic.',
+    icon: <Zap size={20} />,
+    targetPreset: 'gemini-flash',
+    testDepth: 'quick',
+    selectedRiskCategories: ['prompt-injection', 'jailbreak'],
+    badgeColor: 'bg-green-500/20 text-green-400 border-green-500/30',
+  },
+  {
+    id: 'full-audit',
+    label: 'Audit Complet',
+    description: 'Audit exhaustif couvrant toutes les categories de risques avec tests approfondis.',
+    icon: <Search size={20} />,
+    targetPreset: 'gemini-pro',
+    testDepth: 'thorough',
+    selectedRiskCategories: PROMPTFOO_RISK_CATEGORIES.map(c => c.id),
+    badgeColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  },
+  {
+    id: 'injection-focus',
+    label: 'Focus Injection',
+    description: 'Tests specialises sur les attaques par injection de prompts et contournement.',
+    icon: <ShieldAlert size={20} />,
+    targetPreset: 'gemini-flash',
+    testDepth: 'standard',
+    selectedRiskCategories: ['prompt-injection', 'jailbreak', 'harmful-content'],
+    badgeColor: 'bg-red-500/20 text-red-400 border-red-500/30',
+  },
+];
+
+const STEP_LABELS: Record<WizardStep, { title: string; subtitle: string }> = {
+  1: { title: 'Configuration', subtitle: 'Cible, profondeur et categories' },
+  2: { title: 'Validation', subtitle: 'Estimation et confirmations' },
+  3: { title: 'Execution', subtitle: 'Lancement des tests' },
+};
+
 /**
- * Assistant Guidé Promptfoo - Mode Débutant
+ * Assistant Guide Promptfoo - Mode Debutant
  *
- * Flux simplifié en 3 étapes pour les utilisateurs novices :
+ * Flux simplifie en 3 etapes pour les utilisateurs novices :
  * 1. Configuration simple (questions claires)
- * 2. Validation et prévisualisation (garde-fous de sécurité)
- * 3. Exécution automatique
+ * 2. Validation et previsualisation (garde-fous de securite)
+ * 3. Execution automatique
  */
 const PromptfooWizard: React.FC = () => {
   const { setActiveNav } = useNavigation();
 
-  // État du wizard
+  // Wizard state
   const [currentStep, setCurrentStep] = useState<WizardStep>(1);
   const [config, setConfig] = useState<Partial<PromptfooWizardConfig>>({
     targetPreset: 'gemini-flash',
@@ -55,21 +110,40 @@ const PromptfooWizard: React.FC = () => {
     acceptedWarnings: false
   });
 
-  // États de chargement
+  // Loading states
   const [isLoadingEstimation, setIsLoadingEstimation] = useState(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
 
-  // Données calculées
+  // Computed data
   const [estimation, setEstimation] = useState<PromptfooEstimation | null>(null);
   const [preview, setPreview] = useState<PromptfooPreview | null>(null);
   const [dryRunResult, setDryRunResult] = useState<PromptfooDryRunResult | null>(null);
 
-  // État d'exécution
+  // Execution state
   const [testRunId, setTestRunId] = useState<string | null>(null);
   const [executionError, setExecutionError] = useState<string | null>(null);
 
-  // Charger l'estimation automatiquement quand la config change
+  // Validation errors for step 1
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  // Validate step 1
+  const step1Errors = useMemo(() => {
+    const errors: string[] = [];
+    if (!config.targetPreset) errors.push('Veuillez selectionner un systeme IA cible');
+    if (config.targetPreset === 'custom' && !config.customTargetUrl) {
+      errors.push('Veuillez saisir l\'URL de votre endpoint personnalise');
+    }
+    if (!config.testDepth) errors.push('Veuillez choisir un niveau de profondeur');
+    if (!config.selectedRiskCategories || config.selectedRiskCategories.length === 0) {
+      errors.push('Veuillez selectionner au moins une categorie de risque');
+    }
+    return errors;
+  }, [config.targetPreset, config.testDepth, config.selectedRiskCategories, config.customTargetUrl]);
+
+  const isStep1Valid = step1Errors.length === 0;
+
+  // Load estimation automatically when config changes on step 2
   useEffect(() => {
     if (currentStep >= 2) {
       loadEstimation();
@@ -114,24 +188,34 @@ const PromptfooWizard: React.FC = () => {
     }
   };
 
+  const applyPreset = (preset: WizardPreset) => {
+    setConfig({
+      ...config,
+      targetPreset: preset.targetPreset,
+      testDepth: preset.testDepth,
+      selectedRiskCategories: [...preset.selectedRiskCategories],
+    });
+    setValidationErrors([]);
+  };
+
   const handleNext = async () => {
     if (currentStep === 1) {
-      // Valider étape 1
-      if (!config.targetPreset || !config.testDepth || !config.selectedRiskCategories || config.selectedRiskCategories.length === 0) {
-        alert('Veuillez remplir tous les champs requis');
+      if (!isStep1Valid) {
+        setValidationErrors(step1Errors);
         return;
       }
+      setValidationErrors([]);
       setCurrentStep(2);
     } else if (currentStep === 2) {
-      // Valider étape 2 et faire dry-run
       if (!config.acceptedWarnings || !config.userConfirmed) {
-        alert('Veuillez accepter les conditions avant de continuer');
+        setValidationErrors(['Veuillez accepter les conditions avant de continuer']);
         return;
       }
+      setValidationErrors([]);
 
       const dryRunSuccess = await executeDryRun();
       if (!dryRunSuccess && dryRunResult) {
-        alert(`Validation échouée:\n${dryRunResult.errors.join('\n')}`);
+        setValidationErrors(dryRunResult.errors);
         return;
       }
 
@@ -142,6 +226,7 @@ const PromptfooWizard: React.FC = () => {
 
   const handleBack = () => {
     if (currentStep > 1) {
+      setValidationErrors([]);
       setCurrentStep((currentStep - 1) as WizardStep);
     }
   };
@@ -151,13 +236,12 @@ const PromptfooWizard: React.FC = () => {
     setExecutionError(null);
 
     try {
-      // Vérifier si le backend est disponible
       const backendAvailable = await promptfooAutomationService.checkBackendAvailability();
 
       if (!backendAvailable) {
         setExecutionError(
           'Le backend n\'est pas disponible. ' +
-          'Pour exécuter des tests réels, démarrez le backend avec Docker:\n\n' +
+          'Pour executer des tests reels, demarrez le backend avec Docker:\n\n' +
           'docker-compose up -d\n\n' +
           'Ou utilisez le mode "simulation" dans Configuration (Expert).'
         );
@@ -169,11 +253,9 @@ const PromptfooWizard: React.FC = () => {
 
       if (result.success && result.testRunId) {
         setTestRunId(result.testRunId);
-        // Sauvegarder pour la page de résultats
         localStorage.setItem('promptfoo_last_test_run_id', result.testRunId);
         localStorage.setItem('promptfoo-wizard-config', JSON.stringify(config));
 
-        // Rediriger vers la page d'exécution après 2 secondes
         setTimeout(() => {
           setActiveNav('promptfoo-execution');
         }, 2000);
@@ -182,9 +264,9 @@ const PromptfooWizard: React.FC = () => {
       }
     } catch (error) {
       setExecutionError(
-        'Erreur lors de l\'exécution:\n' +
+        'Erreur lors de l\'execution:\n' +
         (error instanceof Error ? error.message : 'Erreur inconnue') +
-        '\n\nVeuillez vérifier que le backend est démarré avec Docker.'
+        '\n\nVeuillez verifier que le backend est demarre avec Docker.'
       );
     } finally {
       setIsExecuting(false);
@@ -206,6 +288,9 @@ const PromptfooWizard: React.FC = () => {
     }
   };
 
+  const selectedDepth = config.testDepth ? PROMPTFOO_TEST_DEPTHS[config.testDepth] : null;
+  const selectedTarget = config.targetPreset ? PROMPTFOO_TARGET_PRESETS[config.targetPreset] : null;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -217,10 +302,10 @@ const PromptfooWizard: React.FC = () => {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">
-                Assistant Guidé Promptfoo - Mode Débutant
+                Assistant Guide Promptfoo - Mode Debutant
               </h2>
               <p className="text-gray-300">
-                Configuration simplifiée en 3 étapes pour lancer des tests de sécurité sans risque
+                Configuration simplifiee en 3 etapes pour lancer des tests de securite sans risque
               </p>
             </div>
           </div>
@@ -236,45 +321,117 @@ const PromptfooWizard: React.FC = () => {
         </div>
       </Card>
 
-      {/* Progress Indicator */}
+      {/* Visual Progress Indicator */}
       <Card className="bg-gray-700/30">
+        {/* Progress bar */}
+        <div className="relative w-full h-1.5 bg-gray-700 rounded-full mb-6">
+          <div
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-green-500 rounded-full transition-all duration-500"
+            style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
+          />
+        </div>
         <div className="flex items-center justify-between">
-          {[1, 2, 3].map((step) => (
+          {([1, 2, 3] as WizardStep[]).map((step) => (
             <div key={step} className="flex items-center flex-1">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                currentStep >= step
-                  ? 'bg-cyan-500 border-cyan-400 text-white'
-                  : 'bg-gray-700 border-gray-600 text-gray-400'
-              }`}>
-                {currentStep > step ? <CheckCircle2 size={20} /> : step}
-              </div>
-              <div className="flex-1 mx-2">
-                <div className={`text-sm font-bold ${
-                  currentStep >= step ? 'text-white' : 'text-gray-500'
+              <div className="flex items-center gap-3">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
+                  currentStep > step
+                    ? 'bg-green-500 border-green-400 text-white'
+                    : currentStep === step
+                    ? 'bg-cyan-500 border-cyan-400 text-white ring-4 ring-cyan-500/20'
+                    : 'bg-gray-700 border-gray-600 text-gray-400'
                 }`}>
-                  {step === 1 && 'Configuration'}
-                  {step === 2 && 'Validation'}
-                  {step === 3 && 'Exécution'}
+                  {currentStep > step ? <CheckCircle2 size={20} /> : step}
+                </div>
+                <div>
+                  <div className={`text-sm font-bold ${
+                    currentStep >= step ? 'text-white' : 'text-gray-500'
+                  }`}>
+                    {STEP_LABELS[step].title}
+                  </div>
+                  <div className={`text-xs ${
+                    currentStep >= step ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {STEP_LABELS[step].subtitle}
+                  </div>
                 </div>
               </div>
               {step < 3 && (
-                <ChevronRight className={`${
-                  currentStep > step ? 'text-cyan-400' : 'text-gray-600'
-                }`} size={20} />
+                <div className="flex-1 mx-4">
+                  <div className={`h-0.5 rounded ${
+                    currentStep > step ? 'bg-green-500' : 'bg-gray-700'
+                  }`} />
+                </div>
               )}
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Étape 1: Configuration Simple */}
+      {/* Validation Errors Banner */}
+      {validationErrors.length > 0 && (
+        <Card className="bg-red-900/20 border-red-500/30">
+          <div className="flex items-start gap-3">
+            <AlertCircle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-bold text-red-400 mb-1">Champs requis</h4>
+              <ul className="space-y-1">
+                {validationErrors.map((err, i) => (
+                  <li key={i} className="text-sm text-red-300">{err}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Step 1: Simple Configuration */}
       {currentStep === 1 && (
         <div className="space-y-6">
-          {/* Sélection de la cible */}
+          {/* Preset Configurations */}
+          <Card>
+            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+              <Sparkles size={20} className="text-yellow-400" />
+              Configurations Pre-definies
+            </h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Selectionnez un preset pour configurer rapidement, ou personnalisez ci-dessous.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {WIZARD_PRESETS.map((preset) => {
+                const isActive =
+                  config.targetPreset === preset.targetPreset &&
+                  config.testDepth === preset.testDepth &&
+                  JSON.stringify([...(config.selectedRiskCategories || [])].sort()) ===
+                    JSON.stringify([...preset.selectedRiskCategories].sort());
+                return (
+                  <button
+                    key={preset.id}
+                    onClick={() => applyPreset(preset)}
+                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                      isActive
+                        ? 'border-cyan-400 bg-cyan-900/30 ring-2 ring-cyan-500/20'
+                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`p-1.5 rounded ${preset.badgeColor}`}>
+                        {preset.icon}
+                      </span>
+                      <span className="font-bold text-white">{preset.label}</span>
+                    </div>
+                    <p className="text-sm text-gray-400">{preset.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+
+          {/* Target Selection */}
           <Card>
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <Target size={20} className="text-cyan-400" />
-              1. Quel système IA voulez-vous tester ?
+              1. Quel systeme IA voulez-vous tester ?
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {Object.entries(PROMPTFOO_TARGET_PRESETS).map(([key, preset]) => (
@@ -297,7 +454,7 @@ const PromptfooWizard: React.FC = () => {
             {config.targetPreset === 'custom' && (
               <div className="mt-4">
                 <label className="block text-sm font-bold text-white mb-2">
-                  URL de votre endpoint personnalisé
+                  URL de votre endpoint personnalise
                 </label>
                 <input
                   type="url"
@@ -310,7 +467,7 @@ const PromptfooWizard: React.FC = () => {
             )}
           </Card>
 
-          {/* Sélection de la profondeur */}
+          {/* Depth Selection */}
           <Card>
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <Clock size={20} className="text-cyan-400" />
@@ -331,19 +488,24 @@ const PromptfooWizard: React.FC = () => {
                   <div className="font-bold text-white mb-1">{depth.label}</div>
                   <div className="text-sm text-gray-400 mb-2">{depth.description}</div>
                   <div className="text-xs text-gray-500">
-                    {depth.numberOfTests} tests • ~{depth.durationMinutes} min
+                    {depth.numberOfTests} tests | ~{depth.durationMinutes} min
                   </div>
                 </button>
               ))}
             </div>
           </Card>
 
-          {/* Sélection des catégories de risques */}
+          {/* Risk Categories Selection */}
           <Card>
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Shield size={20} className="text-cyan-400" />
-              3. Quelles catégories de risques tester ?
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Shield size={20} className="text-cyan-400" />
+                3. Quelles categories de risques tester ?
+              </h3>
+              <span className="text-sm text-gray-400">
+                {(config.selectedRiskCategories || []).length}/{PROMPTFOO_RISK_CATEGORIES.length} selectionnees
+              </span>
+            </div>
             <div className="space-y-3">
               {PROMPTFOO_RISK_CATEGORIES.map((category) => {
                 const isSelected = (config.selectedRiskCategories || []).includes(category.id);
@@ -380,36 +542,72 @@ const PromptfooWizard: React.FC = () => {
               })}
             </div>
           </Card>
+
+          {/* Quick estimation preview at step 1 bottom */}
+          {isStep1Valid && selectedDepth && selectedTarget && (
+            <Card className="bg-gray-700/20 border-gray-600">
+              <div className="flex items-center gap-2 mb-3">
+                <ListChecks size={18} className="text-cyan-400" />
+                <h4 className="text-sm font-bold text-white">Apercu de la configuration</h4>
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                <div className="bg-gray-800/50 p-3 rounded text-center">
+                  <p className="text-xs text-gray-400">Cible</p>
+                  <p className="text-sm font-bold text-white mt-1">{selectedTarget.label.split('(')[0].trim()}</p>
+                </div>
+                <div className="bg-gray-800/50 p-3 rounded text-center">
+                  <p className="text-xs text-gray-400">Tests</p>
+                  <p className="text-lg font-bold text-cyan-400">{selectedDepth.numberOfTests}</p>
+                </div>
+                <div className="bg-gray-800/50 p-3 rounded text-center">
+                  <p className="text-xs text-gray-400">Duree estimee</p>
+                  <p className="text-lg font-bold text-green-400">~{selectedDepth.durationMinutes} min</p>
+                </div>
+                <div className="bg-gray-800/50 p-3 rounded text-center">
+                  <p className="text-xs text-gray-400">Categories</p>
+                  <p className="text-lg font-bold text-purple-400">{(config.selectedRiskCategories || []).length}</p>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
       )}
 
-      {/* Étape 2: Validation et Prévisualisation */}
+      {/* Step 2: Validation & Preview */}
       {currentStep === 2 && (
         <div className="space-y-6">
           {/* Estimation */}
           <Card className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20">
-            <h3 className="text-lg font-bold text-white mb-4">Estimation</h3>
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <DollarSign size={20} className="text-yellow-400" />
+              Estimation des Couts et de la Duree
+            </h3>
             {isLoadingEstimation ? (
               <div className="flex items-center justify-center py-8">
                 <Loader size={24} className="animate-spin text-cyan-400" />
+                <span className="ml-3 text-gray-400">Calcul de l'estimation...</span>
               </div>
             ) : estimation ? (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-gray-700/50 p-4 rounded text-center">
+                <div className="bg-gray-700/50 p-4 rounded text-center border border-gray-600">
                   <div className="text-3xl font-bold text-cyan-400">{estimation.numberOfTests}</div>
                   <div className="text-sm text-gray-400 mt-1">Tests</div>
+                  <div className="text-xs text-gray-500 mt-1">scenarios de securite</div>
                 </div>
-                <div className="bg-gray-700/50 p-4 rounded text-center">
+                <div className="bg-gray-700/50 p-4 rounded text-center border border-gray-600">
                   <div className="text-3xl font-bold text-green-400">~{estimation.estimatedDurationMinutes}</div>
                   <div className="text-sm text-gray-400 mt-1">Minutes</div>
+                  <div className="text-xs text-gray-500 mt-1">duree d'execution</div>
                 </div>
-                <div className="bg-gray-700/50 p-4 rounded text-center">
+                <div className="bg-gray-700/50 p-4 rounded text-center border border-gray-600">
                   <div className="text-3xl font-bold text-yellow-400">${estimation.estimatedCost.toFixed(2)}</div>
-                  <div className="text-sm text-gray-400 mt-1">Coût (USD)</div>
+                  <div className="text-sm text-gray-400 mt-1">Cout (USD)</div>
+                  <div className="text-xs text-gray-500 mt-1">appels API inclus</div>
                 </div>
-                <div className="bg-gray-700/50 p-4 rounded text-center">
+                <div className="bg-gray-700/50 p-4 rounded text-center border border-gray-600">
                   <div className="text-3xl font-bold text-purple-400">{estimation.apiCallsEstimated}</div>
                   <div className="text-sm text-gray-400 mt-1">Appels API</div>
+                  <div className="text-xs text-gray-500 mt-1">requetes au modele</div>
                 </div>
               </div>
             ) : null}
@@ -424,7 +622,7 @@ const PromptfooWizard: React.FC = () => {
               </h4>
               <ul className="space-y-1">
                 {estimation.warnings.map((warning, i) => (
-                  <li key={i} className="text-sm text-yellow-300">• {warning}</li>
+                  <li key={i} className="text-sm text-yellow-300">- {warning}</li>
                 ))}
               </ul>
             </Card>
@@ -442,37 +640,37 @@ const PromptfooWizard: React.FC = () => {
             </Card>
           )}
 
-          {/* Garde-fous de Sécurité */}
+          {/* Safety Guards */}
           <Card className="bg-green-900/20 border-green-500/30">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <Shield size={20} className="text-green-400" />
-              Garde-fous de Sécurité
+              Garde-fous de Securite
             </h3>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-green-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-white">Mode Simulation Sécurisé</div>
+                  <div className="font-bold text-white">Mode Simulation Securise</div>
                   <div className="text-sm text-gray-400">
-                    Aucune modification de vos systèmes de production. Les tests sont exécutés dans un environnement isolé.
+                    Aucune modification de vos systemes de production. Les tests sont executes dans un environnement isole.
                   </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-green-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-white">Confidentialité Garantie</div>
+                  <div className="font-bold text-white">Confidentialite Garantie</div>
                   <div className="text-sm text-gray-400">
-                    Vos données et configurations restent privées. Aucune information n'est partagée avec des tiers.
+                    Vos donnees et configurations restent privees. Aucune information n'est partagee avec des tiers.
                   </div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 size={20} className="text-green-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-white">Conformité Réglementaire</div>
+                  <div className="font-bold text-white">Conformite Reglementaire</div>
                   <div className="text-sm text-gray-400">
-                    Les tests respectent les meilleures pratiques de sécurité et les normes OWASP.
+                    Les tests respectent les meilleures pratiques de securite et les normes OWASP.
                   </div>
                 </div>
               </div>
@@ -488,7 +686,7 @@ const PromptfooWizard: React.FC = () => {
                   type="checkbox"
                   checked={config.acceptedWarnings || false}
                   onChange={(e) => setConfig({ ...config, acceptedWarnings: e.target.checked })}
-                  className="mt-1"
+                  className="mt-1 w-4 h-4 accent-cyan-500"
                 />
                 <span className="text-gray-300">
                   J'ai lu et compris les avertissements et estimations ci-dessus
@@ -499,10 +697,10 @@ const PromptfooWizard: React.FC = () => {
                   type="checkbox"
                   checked={config.userConfirmed || false}
                   onChange={(e) => setConfig({ ...config, userConfirmed: e.target.checked })}
-                  className="mt-1"
+                  className="mt-1 w-4 h-4 accent-cyan-500"
                 />
                 <span className="text-gray-300">
-                  Je confirme vouloir lancer les tests de sécurité avec cette configuration
+                  Je confirme vouloir lancer les tests de securite avec cette configuration
                 </span>
               </label>
             </div>
@@ -510,21 +708,21 @@ const PromptfooWizard: React.FC = () => {
         </div>
       )}
 
-      {/* Étape 3: Exécution */}
+      {/* Step 3: Execution */}
       {currentStep === 3 && (
         <div className="space-y-6">
           {!isExecuting && !testRunId && !executionError && (
             <Card className="bg-gradient-to-r from-cyan-900/20 to-green-900/20 border-cyan-500/30">
-              <h3 className="text-lg font-bold text-white mb-4">Prêt à Lancer les Tests</h3>
+              <h3 className="text-lg font-bold text-white mb-4">Pret a Lancer les Tests</h3>
               {preview && (
                 <div className="space-y-4">
                   <div className="bg-gray-700/50 p-4 rounded">
-                    <h4 className="font-bold text-white mb-2">Récapitulatif :</h4>
+                    <h4 className="font-bold text-white mb-2">Recapitulatif :</h4>
                     <ul className="space-y-2 text-sm text-gray-300">
-                      <li>• <strong>Cible:</strong> {preview.targetDescription}</li>
-                      <li>• <strong>Tests:</strong> {estimation?.numberOfTests} tests sur {preview.plugins.length} plugins</li>
-                      <li>• <strong>Durée estimée:</strong> ~{estimation?.estimatedDurationMinutes} minutes</li>
-                      <li>• <strong>Coût estimé:</strong> ${estimation?.estimatedCost.toFixed(2)} USD</li>
+                      <li>- <strong>Cible:</strong> {preview.targetDescription}</li>
+                      <li>- <strong>Tests:</strong> {estimation?.numberOfTests} tests sur {preview.plugins.length} plugins</li>
+                      <li>- <strong>Duree estimee:</strong> ~{estimation?.estimatedDurationMinutes} minutes</li>
+                      <li>- <strong>Cout estime:</strong> ${estimation?.estimatedCost.toFixed(2)} USD</li>
                     </ul>
                   </div>
 
@@ -533,7 +731,7 @@ const PromptfooWizard: React.FC = () => {
                       <h4 className="font-bold text-red-400 mb-2">Erreurs de Validation:</h4>
                       <ul className="space-y-1">
                         {dryRunResult.errors.map((err, i) => (
-                          <li key={i} className="text-sm text-red-300">• {err}</li>
+                          <li key={i} className="text-sm text-red-300">- {err}</li>
                         ))}
                       </ul>
                     </Card>
@@ -557,14 +755,14 @@ const PromptfooWizard: React.FC = () => {
             <Card className="bg-green-900/20 border-green-500/30">
               <div className="text-center py-8">
                 <CheckCircle2 size={48} className="text-green-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Tests Lancés avec Succès !</h3>
+                <h3 className="text-xl font-bold text-white mb-2">Tests Lances avec Succes !</h3>
                 <p className="text-gray-400 mb-4">Test Run ID: {testRunId}</p>
                 <div className="flex gap-3 justify-center">
                   <Button onClick={() => setActiveNav('promptfoo-execution')}>
                     Suivre la Progression
                   </Button>
                   <Button variant="secondary" onClick={() => setActiveNav('test-results')}>
-                    Voir les Résultats
+                    Voir les Resultats
                   </Button>
                 </div>
               </div>
@@ -577,7 +775,7 @@ const PromptfooWizard: React.FC = () => {
                 <div className="flex items-start gap-4 mb-4">
                   <AlertCircle size={48} className="text-red-400 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white mb-3">Erreur lors de l'Exécution</h3>
+                    <h3 className="text-xl font-bold text-white mb-3">Erreur lors de l'Execution</h3>
                     <div className="text-red-300 text-left whitespace-pre-line mb-4 bg-red-950/30 p-4 rounded border border-red-500/20">
                       {executionError}
                     </div>
@@ -585,7 +783,7 @@ const PromptfooWizard: React.FC = () => {
                 </div>
                 <div className="flex gap-3 justify-center">
                   <Button onClick={handleExecute}>
-                    Réessayer
+                    Reessayer
                   </Button>
                   <Button variant="secondary" onClick={() => setCurrentStep(1)}>
                     Modifier la Configuration
@@ -611,41 +809,39 @@ const PromptfooWizard: React.FC = () => {
               </Button>
             )}
           </div>
-          <div className="flex gap-2">
-            {currentStep < 3 && (
-              <Button onClick={handleNext} disabled={isLoadingEstimation || isLoadingPreview}>
-                {isLoadingEstimation || isLoadingPreview ? (
-                  <>
-                    <Loader size={16} className="mr-2 animate-spin" />
-                    Chargement...
-                  </>
-                ) : (
-                  <>
-                    Continuer
-                    <ChevronRight size={16} className="ml-2" />
-                  </>
-                )}
-              </Button>
-            )}
-            {currentStep === 3 && !testRunId && !isExecuting && (
-              <Button onClick={handleExecute} className="px-8">
-                <Play size={16} className="mr-2" />
-                Lancer les Tests
-              </Button>
-            )}
+          <div className="flex items-center gap-4">
+            {/* Step indicator text */}
+            <span className="text-sm text-gray-500">
+              Etape {currentStep} sur 3
+            </span>
+            <div className="flex gap-2">
+              {currentStep < 3 && (
+                <Button
+                  onClick={handleNext}
+                  disabled={isLoadingEstimation || isLoadingPreview || (currentStep === 1 && !isStep1Valid)}
+                >
+                  {isLoadingEstimation || isLoadingPreview ? (
+                    <>
+                      <Loader size={16} className="mr-2 animate-spin" />
+                      Chargement...
+                    </>
+                  ) : (
+                    <>
+                      Continuer
+                      <ChevronRight size={16} className="ml-2" />
+                    </>
+                  )}
+                </Button>
+              )}
+              {currentStep === 3 && !testRunId && !isExecuting && (
+                <Button onClick={handleExecute} className="px-8">
+                  <Play size={16} className="mr-2" />
+                  Lancer les Tests
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </Card>
-
-      {/* Info Footer */}
-      <Card className="bg-gray-700/20 border-gray-600">
-        <p className="text-sm text-gray-400 text-center">
-          💡 <strong>Besoin d'aide ?</strong> Consultez la{' '}
-          <a href="#" className="text-cyan-400 hover:underline">documentation</a> ou{' '}
-          <button onClick={() => setActiveNav('promptfoo-config')} className="text-cyan-400 hover:underline">
-            passez en mode expert
-          </button> pour plus d'options.
-        </p>
       </Card>
     </div>
   );
