@@ -76,21 +76,22 @@ export default defineConfig(({ mode }) => {
         cssCodeSplit: true, // Split CSS for better caching
         rollupOptions: {
           output: {
-            // Better code splitting
             manualChunks: (id) => {
-              // Split node_modules into separate chunks
               if (id.includes('node_modules')) {
-                if (id.includes('react') || id.includes('react-dom')) {
+                // Keep React and all React-dependent UI libs together
+                if (
+                  id.includes('react') ||
+                  id.includes('react-dom') ||
+                  id.includes('recharts') ||
+                  id.includes('@reduxjs') ||
+                  id.includes('react-is') ||
+                  id.includes('scheduler')
+                ) {
                   return 'react-vendor';
-                }
-                if (id.includes('lucide-react')) {
-                  return 'ui-vendor';
                 }
                 if (id.includes('socket.io')) {
                   return 'socket-vendor';
                 }
-                // Other node_modules
-                return 'vendor';
               }
             },
           },
