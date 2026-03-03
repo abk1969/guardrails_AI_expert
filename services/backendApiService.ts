@@ -1,5 +1,6 @@
 import io, { Socket } from 'socket.io-client';
 import { TestConfiguration, TestResult, TestRunStatus } from '../types';
+import { backendStatus } from './backendStatus';
 
 /**
  * Service d'intégration avec le backend NestJS
@@ -10,12 +11,12 @@ import { TestConfiguration, TestResult, TestRunStatus } from '../types';
  * - Connexion WebSocket pour temps réel
  */
 class BackendApiService {
-  private baseURL: string;
   private socket: Socket | null = null;
   private accessToken: string | null = null;
 
-  constructor() {
-    this.baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+  /** Base URL derived from backendStatus (strips /api/v1 suffix). */
+  private get baseURL(): string {
+    return backendStatus.apiUrl.replace(/\/api\/v1\/?$/, '');
   }
 
   /**
@@ -47,6 +48,7 @@ class BackendApiService {
     testRunId: string;
     status: TestRunStatus;
   }> {
+    if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(`${this.baseURL}/api/v1/tests/run`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -83,6 +85,7 @@ class BackendApiService {
    * Récupère les détails d'un test run
    */
   async getTestRun(testRunId: string) {
+    if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(`${this.baseURL}/api/v1/tests/runs/${testRunId}`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -104,6 +107,7 @@ class BackendApiService {
     page: number;
     pageSize: number;
   }> {
+    if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(
       `${this.baseURL}/api/v1/tests/runs/${testRunId}/results?page=${page}`,
       {
@@ -123,6 +127,7 @@ class BackendApiService {
    * Annule un test en cours
    */
   async cancelTestRun(testRunId: string) {
+    if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(`${this.baseURL}/api/v1/tests/runs/${testRunId}/cancel`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -139,6 +144,7 @@ class BackendApiService {
    * Relance les tests échoués
    */
   async retryFailedTests(testRunId: string) {
+    if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(`${this.baseURL}/api/v1/tests/runs/${testRunId}/retry`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -155,6 +161,7 @@ class BackendApiService {
    * Récupère la liste des targets disponibles
    */
   async getTestTargets() {
+    if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(`${this.baseURL}/api/v1/tests/targets`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -171,6 +178,7 @@ class BackendApiService {
    * Récupère l'historique des tests
    */
   async getTestHistory(page: number = 1, limit: number = 20) {
+    if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(
       `${this.baseURL}/api/v1/tests/runs?limit=${limit}&offset=${(page - 1) * limit}`,
       {
@@ -193,6 +201,11 @@ class BackendApiService {
    */
   connectWebSocket(): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (!backendStatus.isAvailable()) {
+        reject(new Error('Backend non disponible'));
+        return;
+      }
+
       if (this.socket?.connected) {
         resolve();
         return;

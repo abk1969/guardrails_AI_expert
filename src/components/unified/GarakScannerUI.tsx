@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Card from '../ui/Card';
 import { useLLMConfig } from '@/contexts/LLMConfigContext';
+import { backendStatus } from '../../../services/backendStatus';
 import type {
   GarakScanConfig,
   GarakScanResult,
@@ -99,6 +100,13 @@ const SeverityBadge: React.FC<{ severity: GarakSeverity }> = ({ severity }) => {
 const GarakScannerUI: React.FC = () => {
   const { config: llmConfig, isConfigured } = useLLMConfig();
 
+  // Backend availability
+  const [backendAvailable, setBackendAvailable] = useState<boolean>(false);
+
+  useEffect(() => {
+    backendStatus.check().then(setBackendAvailable);
+  }, []);
+
   // Scan configuration
   const [config, setConfig] = useState<GarakScanConfig>({
     model: llmConfig?.model || 'openai/gpt-4',
@@ -178,8 +186,7 @@ const GarakScannerUI: React.FC = () => {
     }, 800);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
-      const response = await fetch(`${apiUrl}/garak/scan`, {
+      const response = await fetch(`${backendStatus.apiUrl}/garak/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
@@ -257,6 +264,16 @@ const GarakScannerUI: React.FC = () => {
           <span className="text-cyan-300">
             Configuration LLM détectée : <span className="font-semibold text-white">{llmConfig.provider}</span> / <span className="font-semibold text-white">{llmConfig.model}</span>
           </span>
+        </div>
+      )}
+
+      {/* Backend Unavailable Warning */}
+      {!backendAvailable && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-yellow-900/30 border border-yellow-700/40 rounded-lg">
+          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+          <p className="text-yellow-300 text-sm">
+            Mode autonome — Backend non disponible. Lancez le backend Docker pour lancer des scans Garak.
+          </p>
         </div>
       )}
 
@@ -372,13 +389,18 @@ const GarakScannerUI: React.FC = () => {
               <button
                 type="button"
                 onClick={startScan}
-                disabled={scanning}
+                disabled={scanning || !backendAvailable}
                 className="w-full px-4 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold text-white"
               >
                 {scanning ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
                     Scan en cours...
+                  </>
+                ) : !backendAvailable ? (
+                  <>
+                    <AlertTriangle className="w-5 h-5" />
+                    Backend non disponible
                   </>
                 ) : (
                   <>

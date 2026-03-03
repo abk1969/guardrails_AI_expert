@@ -17,6 +17,7 @@ import {
   PromptfooTestDepth,
   PromptfooTargetPreset
 } from '../types/promptfoo';
+import { backendStatus } from './backendStatus';
 
 export class PromptfooAutomationService {
 
@@ -195,8 +196,7 @@ export class PromptfooAutomationService {
   async executeReal(config: PromptfooWizardConfig): Promise<{ success: boolean; testRunId?: string; error?: string }> {
     try {
       // Vérifier que le backend est disponible
-      const backendAvailable = await this.checkBackendAvailability();
-      if (!backendAvailable) {
+      if (!backendStatus.isAvailable()) {
         return {
           success: false,
           error: 'Backend non disponible. Veuillez démarrer le backend avec Docker ou npm.'
@@ -208,8 +208,7 @@ export class PromptfooAutomationService {
       const yamlContent = preview.yamlPreview;
 
       // Appeler l'API backend
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
-      const response = await fetch(`${API_URL}/promptfoo/run`, {
+      const response = await fetch(`${backendStatus.apiUrl}/promptfoo/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ yaml: yamlContent }),
@@ -246,26 +245,10 @@ export class PromptfooAutomationService {
   }
 
   /**
-   * Vérifie si le backend est disponible
+   * Vérifie si le backend est disponible (delegates to centralized backendStatus)
    */
   async checkBackendAvailability(): Promise<boolean> {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-    try {
-      const response = await fetch(`${API_URL}/health`, {
-        method: 'GET',
-        signal: controller.signal,
-        mode: 'cors',
-      });
-
-      clearTimeout(timeoutId);
-      return response.ok && response.status === 200;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      return false;
-    }
+    return backendStatus.check();
   }
 
   /**
@@ -274,9 +257,8 @@ export class PromptfooAutomationService {
   private async callBackendDryRun(config: PromptfooWizardConfig): Promise<{ success: boolean; errors: string[] }> {
     try {
       const preview = await this.generatePreview(config);
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
 
-      const response = await fetch(`${API_URL}/promptfoo/dry-run`, {
+      const response = await fetch(`${backendStatus.apiUrl}/promptfoo/dry-run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ yaml: preview.yamlPreview }),
