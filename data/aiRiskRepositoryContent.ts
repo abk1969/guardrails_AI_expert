@@ -2,7 +2,7 @@ import { CausalTaxonomyNode, DatabaseExplainerContent, RiskDatabaseExample } fro
 // @ts-ignore - JSON import
 import parsedData from './aiRiskDatabaseParsed.json';
 
-// Export parsed AI Risk Database (1,350 risks)
+// Export parsed AI Risk Database V4 (1,579 risks - updated from V3's 1,350)
 export const AI_RISK_DATABASE = parsedData.risks;
 export const AI_RISK_METADATA = parsedData.metadata;
 export const AI_RISK_STATISTICS = parsedData.statistics;
@@ -139,7 +139,7 @@ export const DOMAIN_TAXONOMY_DATA: CausalTaxonomyNode[] = [
     id: 'safety',
     name: 'Sécurité du Système IA, Défaillances et Limitations',
     description: 'Risques techniques liés aux défaillances, limitations et comportements imprévisibles des systèmes d\'IA.',
-    count: parsedData.statistics.byDomain['7. AI System Safety, Failures, & Limitations'] || 0,
+    count: parsedData.statistics.byDomain['Sécurité du Système IA, Défaillances et Limitations'] || 0,
     children: []
   },
   {
