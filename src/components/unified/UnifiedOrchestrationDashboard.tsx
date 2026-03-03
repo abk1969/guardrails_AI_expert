@@ -73,6 +73,8 @@ interface UnifiedExecution {
   };
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+
 const UnifiedOrchestrationDashboard: React.FC = () => {
   const [config, setConfig] = useState<UnifiedExecutionConfig>({
     mode: ExecutionMode.PARALLEL,
@@ -101,7 +103,7 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:3003/api/v1/unified/orchestration/${execution.id}`
+        `${API_URL}/unified/orchestration/${execution.id}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -116,7 +118,7 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
     setIsStarting(true);
     try {
       const response = await fetch(
-        'http://localhost:3003/api/v1/unified/orchestration/start',
+        `${API_URL}/unified/orchestration/start`,
         {
           method: 'POST',
           headers: {
@@ -145,7 +147,7 @@ const UnifiedOrchestrationDashboard: React.FC = () => {
 
     try {
       await fetch(
-        `http://localhost:3003/api/v1/unified/orchestration/${execution.id}/stop`,
+        `${API_URL}/unified/orchestration/${execution.id}/stop`,
         {
           method: 'POST',
           headers: {
