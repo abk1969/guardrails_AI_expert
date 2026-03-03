@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useNavigation } from '../contexts/NavigationContext';
 import { io, Socket } from 'socket.io-client';
+import { backendStatus } from '../services/backendStatus';
 
 type ExecutionMode = 'auto' | 'manual' | 'checking';
 type TestStatus = 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';
@@ -104,6 +105,7 @@ const PromptfooTestExecution: React.FC = () => {
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedDisplay, setElapsedDisplay] = useState('0:00');
+  const [backendAvailable, setBackendAvailable] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
@@ -129,12 +131,22 @@ const PromptfooTestExecution: React.FC = () => {
     return () => clearInterval(interval);
   }, [testStatus, startTime]);
 
-  // Load YAML on mount
+  // Load YAML and check backend on mount
   useEffect(() => {
     loadYamlFromStorage();
-    addLog('Mode manuel active par defaut');
-    addLog('Suivez les instructions ci-dessous pour lancer Promptfoo en ligne de commande');
-    addLog('Cliquez sur "Activer Mode Automatique" si vous avez demarre le backend');
+    backendStatus.check().then((available) => {
+      setBackendAvailable(available);
+      if (available) {
+        setMode('auto');
+        addLog('Backend disponible - Mode automatique active');
+      } else {
+        addLog('Mode manuel active par defaut (backend non disponible)');
+        addLog('Suivez les instructions ci-dessous pour lancer Promptfoo en ligne de commande');
+        addLog('Cliquez sur "Activer Mode Auto" si vous avez demarre le backend');
+      }
+    });
+    const unsub = backendStatus.onChange((available) => setBackendAvailable(available));
+    return () => { unsub(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -151,34 +163,23 @@ const PromptfooTestExecution: React.FC = () => {
     addLog('Verification de la disponibilite du backend...');
     setMode('checking');
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-
     try {
-      const response = await fetch(`${API_URL}/health`, {
-        method: 'GET',
-        signal: controller.signal,
-        mode: 'cors',
-      });
+      const available = await backendStatus.forceCheck();
+      setBackendAvailable(available);
 
-      clearTimeout(timeoutId);
-
-      if (response.ok && response.status === 200) {
+      if (available) {
         setMode('auto');
         addLog('Backend disponible - Mode automatique active');
       } else {
-        throw new Error(`Backend retourne status ${response.status}`);
+        setMode('manual');
+        addLog('Backend non disponible (normal si non demarre)');
+        addLog('Restez en mode manuel pour utiliser Promptfoo en CLI');
       }
-    } catch (error) {
-      clearTimeout(timeoutId);
+    } catch {
       setMode('manual');
+      setBackendAvailable(false);
       addLog('Backend non disponible (normal si non demarre)');
       addLog('Restez en mode manuel pour utiliser Promptfoo en CLI');
-
-      if (error instanceof Error && error.name !== 'AbortError') {
-        addLog(`Details: ${error.message}`);
-      }
     }
   };
 
@@ -193,7 +194,13 @@ const PromptfooTestExecution: React.FC = () => {
   };
 
   const setupWebSocket = (testRunId: string) => {
-    const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3003';
+    if (!backendAvailable) {
+      addLog('WebSocket non disponible - backend hors ligne');
+      return;
+    }
+
+    // Derive WS base URL from the API URL (strip /api/v1 suffix)
+    const WS_URL = backendStatus.apiUrl.replace(/\/api\/v1\/?$/, '');
 
     addLog('Connexion au WebSocket...');
     setCurrentStepIndex(0);
@@ -273,8 +280,7 @@ const PromptfooTestExecution: React.FC = () => {
     addLog('Lancement des tests via le backend...');
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003/api/v1';
-      const response = await fetch(`${API_URL}/promptfoo/run`, {
+      const response = await fetch(`${backendStatus.apiUrl}/promptfoo/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ yaml: yamlContent }),
@@ -344,6 +350,21 @@ const PromptfooTestExecution: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Offline warning banner */}
+      {!backendAvailable && (
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-900/20 border border-yellow-500/30 text-yellow-300 text-sm">
+          <WifiOff size={18} className="flex-shrink-0" />
+          <span>Backend non disponible — mode hors-ligne actif. Les tests automatiques et les resultats en temps reel ne sont pas accessibles.</span>
+          <button
+            onClick={checkBackendAvailability}
+            className="ml-auto flex items-center gap-1 text-yellow-400 hover:text-yellow-300 whitespace-nowrap"
+          >
+            <RefreshCw size={14} />
+            Reessayer
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <Card className="bg-gradient-to-r from-cyan-900/20 to-green-900/20 border-cyan-500/30">
         <div className="flex items-start justify-between">
