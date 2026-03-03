@@ -35,7 +35,16 @@ function _isRemoteOriginWithLocalBackend(): boolean {
   }
 }
 
+/**
+ * Detect if running on Vercel serverless (relative API URL = same origin).
+ * Vercel serverless does NOT support WebSocket/Socket.IO connections.
+ */
+function _isServerlessMode(): boolean {
+  return API_URL.startsWith('/');
+}
+
 const _standaloneMode = _isRemoteOriginWithLocalBackend();
+const _serverlessMode = _isServerlessMode();
 
 let _available: boolean | null = _standaloneMode ? false : null;
 let _lastCheck = _standaloneMode ? Date.now() : 0;
@@ -88,6 +97,9 @@ export const backendStatus = {
 
   /** True when running on a remote host with a localhost backend URL (e.g. Vercel). */
   isStandaloneMode: _standaloneMode,
+
+  /** True when using Vercel serverless API (no WebSocket/Socket.IO support). */
+  isServerless: _serverlessMode,
 
   /**
    * Returns cached availability. `null` means not yet checked.
