@@ -23,6 +23,7 @@ import { RiskLevel, OODAPhase } from '../../types';
 import CompassUseCaseCard from './CompassUseCaseCard';
 import CompassUseCaseModal from './CompassUseCaseModal';
 import CompassFilters from './CompassFilters';
+import CompassOWASPReferences from './CompassOWASPReferences';
 import CompassStatistics from './CompassStatistics';
 
 const CompassUseCasesView: React.FC = () => {
@@ -109,6 +110,9 @@ const CompassUseCasesView: React.FC = () => {
             : '31 threat scenarios with risk scores based on OODA Loop methodology'}
         </p>
       </div>
+
+      {/* OWASP References Banner */}
+      <CompassOWASPReferences />
 
       {/* Statistics */}
       <CompassStatistics />
