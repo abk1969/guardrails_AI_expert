@@ -25,8 +25,11 @@ import {
   Activity,
   Users,
   FileSearch,
-  FileText
+  FileText,
+  BookOpen
 } from 'lucide-react';
+import { pdfReferences } from '../../data/pdfReferences';
+import { getPDFLinksForUseCase } from '../../data/compassPDFMapping';
 import Card from '../ui/Card';
 
 interface CompassUseCaseModalProps {
@@ -98,6 +101,18 @@ const CompassUseCaseModal: React.FC<CompassUseCaseModalProps> = ({ useCase, onCl
     };
     return labels[useCase.oodaPhase][language];
   };
+
+  const pdfLinks = getPDFLinksForUseCase(useCase.id);
+  const resolvedLinks = pdfLinks
+    .map(link => {
+      const pdf = pdfReferences.find(r => r.id === link.pdfId);
+      if (!pdf) return null;
+      const items = link.itemIds
+        ? pdf.keyItems.filter(i => link.itemIds!.includes(i.id))
+        : [];
+      return { pdf, items, relevance: link.relevance };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
 
   return (
     <div
@@ -666,6 +681,56 @@ const CompassUseCaseModal: React.FC<CompassUseCaseModalProps> = ({ useCase, onCl
               </button>
             </div>
           </Card>
+
+          {/* OWASP References Panel */}
+          {resolvedLinks.length > 0 && (
+            <section className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen className="w-5 h-5 text-blue-400" aria-hidden="true" />
+                <h3 className="font-semibold text-white">
+                  {language === 'fr' ? 'Références OWASP liées' : 'Related OWASP References'}
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {resolvedLinks.map(({ pdf, items, relevance }) => (
+                  <div key={pdf.id} className="bg-gray-900/50 rounded p-3">
+                    <h4 className="text-sm font-medium text-blue-300 mb-2">{pdf.title}</h4>
+                    {relevance && (
+                      <p className="text-xs text-gray-400 italic mb-2">{relevance[language]}</p>
+                    )}
+                    <ul className="space-y-1.5">
+                      {items.map(item => (
+                        <li key={item.id} className="flex items-start gap-2 text-xs">
+                          <span
+                            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono flex-shrink-0 ${
+                              item.priority === 'critical'
+                                ? 'bg-red-500/20 text-red-300 border-red-500/30'
+                                : item.priority === 'high'
+                                ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                                : item.priority === 'medium'
+                                ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                                : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                            }`}
+                          >
+                            {item.code || item.id.toUpperCase()}
+                          </span>
+                          <div className="flex-1">
+                            <span className="text-gray-200 font-medium">{item.title}</span>
+                            {item.detailedSections?.overview && (
+                              <p className="text-gray-400 mt-0.5 text-[11px] leading-relaxed">
+                                {item.detailedSections.overview.slice(0, 200)}
+                                {item.detailedSections.overview.length > 200 ? '…' : ''}
+                              </p>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </div>
