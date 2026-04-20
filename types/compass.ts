@@ -44,6 +44,11 @@ export interface CompassUseCase {
     useCases: string[];
   };
   oodaPhase: OODAPhase;
+  relatedPDFs?: Array<{
+    pdfId: string;
+    itemIds?: string[];
+    relevance?: BilingualText;
+  }>;
   createdAt?: string;
   updatedAt?: string;
 }
