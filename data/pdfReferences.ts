@@ -2,14 +2,29 @@
 // Source: data_ai_risk/ directory - OWASP GenAI Security Project publications
 // License: CC BY-SA 4.0
 
+export type PDFCategory =
+  | 'agentic-security'
+  | 'mcp-security'
+  | 'red-teaming'
+  | 'incident-response'
+  | 'governance'
+  | 'data-security';
+
 export interface PDFReference {
   id: string;
   title: string;
   source: string;
-  category: 'agentic-security' | 'mcp-security' | 'red-teaming' | 'incident-response' | 'governance';
+  category: PDFCategory;
   summary: string;
   keyItems: ReferenceItem[];
   url?: string;
+  documentMeta?: {
+    version?: string;
+    publicationDate?: string;
+    pages?: number;
+    authors?: string[];
+    license?: string;
+  };
 }
 
 export interface ReferenceItem {
@@ -18,6 +33,22 @@ export interface ReferenceItem {
   title: string;
   description: string;
   priority?: 'critical' | 'high' | 'medium' | 'low';
+  detailedSections?: {
+    overview?: string;
+    attackVectors?: string[];
+    examples?: string[];
+    impacts?: string[];
+    mitigations?: string[];
+    mitigationTiers?: {
+      tier1?: string[];
+      tier2?: string[];
+      tier3?: string[];
+    };
+    knownCVEs?: string[];
+    references?: string[];
+    editorialNotes?: string[];
+    relatedOwaspLLM?: string[];
+  };
 }
 
 export const pdfReferences: PDFReference[] = [
