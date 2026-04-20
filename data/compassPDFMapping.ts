@@ -2,13 +2,9 @@
 // Généré initialement par heuristiques mots-clés, puis révisable manuellement.
 // Source du mapping : spec docs/superpowers/specs/2026-04-20-owasp-data-security-pdf-ingestion-design.md §6.
 
-import type { BilingualText } from '../types/compass';
+import type { PDFLink } from '../types/compass';
 
-export interface PDFLink {
-  pdfId: string;
-  itemIds?: string[];
-  relevance?: BilingualText;
-}
+export type { PDFLink };
 
 /**
  * Mapping CompassUseCase.id → PDFLink[]
