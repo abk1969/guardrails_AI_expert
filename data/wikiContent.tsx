@@ -205,6 +205,7 @@ const MCP_THIRD_PARTY_REF = pdfReferences.find(r => r.id === 'mcp-third-party-ch
 const VENDOR_EVAL_REF = pdfReferences.find(r => r.id === 'vendor-eval-red-teaming')!;
 const COMPASS_RUNBOOK_REF = pdfReferences.find(r => r.id === 'compass-runbook')!;
 const IR_GUIDE_REF = pdfReferences.find(r => r.id === 'genai-ir-guide')!;
+const DATA_SECURITY_REF = pdfReferences.find(r => r.id === 'genai-data-security-2026')!;
 
 const priorityColors: Record<string, string> = {
     critical: 'bg-red-500/20 text-red-300 border-red-500/30',
@@ -460,6 +461,86 @@ const RedTeamEvalContent: React.FC<ContentComponentProps> = ({ searchTerm = '' }
     </Card>
 );
 
+const DataSecurityContent: React.FC<ContentComponentProps> = ({ searchTerm = '' }) => (
+    <Card>
+        <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+            <Database size={24} className="mr-3 text-cyan-400" />
+            Sécurité des Données GenAI (OWASP DSGAI)
+        </h2>
+        <p className="text-gray-500 text-sm mb-4">
+            Source : OWASP GenAI Security Project - Data Security (CC BY-SA 4.0)
+        </p>
+
+        <p className="text-sm text-gray-300 mb-4">
+            <Highlight text={DATA_SECURITY_REF.summary} highlight={searchTerm} />
+        </p>
+
+        {DATA_SECURITY_REF.documentMeta && (
+            <div className="text-xs text-gray-400 flex flex-wrap gap-3 mb-6">
+                <span>Version {DATA_SECURITY_REF.documentMeta.version}</span>
+                <span>{DATA_SECURITY_REF.documentMeta.pages} pages</span>
+                <span>Licence {DATA_SECURITY_REF.documentMeta.license}</span>
+            </div>
+        )}
+
+        <div className="space-y-2">
+            {DATA_SECURITY_REF.keyItems.map((item) => (
+                <details key={item.id} className="bg-gray-800/50 rounded-lg border border-gray-700">
+                    <summary className="cursor-pointer p-3 flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded border text-[10px] font-mono ${priorityColors[item.priority || 'medium']}`}>
+                            {item.code || item.id.toUpperCase()}
+                        </span>
+                        <span className="text-sm font-medium text-white">
+                            <Highlight text={item.title} highlight={searchTerm} />
+                        </span>
+                    </summary>
+                    <div className="p-3 pt-0 text-xs text-gray-300 space-y-3">
+                        {item.detailedSections?.overview && (
+                            <div>
+                                <div className="font-semibold text-gray-200 mb-1">Overview</div>
+                                <p className="leading-relaxed">{item.detailedSections.overview}</p>
+                            </div>
+                        )}
+                        {item.detailedSections?.attackVectors && item.detailedSections.attackVectors.length > 0 && (
+                            <div>
+                                <div className="font-semibold text-gray-200 mb-1">Attack Vectors</div>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    {item.detailedSections.attackVectors.map((v, i) => <li key={i}>{v}</li>)}
+                                </ul>
+                            </div>
+                        )}
+                        {item.detailedSections?.mitigationTiers && (
+                            <div>
+                                <div className="font-semibold text-gray-200 mb-1">Mitigations tiered</div>
+                                {(['tier1', 'tier2', 'tier3'] as const).map(tier =>
+                                    item.detailedSections?.mitigationTiers?.[tier]?.length ? (
+                                        <div key={tier} className="mt-2">
+                                            <div className="text-[11px] uppercase tracking-wide text-blue-400">
+                                                {tier === 'tier1' ? 'Tier 1 (Foundational)' : tier === 'tier2' ? 'Tier 2 (Hardening)' : 'Tier 3 (Advanced)'}
+                                            </div>
+                                            <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                                                {item.detailedSections.mitigationTiers[tier]!.map((m, i) => <li key={i}>{m}</li>)}
+                                            </ul>
+                                        </div>
+                                    ) : null
+                                )}
+                            </div>
+                        )}
+                        {item.detailedSections?.knownCVEs && item.detailedSections.knownCVEs.length > 0 && (
+                            <div>
+                                <div className="font-semibold text-gray-200 mb-1">Known CVEs / exploits</div>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    {item.detailedSections.knownCVEs.map((c, i) => <li key={i}>{c}</li>)}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </details>
+            ))}
+        </div>
+    </Card>
+);
+
 export const WIKI_SECTIONS = [
     { id: 'quick-start', title: 'Démarrage Rapide', icon: <FileText size={18} />, content: <QuickStartContent /> },
     { id: 'blueprint', title: 'Blueprint (Checklists)', icon: <ShieldCheck size={18} />, content: <BlueprintContent /> },
@@ -469,4 +550,5 @@ export const WIKI_SECTIONS = [
     { id: 'agentic-security', title: 'Sécurité IA Agentique', icon: <Bot size={18} />, content: <AgenticSecurityContent /> },
     { id: 'mcp-security', title: 'Sécurité MCP', icon: <Lock size={18} />, content: <MCPSecurityContent /> },
     { id: 'red-team-eval', title: 'Évaluation Red Team', icon: <ClipboardCheck size={18} />, content: <RedTeamEvalContent /> },
+    { id: 'data-security-genai', title: 'Sécurité Données GenAI (DSGAI)', icon: <Database size={18} />, content: <DataSecurityContent /> },
 ];
