@@ -31,21 +31,35 @@ const BULLET_RE = /[\u2022\u25CF\u00B7\uFFFD\u25AA]\s*/g;
 // ── 3. Section recognizers ────────────────────────────────────
 const SECTION_MAP = {
   'How the attack unfolds': 'overview',
+  'How the violation materializes': 'overview',   // DSGAI08 variant
   'Attacker Capabilities': 'attackVectors',
+  'Attacker capabilities': 'attackVectors',        // lowercase variant
   'Illustrative scenario': 'examples',
   'Impact': 'impacts',
   'Mitigations': 'mitigations',
   'Tier 1 (foundational)': 'tier1',
+  'Tier 1 (Foundational)': 'tier1',               // capitalised variant
   'Tier 2 (hardening)': 'tier2',
+  'Tier 2 (Hardening)': 'tier2',                  // capitalised variant
   'Tier 3 (advanced)': 'tier3',
+  'Tier 3 (Advanced)': 'tier3',                   // capitalised variant
   'Known CVEs / exploits': 'knownCVEs',
   'Known CVEs / Exploits': 'knownCVEs',
   'References': 'references',
 };
 
-// DSGAI header can span 2 lines; handle "DSGAI01 -- Title" or "DSGAI01 --" followed by next line
+// DSGAI header can span 2 lines; handle "DSGAI01 -- Title" or title wrapping to next line.
+// lineA MUST begin (after optional form-feed \f) with "DSGAIxx --" without leading spaces.
+// This rejects:
+//   - lines where lineA is empty and the header is on lineB (would double-count)
+//   - Table-of-Contents lines that are deeply indented (17+ leading spaces)
 function detectHeader(lineA, lineB) {
-  const joined = `${lineA.trim()} ${lineB ? lineB.trim() : ''}`.trim();
+  // Strip optional leading form-feed only; do NOT fully trim so we can detect indentation
+  const stripped = lineA.replace(/^\f/, '');
+  // Reject if the line has leading whitespace (TOC entries) or doesn't start with DSGAI
+  if (!/^DSGAI\d{2}\s+--/.test(stripped)) return null;
+  const trimA = stripped.trim();
+  const joined = `${trimA} ${lineB ? lineB.trim() : ''}`.trim();
   const m = joined.match(/^(DSGAI\d{2})\s+--\s+(.+?)(?:\s{2,}\d+)?$/);
   if (m) return { code: m[1], title: m[2].trim() };
   return null;
