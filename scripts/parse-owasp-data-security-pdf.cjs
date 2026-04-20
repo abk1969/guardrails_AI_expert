@@ -68,7 +68,8 @@ function flushBuffer() {
   const splitBullets = (txt) => txt
     .split(BULLET_RE)
     .map(s => s.trim())
-    .filter(s => s.length > 15);
+    // Filter out layout-engine noise fragments (very short strings) while keeping genuinely short bullets like "Use TLS 1.3".
+    .filter(s => s.length > 7);
 
   const tiers = ['tier1', 'tier2', 'tier3'];
   const lists = ['attackVectors', 'examples', 'impacts', 'mitigations', 'knownCVEs', 'references'];
@@ -105,7 +106,7 @@ for (let i = 0; i < lines.length; i++) {
     };
     risks.push(current);
     section = null;
-    // Skip continuation line if we consumed it
+    // If the title came as a single line, no continuation was consumed — skip ahead only when the title wraps across two lines.
     if (!trimmed.match(/^DSGAI\d{2}\s+--\s+.+/)) i++;
     continue;
   }
@@ -151,6 +152,16 @@ const dspm = {
 
 risks.unshift(dspm);
 
+// ── 4b. Warn on missing mitigations (non-fatal) ─────────────────
+for (const r of risks) {
+  if (r.code === 'DSPM') continue;
+  const hasFlat = Array.isArray(r.detailedSections.mitigations) && r.detailedSections.mitigations.length > 0;
+  const hasTiers = r.detailedSections.mitigationTiers && Object.values(r.detailedSections.mitigationTiers).some(t => Array.isArray(t) && t.length > 0);
+  if (!hasFlat && !hasTiers) {
+    console.warn(`WARN: ${r.code} has no flat mitigations and no tiered mitigations`);
+  }
+}
+
 // ── 6. Priority heuristics ─────────────────────────────────────
 const PRIORITY = {
   'DSPM':    'medium',
@@ -178,6 +189,9 @@ const PRIORITY = {
 };
 
 risks.forEach(r => {
+  if (!(r.code in PRIORITY)) {
+    console.warn(`WARN: no priority mapping for ${r.code}, defaulting to medium`);
+  }
   r.priority = PRIORITY[r.code] || 'medium';
   const ov = r.detailedSections.overview || '';
   const desc = ov.length > 240 ? ov.slice(0, 240).replace(/\s+\S*$/, '') + '…' : ov;
