@@ -14,7 +14,7 @@ export class McpService {
   ) {}
 
   /**
-   * List all available MCP tools (12 database + 13 static data = 25 total)
+   * List all available MCP tools (12 database + 13 static data + 3 DSGAI = 28 total)
    */
   async listTools() {
     return {
@@ -135,6 +135,19 @@ export class McpService {
 
         case 'get_security_frameworks':
           result = this.staticDataService.getSecurityFrameworks();
+          break;
+
+        // DSGAI tools (3)
+        case 'search_dsgai_risks':
+          result = this.staticDataService.searchDsgaiRisks(request.parameters);
+          break;
+
+        case 'get_dsgai_risk_by_code':
+          result = this.staticDataService.getDsgaiRiskByCode(request.parameters);
+          break;
+
+        case 'get_dsgai_statistics':
+          result = this.staticDataService.getDsgaiStatistics();
           break;
 
         default:
