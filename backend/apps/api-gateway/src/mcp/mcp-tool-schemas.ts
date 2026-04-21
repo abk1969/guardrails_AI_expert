@@ -10,7 +10,7 @@ export interface McpToolSchema {
 
 /**
  * Unified MCP tool schemas compatible with Anthropic/Gemini/OpenAI tool calling.
- * 12 existing database tools + 13 new static data tools = 25 total.
+ * 12 database tools + 13 static data tools + 3 DSGAI tools = 28 total.
  */
 export const MCP_TOOL_SCHEMAS: McpToolSchema[] = [
   // ============================================================
@@ -279,6 +279,41 @@ export const MCP_TOOL_SCHEMAS: McpToolSchema[] = [
   {
     name: 'get_security_frameworks',
     description: 'Obtenir les frameworks de sécurité IA référencés : OWASP LLM Top 10, OWASP Agentic AI Top 15, MITRE ATT&CK, MITRE ATLAS, NIST AI RMF, EU AI Act.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+
+  // ============================================================
+  // DSGAI — OWASP GenAI Data Security 2026 (3)
+  // ============================================================
+  {
+    name: 'search_dsgai_risks',
+    description: 'Rechercher dans les 22 risques OWASP GenAI Data Security 2026 (DSPM + DSGAI01 à DSGAI21). Couvre les risques de data leakage, poisoning, shadow AI, RAG, vector stores, telemetry, inference avec attack vectors, scénarios, impacts et 3 tiers de mitigations.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Texte de recherche dans titres, overviews, attack vectors et mitigations' },
+        code: { type: 'string', description: 'Code exact (ex: DSGAI01, DSPM) — case-insensitive' },
+        priority: { type: 'string', description: 'Priorité', enum: ['critical', 'high', 'medium', 'low'] },
+      },
+    },
+  },
+  {
+    name: 'get_dsgai_risk_by_code',
+    description: 'Obtenir un risque OWASP GenAI Data Security 2026 par son code exact (ex: DSGAI01, DSGAI11, DSPM). Retourne l\'overview complet, attack vectors, examples, impacts et mitigations tier 1/2/3.',
+    parameters: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', description: 'Code du risque (ex: DSGAI01) — case-insensitive' },
+      },
+      required: ['code'],
+    },
+  },
+  {
+    name: 'get_dsgai_statistics',
+    description: 'Statistiques OWASP GenAI Data Security 2026 : total de risques, distribution par priorité (critical/high/medium/low), top 10 des risques par priorité.',
     parameters: {
       type: 'object',
       properties: {},
