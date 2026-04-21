@@ -1,0 +1,58 @@
+[
+  {
+    "moduleId": "applications",
+    "title": "Applications à Tester",
+    "description": "Module de gestion des profils d'applications cibles. Permet de définir les systèmes IA à évaluer : type de composant (chatbot, API, agent), URL d'accès, niveau de sensibilité, et configuration de test. C'est le prérequis pour tous les modes de test (débutant, expert, plateforme unifiée). Chaque profil d'application sert de cible pour les campagnes de tests de sécurité.",
+    "workflow": "1. Créer un profil d'application (nom, type, URL). 2. Configurer le niveau de sensibilité. 3. Lancer les tests depuis les autres modules.",
+    "keyFeatures": ["Gestion des profils d'applications", "Configuration des cibles de test", "Niveaux de sensibilité", "Types de composants IA"]
+  },
+  {
+    "moduleId": "beginner-mode",
+    "title": "Mode Débutant",
+    "description": "Assistant guidé pas-à-pas pour créer des configurations de test Promptfoo. Idéal pour les utilisateurs non techniques. L'assistant wizard guide l'utilisateur à travers la sélection de catégories de tests OWASP, la génération automatique de prompts d'attaque, et la création d'un fichier de configuration YAML prêt à l'exécution. Inclut des explications pédagogiques pour chaque catégorie de risque.",
+    "workflow": "1. Sélectionner les catégories OWASP à tester. 2. Configurer les paramètres (modèle, température). 3. Générer la configuration YAML. 4. Exécuter les tests.",
+    "keyFeatures": ["Assistant wizard guidé", "Sélection catégories OWASP", "Génération YAML automatique", "Explications pédagogiques"]
+  },
+  {
+    "moduleId": "expert-mode",
+    "title": "Mode Expert",
+    "description": "Interface avancée pour les professionnels de la sécurité IA. Permet la configuration manuelle complète des tests : édition YAML directe, gestion des datasets de prompts d'attaque, paramétrage fin des évaluations (température, tokens, top-p/top-k), et exécution avec suivi en temps réel. Supporte les configurations multi-modèles et les tests comparatifs.",
+    "workflow": "1. Configurer le fournisseur LLM et le modèle. 2. Éditer la configuration YAML. 3. Gérer les datasets de prompts. 4. Exécuter et analyser les résultats.",
+    "keyFeatures": ["Éditeur YAML avancé", "Gestion de datasets", "Configuration multi-modèles", "Exécution temps réel"]
+  },
+  {
+    "moduleId": "unified-platform",
+    "title": "Plateforme Unifiée",
+    "description": "Centre de commande unifié intégrant deux outils de pentest IA conteneurisés : Garak (scanner de vulnérabilités LLM) et Promptfoo (framework de test). Permet de lancer des scans coordonnés, suivre les résultats en temps réel via WebSocket, et corréler les findings entre outils.",
+    "workflow": "1. Sélectionner l'outil (Garak, Promptfoo). 2. Configurer la cible et les paramètres. 3. Lancer le scan. 4. Suivre en temps réel. 5. Analyser les résultats corrélés.",
+    "keyFeatures": ["Garak Scanner", "Promptfoo Integration", "WebSocket temps réel", "Corrélation multi-outils"]
+  },
+  {
+    "moduleId": "governance",
+    "title": "Gouvernance IA",
+    "description": "Module de gouvernance et gestion des risques IA. Inclut : cas d'usage et évaluations de risques, profils de menaces, cartographie de la surface d'attaque, base d'incidents connus, et outil d'édition de politiques IA (règles SIA CLUSIF). Permet de construire un référentiel de gouvernance complet aligné sur les frameworks OWASP, NIST et EU AI Act.",
+    "workflow": "1. Définir les cas d'usage IA. 2. Évaluer les menaces et risques. 3. Cartographier la surface d'attaque. 4. Documenter les incidents. 5. Rédiger les politiques IA.",
+    "keyFeatures": ["Cas d'usage IA", "Profils de menaces", "Surface d'attaque", "Incidents connus", "Politique IA (SIA CLUSIF)"]
+  },
+  {
+    "moduleId": "red-team",
+    "title": "Red Team & Audit",
+    "description": "Module de revue de sécurité et d'audit des systèmes IA. Permet de conduire des exercices de red teaming structurés, documenter les findings, générer des rapports d'audit PDF, et suivre la remédiation. Inclut des checklists de sécurité, des templates d'évaluation, et l'historique des campagnes d'audit.",
+    "workflow": "1. Planifier la campagne de red team. 2. Exécuter les tests. 3. Documenter les findings. 4. Générer le rapport d'audit. 5. Suivre la remédiation.",
+    "keyFeatures": ["Revue de sécurité", "Résultats d'audit", "Rapports PDF", "Suivi de remédiation"]
+  },
+  {
+    "moduleId": "references",
+    "title": "Référentiels",
+    "description": "Base de connaissances complète sur la sécurité IA. Regroupe : OWASP GenAI COMPASS (31 scénarios de menaces avec scores de risque et méthodologie OODA), analyse de la sécurité agentique (29 menaces, 9 catégories, framework MAESTRO), base de risques IA (1579 entrées du AI Risk Repository V4), vulnérabilités connues (CVE), et un wiki encyclopédique du red teaming IA.",
+    "workflow": "Consulter les référentiels pour enrichir l'analyse de risques, identifier les menaces pertinentes, et appliquer les mitigations recommandées.",
+    "keyFeatures": ["OWASP COMPASS (31 scénarios)", "Sécurité Agentique (29 menaces)", "Base de Risques IA (1579 entrées)", "CVE et vulnérabilités", "Wiki Red Teamer"]
+  },
+  {
+    "moduleId": "settings",
+    "title": "Paramètres",
+    "description": "Configuration globale de la plateforme. Inclut la configuration du fournisseur LLM (10 providers supportés : Gemini, OpenAI, Claude, Mistral, DeepSeek, Qwen, xAI Grok, Groq, Ollama, LM Studio), les paramètres de connexion API, la configuration des outils de pentest, et les préférences utilisateur (langue, thème).",
+    "workflow": "1. Sélectionner le fournisseur LLM. 2. Configurer la clé API et le modèle. 3. Ajuster les paramètres (température, tokens). 4. Tester la connexion.",
+    "keyFeatures": ["Configuration LLM multi-provider", "10 fournisseurs supportés", "Test de connexion", "Paramètres globaux partagés"]
+  }
+]
