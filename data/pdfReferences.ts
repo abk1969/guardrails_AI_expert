@@ -2,14 +2,34 @@
 // Source: data_ai_risk/ directory - OWASP GenAI Security Project publications
 // License: CC BY-SA 4.0
 
+import {
+  owaspDataSecurity2026KeyItems,
+  owaspDataSecurity2026EditorialNotes,
+} from './owaspDataSecurity2026.generated';
+
+export type PDFCategory =
+  | 'agentic-security'
+  | 'mcp-security'
+  | 'red-teaming'
+  | 'incident-response'
+  | 'governance'
+  | 'data-security';
+
 export interface PDFReference {
   id: string;
   title: string;
   source: string;
-  category: 'agentic-security' | 'mcp-security' | 'red-teaming' | 'incident-response' | 'governance';
+  category: PDFCategory;
   summary: string;
   keyItems: ReferenceItem[];
   url?: string;
+  documentMeta?: {
+    version?: string;
+    publicationDate?: string;
+    pages?: number;
+    authors?: string[];
+    license?: string;
+  };
 }
 
 export interface ReferenceItem {
@@ -18,6 +38,22 @@ export interface ReferenceItem {
   title: string;
   description: string;
   priority?: 'critical' | 'high' | 'medium' | 'low';
+  detailedSections?: {
+    overview?: string;
+    attackVectors?: string[];
+    examples?: string[];
+    impacts?: string[];
+    mitigations?: string[];
+    mitigationTiers?: {
+      tier1?: string[];
+      tier2?: string[];
+      tier3?: string[];
+    };
+    knownCVEs?: string[];
+    references?: string[];
+    editorialNotes?: string[];
+    relatedOwaspLLM?: string[];
+  };
 }
 
 export const pdfReferences: PDFReference[] = [
@@ -475,6 +511,42 @@ export const pdfReferences: PDFReference[] = [
         priority: 'medium',
       },
     ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // 8. OWASP GenAI Data Security Risks and Mitigations 2026 v1.0
+  // ─────────────────────────────────────────────────────────
+  {
+    id: 'genai-data-security-2026',
+    title: 'OWASP GenAI Data Security Risks and Mitigations 2026 v1.0',
+    source: 'OWASP-GenAI-Data-Security-Risks-and-Mitigations-2026-v1.0.pdf',
+    category: 'data-security',
+    url: 'https://genai.owasp.org',
+    documentMeta: {
+      version: '1.0',
+      publicationDate: '2026-03',
+      pages: 103,
+      license: 'CC BY-SA 4.0',
+      authors: [
+        'Scott Clinton (OWASP GenAI Co-founder)',
+        'Kyriakos "Rock" Lambros (Zenity)',
+        'Emmanuel Guilherme Junior (Data Security Initiative Lead)',
+      ],
+    },
+    summary:
+      "Évolution du LLM and GenAI Data Security Best Practices Guide (février 2025). Couvre la sécurité des données dans les systèmes LLM, GenAI et Agentic AI à travers 21 risques DSGAI (leakage, poisoning, shadow AI, RAG, vector stores, telemetry, inference, etc.) organisés par flux de données. Introduit DSPM for GenAI (13 capability categories) pour la gestion posturale des données. Chaque risque est structuré avec attack vectors, illustrative scenarios, impacts et 3 tiers de mitigations (Foundational/Hardening/Advanced, Buy/Build). Licence CC BY-SA 4.0. Content extracted and adapted from OWASP GenAI Data Security Risks and Mitigations 2026 v1.0 under CC BY-SA 4.0.",
+    keyItems: owaspDataSecurity2026KeyItems.map(item => ({
+      ...item,
+      detailedSections: item.detailedSections
+        ? {
+            ...item.detailedSections,
+            editorialNotes:
+              item.code === 'DSPM'
+                ? owaspDataSecurity2026EditorialNotes
+                : item.detailedSections.editorialNotes,
+          }
+        : item.detailedSections,
+    })),
   },
 ];
 

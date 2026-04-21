@@ -9,6 +9,12 @@ export interface BilingualText {
 
 export type RiskLevel = 'critical' | 'high' | 'moderate' | 'low';
 
+export interface PDFLink {
+  pdfId: string;
+  itemIds?: string[];
+  relevance?: BilingualText;
+}
+
 export enum OODAPhase {
   OBSERVE = 'observe',
   ORIENT = 'orient',
@@ -44,6 +50,7 @@ export interface CompassUseCase {
     useCases: string[];
   };
   oodaPhase: OODAPhase;
+  relatedPDFs?: PDFLink[];
   createdAt?: string;
   updatedAt?: string;
 }
