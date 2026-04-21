@@ -698,34 +698,36 @@ const CompassUseCaseModal: React.FC<CompassUseCaseModalProps> = ({ useCase, onCl
                     {relevance && (
                       <p className="text-xs text-gray-400 italic mb-2">{relevance[language]}</p>
                     )}
-                    <ul className="space-y-1.5">
-                      {items.map(item => (
-                        <li key={item.id} className="flex items-start gap-2 text-xs">
-                          <span
-                            className={`px-1.5 py-0.5 rounded border text-[10px] font-mono flex-shrink-0 ${
-                              item.priority === 'critical'
-                                ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                                : item.priority === 'high'
-                                ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
-                                : item.priority === 'medium'
-                                ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
-                                : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                            }`}
-                          >
-                            {item.code || item.id.toUpperCase()}
-                          </span>
-                          <div className="flex-1">
-                            <span className="text-gray-200 font-medium">{item.title}</span>
-                            {item.detailedSections?.overview && (
-                              <p className="text-gray-400 mt-0.5 text-[11px] leading-relaxed">
-                                {item.detailedSections.overview.slice(0, 200)}
-                                {item.detailedSections.overview.length > 200 ? '…' : ''}
-                              </p>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                    {items.length > 0 && (
+                      <ul className="space-y-1.5">
+                        {items.map(item => (
+                          <li key={item.id} className="flex items-start gap-2 text-xs">
+                            <span
+                              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono flex-shrink-0 ${
+                                item.priority === 'critical'
+                                  ? 'bg-red-500/20 text-red-300 border-red-500/30'
+                                  : item.priority === 'high'
+                                  ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                                  : item.priority === 'medium'
+                                  ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                                  : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                              }`}
+                            >
+                              {item.code || item.id.toUpperCase()}
+                            </span>
+                            <div className="flex-1">
+                              <span className="text-gray-200 font-medium">{item.title}</span>
+                              {item.detailedSections?.overview && (
+                                <p className="text-gray-400 mt-0.5 text-[11px] leading-relaxed">
+                                  {item.detailedSections.overview.slice(0, 200)}
+                                  {item.detailedSections.overview.length > 200 ? '…' : ''}
+                                </p>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </div>
