@@ -137,6 +137,43 @@ const MOCK_MODULE_EXPLANATIONS = [
   { moduleId: 'settings', title: 'Paramètres', description: 'Configuration globale', workflow: 'Setup', keyFeatures: ['LLM config', 'Préférences'] },
 ];
 
+const MOCK_DSGAI = [
+  {
+    id: 'dspm-genai',
+    code: 'DSPM',
+    title: 'DSPM for GenAI (AI-DSPM)',
+    priority: 'medium',
+    description: 'AI-DSPM is the continuous practice of discovering, classifying, governing, and monitoring data across GenAI pipelines.',
+    detailedSections: {
+      overview: 'AI-DSPM overview text.',
+      mitigations: ['GenAI data asset discovery', 'Data classification'],
+    },
+  },
+  {
+    id: 'dsgai01',
+    code: 'DSGAI01',
+    title: 'Sensitive Data Leakage',
+    priority: 'critical',
+    description: 'Attackers retrieve sensitive corporate data from RAG or model.',
+    detailedSections: {
+      overview: 'Sensitive data leakage via RAG or fine-tuned adapters.',
+      attackVectors: ['High-recall prompts', 'Enumeration'],
+      mitigations: ['PII redaction', 'Output filtering'],
+    },
+  },
+  {
+    id: 'dsgai11',
+    code: 'DSGAI11',
+    title: 'Vector Store Poisoning',
+    priority: 'high',
+    description: 'Adversaries poison embeddings in vector stores.',
+    detailedSections: {
+      overview: 'Vector store poisoning overview.',
+      mitigations: ['Signed datasets', 'Drift detection'],
+    },
+  },
+];
+
 // ── Mock fs ──────────────────────────────────────────────────────────
 jest.mock('fs', () => ({
   readFileSync: jest.fn((filePath: string) => {
@@ -151,6 +188,9 @@ jest.mock('fs', () => ({
     }
     if (filePath.includes('module-explanations')) {
       return JSON.stringify(MOCK_MODULE_EXPLANATIONS);
+    }
+    if (filePath.includes('owasp-data-security-2026')) {
+      return JSON.stringify(MOCK_DSGAI);
     }
     return '[]';
   }),
@@ -617,6 +657,103 @@ describe('McpStaticDataService', () => {
       const ids = result.frameworks.map((f) => f.id);
       expect(ids).toContain('mitre-attack');
       expect(ids).toContain('mitre-atlas');
+    });
+  });
+
+  // ================================================================
+  // DSGAI (OWASP GenAI Data Security 2026)
+  // ================================================================
+
+  describe('searchDsgaiRisks', () => {
+    it('should return all items when no filters are provided', () => {
+      const result = service.searchDsgaiRisks({});
+      expect(result.count).toBe(3);
+      expect(result.totalRisks).toBe(3);
+      expect(result.risks).toHaveLength(3);
+    });
+
+    it('should filter by query on title', () => {
+      const result = service.searchDsgaiRisks({ query: 'leakage' });
+      expect(result.count).toBe(1);
+      expect(result.risks[0].code).toBe('DSGAI01');
+    });
+
+    it('should filter by query on overview (detailedSections)', () => {
+      const result = service.searchDsgaiRisks({ query: 'embeddings' });
+      expect(result.count).toBe(1);
+      expect(result.risks[0].code).toBe('DSGAI11');
+    });
+
+    it('should filter by code (case-insensitive)', () => {
+      const result = service.searchDsgaiRisks({ code: 'dsgai01' });
+      expect(result.count).toBe(1);
+      expect(result.risks[0].code).toBe('DSGAI01');
+    });
+
+    it('should filter by priority', () => {
+      const result = service.searchDsgaiRisks({ priority: 'critical' });
+      expect(result.count).toBe(1);
+      expect(result.risks[0].code).toBe('DSGAI01');
+    });
+
+    it('should return empty results when no match', () => {
+      const result = service.searchDsgaiRisks({ query: 'nonexistent-xyz' });
+      expect(result.count).toBe(0);
+    });
+
+    it('should handle null/undefined params', () => {
+      const result = service.searchDsgaiRisks(null);
+      expect(result.count).toBe(3);
+    });
+  });
+
+  describe('getDsgaiRiskByCode', () => {
+    it('should return the risk when found (exact code)', () => {
+      const result = service.getDsgaiRiskByCode({ code: 'DSGAI01' });
+      expect(result.found).toBe(true);
+      expect(result.risk).toBeDefined();
+      expect(result.risk.code).toBe('DSGAI01');
+      expect(result.risk.title).toBe('Sensitive Data Leakage');
+    });
+
+    it('should be case-insensitive on code', () => {
+      const result = service.getDsgaiRiskByCode({ code: 'dsgai11' });
+      expect(result.found).toBe(true);
+      expect(result.risk.code).toBe('DSGAI11');
+    });
+
+    it('should match DSPM as a special case', () => {
+      const result = service.getDsgaiRiskByCode({ code: 'DSPM' });
+      expect(result.found).toBe(true);
+      expect(result.risk.id).toBe('dspm-genai');
+    });
+
+    it('should return found=false when not found', () => {
+      const result = service.getDsgaiRiskByCode({ code: 'DSGAI99' });
+      expect(result.found).toBe(false);
+      expect(result.code).toBe('DSGAI99');
+    });
+
+    it('should handle missing code param', () => {
+      const result = service.getDsgaiRiskByCode({});
+      expect(result.found).toBe(false);
+    });
+  });
+
+  describe('getDsgaiStatistics', () => {
+    it('should return statistics aggregate', () => {
+      const result = service.getDsgaiStatistics();
+      expect(result.totalRisks).toBe(3);
+      expect(result.byPriority).toBeDefined();
+      expect(result.byPriority.critical).toBe(1);
+      expect(result.byPriority.high).toBe(1);
+      expect(result.byPriority.medium).toBe(1);
+    });
+
+    it('should list top risks by priority (critical first)', () => {
+      const result = service.getDsgaiStatistics();
+      expect(result.topRisks).toBeDefined();
+      expect(result.topRisks[0].priority).toBe('critical');
     });
   });
 });
