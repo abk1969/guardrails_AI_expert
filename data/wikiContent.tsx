@@ -497,13 +497,13 @@ const DataSecurityContent: React.FC<ContentComponentProps> = ({ searchTerm = '' 
                     <div className="p-3 pt-0 text-xs text-gray-300 space-y-3">
                         {item.detailedSections?.overview && (
                             <div>
-                                <div className="font-semibold text-gray-200 mb-1">Overview</div>
+                                <div className="font-semibold text-gray-200 mb-1">Aperçu</div>
                                 <p className="leading-relaxed">{item.detailedSections.overview}</p>
                             </div>
                         )}
                         {item.detailedSections?.attackVectors && item.detailedSections.attackVectors.length > 0 && (
                             <div>
-                                <div className="font-semibold text-gray-200 mb-1">Attack Vectors</div>
+                                <div className="font-semibold text-gray-200 mb-1">Vecteurs d'attaque</div>
                                 <ul className="list-disc pl-5 space-y-1">
                                     {item.detailedSections.attackVectors.map((v, i) => <li key={i}>{v}</li>)}
                                 </ul>
@@ -511,7 +511,7 @@ const DataSecurityContent: React.FC<ContentComponentProps> = ({ searchTerm = '' 
                         )}
                         {item.detailedSections?.mitigationTiers && (
                             <div>
-                                <div className="font-semibold text-gray-200 mb-1">Mitigations tiered</div>
+                                <div className="font-semibold text-gray-200 mb-1">Mitigations par niveau</div>
                                 {(['tier1', 'tier2', 'tier3'] as const).map(tier =>
                                     item.detailedSections?.mitigationTiers?.[tier]?.length ? (
                                         <div key={tier} className="mt-2">
@@ -528,7 +528,7 @@ const DataSecurityContent: React.FC<ContentComponentProps> = ({ searchTerm = '' 
                         )}
                         {item.detailedSections?.knownCVEs && item.detailedSections.knownCVEs.length > 0 && (
                             <div>
-                                <div className="font-semibold text-gray-200 mb-1">Known CVEs / exploits</div>
+                                <div className="font-semibold text-gray-200 mb-1">CVEs / exploits connus</div>
                                 <ul className="list-disc pl-5 space-y-1">
                                     {item.detailedSections.knownCVEs.map((c, i) => <li key={i}>{c}</li>)}
                                 </ul>
