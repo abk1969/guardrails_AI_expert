@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import Card from '../ui/Card';
-import { pdfReferences, type PDFReference } from '../../data/pdfReferences';
+import { getReferencesByCategory, type PDFReference } from '../../data/pdfReferences';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const RELEVANT_CATEGORIES = ['data-security', 'governance', 'agentic-security'] as const;
@@ -24,9 +24,7 @@ const CompassOWASPReferences: React.FC = () => {
   const [expanded, setExpanded] = useState(false);
   const [expandedPdfId, setExpandedPdfId] = useState<string | null>(null);
 
-  const relevantRefs = pdfReferences.filter(r =>
-    (RELEVANT_CATEGORIES as readonly string[]).includes(r.category)
-  );
+  const relevantRefs = RELEVANT_CATEGORIES.flatMap(c => getReferencesByCategory(c));
 
   if (relevantRefs.length === 0) return null;
 
@@ -38,7 +36,6 @@ const CompassOWASPReferences: React.FC = () => {
         : `${relevantRefs.length} documents related to this COMPASS module`,
     keyItemsLabel: language === 'fr' ? 'éléments clés' : 'key items',
     openSource: language === 'fr' ? 'Source OWASP' : 'OWASP source',
-    viewDetails: language === 'fr' ? 'Voir le détail' : 'View details',
   };
 
   return (
@@ -86,7 +83,7 @@ interface PDFRefCardProps {
   pdf: PDFReference;
   isExpanded: boolean;
   onToggle: () => void;
-  labels: { keyItemsLabel: string; openSource: string; viewDetails: string };
+  labels: { keyItemsLabel: string; openSource: string };
   language: 'fr' | 'en';
 }
 
