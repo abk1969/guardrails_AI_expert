@@ -70,6 +70,24 @@ interface ModuleExplanation {
   keyFeatures: string[];
 }
 
+interface DsgaiItem {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  priority?: 'critical' | 'high' | 'medium' | 'low';
+  detailedSections?: {
+    overview?: string;
+    attackVectors?: string[];
+    examples?: string[];
+    impacts?: string[];
+    mitigations?: string[];
+    mitigationTiers?: { tier1?: string[]; tier2?: string[]; tier3?: string[] };
+    knownCVEs?: string[];
+    references?: string[];
+  };
+}
+
 @Injectable()
 export class McpStaticDataService {
   private readonly logger = new Logger(McpStaticDataService.name);
@@ -78,6 +96,7 @@ export class McpStaticDataService {
   private agenticSecurityData: AgenticSecurityData;
   private riskDatabase: RiskDatabase;
   private moduleExplanations: ModuleExplanation[] = [];
+  private dsgaiItems: DsgaiItem[] = [];
 
   constructor() {
     this.loadStaticData();
@@ -120,6 +139,15 @@ export class McpStaticDataService {
       this.logger.log(`Loaded ${this.moduleExplanations.length} module explanations`);
     } catch (e) {
       this.logger.warn('Failed to load module-explanations.json', e.message);
+    }
+
+    try {
+      this.dsgaiItems = JSON.parse(
+        fs.readFileSync(path.join(staticDir, 'owasp-data-security-2026.json'), 'utf-8'),
+      );
+      this.logger.log(`Loaded ${this.dsgaiItems.length} DSGAI items (OWASP GenAI Data Security 2026)`);
+    } catch (e) {
+      this.logger.warn('Failed to load owasp-data-security-2026.json', e.message);
     }
   }
 
@@ -458,6 +486,79 @@ export class McpStaticDataService {
           description: 'Règlement européen sur l\'intelligence artificielle. Classification par niveau de risque.',
         },
       ],
+    };
+  }
+
+  // ============================================================
+  // DSGAI — OWASP GenAI Data Security 2026 (3 tools)
+  // ============================================================
+
+  searchDsgaiRisks(params: any) {
+    const { query, code, priority } = params || {};
+    let results = [...this.dsgaiItems];
+
+    if (query) {
+      const q = query.toLowerCase();
+      results = results.filter(
+        (r) =>
+          r.title.toLowerCase().includes(q) ||
+          r.description.toLowerCase().includes(q) ||
+          (r.detailedSections?.overview || '').toLowerCase().includes(q) ||
+          (r.detailedSections?.attackVectors || []).join(' ').toLowerCase().includes(q) ||
+          (r.detailedSections?.mitigations || []).join(' ').toLowerCase().includes(q),
+      );
+    }
+
+    if (code) {
+      const c = code.toLowerCase();
+      results = results.filter((r) => r.code.toLowerCase() === c);
+    }
+
+    if (priority) {
+      results = results.filter((r) => r.priority === priority);
+    }
+
+    return {
+      count: results.length,
+      totalRisks: this.dsgaiItems.length,
+      risks: results,
+    };
+  }
+
+  getDsgaiRiskByCode(params: any) {
+    const { code } = params || {};
+    if (!code) {
+      return { found: false, code: null };
+    }
+    const c = code.toLowerCase();
+    const risk = this.dsgaiItems.find((r) => r.code.toLowerCase() === c);
+
+    if (!risk) {
+      return { found: false, code };
+    }
+
+    return { found: true, risk };
+  }
+
+  getDsgaiStatistics() {
+    const byPriority: Record<string, number> = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const r of this.dsgaiItems) {
+      const p = r.priority || 'medium';
+      byPriority[p] = (byPriority[p] || 0) + 1;
+    }
+
+    const priorityRank: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+    const topRisks = [...this.dsgaiItems]
+      .sort((a, b) => (priorityRank[b.priority || 'medium'] || 0) - (priorityRank[a.priority || 'medium'] || 0))
+      .slice(0, 10)
+      .map((r) => ({ code: r.code, title: r.title, priority: r.priority }));
+
+    return {
+      totalRisks: this.dsgaiItems.length,
+      documentVersion: '1.0',
+      publicationDate: '2026-03',
+      byPriority,
+      topRisks,
     };
   }
 }
