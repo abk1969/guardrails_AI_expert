@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { AIPolicyRule, AIPolicyRuleStatus } from '../../types';
 import { useAIPolicy } from '../../contexts/AIPolicyContext';
 import { AI_POLICY_STATUS_OPTIONS, AI_POLICY_STATUS_COLORS } from '../../constants';
-import { Edit, Save, X, ShieldAlert, AlertTriangle, Settings, ClipboardCheck, BrainCircuit, UserX, Target, Activity, Eye, ShieldOff, Banknote, ShieldCheck } from 'lucide-react';
+import { Edit, Save, X, ShieldAlert, AlertTriangle, Settings, ClipboardCheck, BrainCircuit, UserX, Target, Activity, Eye, ShieldOff, Banknote, ShieldCheck, ChevronDown } from 'lucide-react';
 import Button from '../ui/Button';
 import Accordion from '../ui/Accordion';
+import RichAnswer from '../chatbot/RichAnswer';
 
 const PolicyRule: React.FC<{ rule: AIPolicyRule }> = ({ rule }) => {
     const { updateRule } = useAIPolicy();
@@ -43,27 +44,84 @@ const PolicyRule: React.FC<{ rule: AIPolicyRule }> = ({ rule }) => {
 
     const statusColor = AI_POLICY_STATUS_COLORS[status];
     
-    const GRCAnalysisSection: React.FC<{ label: string; content: string; icon: React.ReactNode; isEditing: boolean; onChange: (value: string) => void; placeholder: string; }> = ({ label, content, icon, isEditing, onChange, placeholder }) => (
-        <div>
-            <h5 className="flex items-center text-sm font-semibold text-cyan-300 mb-2">
-                {icon}
-                <span className="ml-2">{label}</span>
-            </h5>
-            {isEditing ? (
-                 <textarea
-                    value={content}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder={placeholder}
-                    className="w-full bg-gray-700 p-2 rounded-md focus:ring-1 focus:ring-cyan-500 transition text-sm text-white"
-                    rows={4}
-                />
-            ) : (
-                <div className="p-2 bg-gray-900/50 rounded-md min-h-[40px] text-sm text-gray-300 whitespace-pre-wrap">
-                    {content || <span className="text-gray-500 italic">Non défini</span>}
+    const GRCAnalysisSection: React.FC<{
+        label: string;
+        content: string;
+        icon: React.ReactNode;
+        isEditing: boolean;
+        onChange: (value: string) => void;
+        placeholder: string;
+        accent: 'red' | 'amber' | 'cyan' | 'emerald';
+        defaultOpen?: boolean;
+    }> = ({ label, content, icon, isEditing, onChange, placeholder, accent, defaultOpen = false }) => {
+        const [open, setOpen] = useState(defaultOpen);
+        const palette = {
+            red:     { text: 'text-red-300',     bg: 'bg-red-500/5',     border: 'border-red-500/20',     hover: 'hover:bg-red-500/10',     dot: 'bg-red-500' },
+            amber:   { text: 'text-amber-300',   bg: 'bg-amber-500/5',   border: 'border-amber-500/20',   hover: 'hover:bg-amber-500/10',   dot: 'bg-amber-500' },
+            cyan:    { text: 'text-cyan-300',    bg: 'bg-cyan-500/5',    border: 'border-cyan-500/20',    hover: 'hover:bg-cyan-500/10',    dot: 'bg-cyan-500' },
+            emerald: { text: 'text-emerald-300', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', hover: 'hover:bg-emerald-500/10', dot: 'bg-emerald-500' },
+        }[accent];
+
+        const isEmpty = !content || !content.trim();
+        const charCount = content?.length || 0;
+        const isLarge = charCount > 200;
+
+        if (isEditing) {
+            return (
+                <div className={`rounded-lg border ${palette.border} ${palette.bg}`}>
+                    <div className={`flex items-center gap-2 px-3 py-2 border-b ${palette.border}`}>
+                        <span className={palette.text}>{icon}</span>
+                        <span className={`text-sm font-semibold ${palette.text}`}>{label}</span>
+                    </div>
+                    <textarea
+                        value={content}
+                        onChange={(e) => onChange(e.target.value)}
+                        placeholder={placeholder}
+                        className="w-full bg-gray-800/50 p-3 rounded-b-lg focus:ring-1 focus:ring-cyan-500 transition text-sm text-white border-0 outline-none"
+                        rows={6}
+                    />
                 </div>
-            )}
-        </div>
-    );
+            );
+        }
+
+        return (
+            <div className={`rounded-lg border ${palette.border} ${palette.bg} overflow-hidden`}>
+                <button
+                    type="button"
+                    onClick={() => !isEmpty && setOpen(o => !o)}
+                    disabled={isEmpty}
+                    className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 ${!isEmpty ? `cursor-pointer ${palette.hover}` : 'cursor-default'} transition-colors`}
+                >
+                    <div className="flex items-center gap-2">
+                        <span className={palette.text}>{icon}</span>
+                        <span className={`text-sm font-semibold ${palette.text}`}>{label}</span>
+                        {!isEmpty && isLarge && (
+                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${palette.bg} ${palette.text} ${palette.border} border`}>
+                                {Math.round(charCount / 100) / 10}k chars
+                            </span>
+                        )}
+                    </div>
+                    {!isEmpty && (
+                        <ChevronDown
+                            size={16}
+                            className={`${palette.text} transition-transform ${open ? 'rotate-180' : ''}`}
+                        />
+                    )}
+                </button>
+                {isEmpty ? (
+                    <div className="px-3 pb-3 text-xs italic text-gray-500">Non défini</div>
+                ) : open ? (
+                    <div className={`px-4 py-3 border-t ${palette.border}`}>
+                        <RichAnswer content={content} />
+                    </div>
+                ) : (
+                    <div className="px-3 pb-2.5 text-xs text-gray-400 line-clamp-1">
+                        {content.replace(/\*\*|##+|\n/g, ' ').replace(/\s+/g, ' ').slice(0, 120)}…
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 my-4">
@@ -140,31 +198,35 @@ const PolicyRule: React.FC<{ rule: AIPolicyRule }> = ({ rule }) => {
                              <h4 className="text-md font-semibold text-white mb-4">Analyse GRC & Cybersécurité</h4>
                              <div className="space-y-4">
                                 <GRCAnalysisSection
-                                    label="Menace Associée"
+                                    label="Menaces associées"
                                     content={associatedThreat}
                                     icon={<ShieldAlert size={16} />}
                                     isEditing={isEditing}
                                     onChange={setAssociatedThreat}
+                                    accent="red"
                                     placeholder="Ex: Acteur interne non formé, Attaquant externe exploitant une API publique..."
                                 />
                                  <GRCAnalysisSection
-                                    label="Risque Associé"
+                                    label="Risques associés"
                                     content={associatedRisk}
                                     icon={<AlertTriangle size={16} />}
                                     isEditing={isEditing}
                                     onChange={setAssociatedRisk}
+                                    accent="amber"
                                     placeholder="Ex: Fuite de données PII, génération de contenu illégal, mauvaise décision métier..."
                                 />
                                  <GRCAnalysisSection
-                                    label="Guide d'Implémentation"
+                                    label="Guide d'implémentation"
                                     content={implementationGuide}
                                     icon={<Settings size={16} />}
                                     isEditing={isEditing}
                                     onChange={setImplementationGuide}
+                                    accent="cyan"
                                     placeholder="Comment mettre en œuvre cette règle ? Quels modules de l'application utiliser ? Ex: Utiliser 'Profil de Menace' pour identifier les acteurs..."
                                 />
                                  <GRCAnalysisSection
-                                    label="Guide de Test"
+                                    accent="emerald"
+                                    label="Guide de test"
                                     content={testingGuide}
                                     icon={<ClipboardCheck size={16} />}
                                     isEditing={isEditing}
