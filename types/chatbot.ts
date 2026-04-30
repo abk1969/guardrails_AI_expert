@@ -28,6 +28,13 @@ export interface AgenticMessage {
   // UI state
   favorite?: boolean;
   reaction?: 'like' | 'dislike';
+  // Friendly error rendering (replaces RichAnswer when present)
+  errorPayload?: {
+    kind: string;
+    title: string;
+    detail: string;
+    cta?: { label: string; action: 'open-llm-settings' | 'retry' | 'open-docs'; url?: string };
+  };
 }
 
 export interface AgenticConversation {
