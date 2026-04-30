@@ -269,7 +269,7 @@ const governanceSection: NavSection = {
       icon: <BookMarked size={18} />,
       content: <AIPolicyView />,
       section: 'Gouvernance IA',
-      description: '22 règles CLUSIF'
+      description: '172 SIA PSSI IA v3'
     },
   ]
 };
