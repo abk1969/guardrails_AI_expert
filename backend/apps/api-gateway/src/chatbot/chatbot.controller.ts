@@ -20,8 +20,9 @@ export class ChatbotController {
     @CurrentUser() user: any,
   ): Promise<ChatbotSendResponseDto> {
     const sessionId = randomUUID();
+    const provider = dto.llmConfig?.provider ?? 'gemini (server default)';
     this.logger.log(
-      `New chatbot session: ${sessionId}, provider: ${dto.llmConfig.provider}`,
+      `New chatbot session: ${sessionId}, provider: ${provider}`,
     );
 
     // Process asynchronously - don't await (results stream via WebSocket)

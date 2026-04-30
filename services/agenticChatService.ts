@@ -45,5 +45,5 @@ export function generateFallbackResponse(userMessage: string): string {
     return "Les politiques IA (regles SIA) sont gerees dans le module Gouvernance IA. Le backend est necessaire pour les interroger.";
   }
 
-  return "Je suis en mode hors-ligne. Mes capacites sont limitees sans connexion au backend. Veuillez lancer le backend pour acceder a l'analyse complete par IA avec raisonnement agentique et acces aux 25 outils MCP.";
+  return "Je suis en mode hors-ligne. Mes capacites sont limitees sans connexion au backend. Veuillez lancer le backend pour acceder a l'analyse complete par IA avec raisonnement agentique et acces aux 32 outils MCP (PSSI IA v3 172 SIA, COMPASS 31, Agentic 29, DSGAI 22, Risk DB 1579).";
 }

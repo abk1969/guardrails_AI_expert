@@ -91,19 +91,36 @@ export class ReactAgentService {
           `ReAct iteration ${iteration}/${MAX_ITERATIONS} for session ${sessionId}`,
         );
 
-        // Call LLM with tools
+        // Call LLM with tools — fall back to backend env if user did not provide an LLM config
+        const userCfg = dto.llmConfig;
+        const config = userCfg
+          ? {
+              provider: userCfg.provider,
+              model: userCfg.model,
+              apiKey: userCfg.apiKey,
+              baseUrl: userCfg.baseUrl,
+              temperature: userCfg.temperature ?? 0.3,
+              maxTokens: userCfg.maxTokens ?? 4096,
+            }
+          : {
+              provider: 'gemini' as any,
+              model: process.env.GEMINI_DEFAULT_MODEL || 'gemini-2.0-flash-exp',
+              apiKey: process.env.GEMINI_API_KEY,
+              temperature: 0.3,
+              maxTokens: 4096,
+            };
+
+        if (!config.apiKey) {
+          throw new Error(
+            'No LLM API key available — neither user llmConfig nor backend GEMINI_API_KEY env. Configure an LLM provider in the UI.',
+          );
+        }
+
         const request: ChatRequest = {
           messages,
           tools,
           systemPrompt: SYSTEM_PROMPT,
-          config: {
-            provider: dto.llmConfig.provider,
-            model: dto.llmConfig.model,
-            apiKey: dto.llmConfig.apiKey,
-            baseUrl: dto.llmConfig.baseUrl,
-            temperature: dto.llmConfig.temperature ?? 0.3,
-            maxTokens: dto.llmConfig.maxTokens ?? 4096,
-          },
+          config,
         };
 
         const response = await this.llmChatService.chatWithTools(request);

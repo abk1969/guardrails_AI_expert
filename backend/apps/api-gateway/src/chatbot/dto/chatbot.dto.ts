@@ -52,11 +52,12 @@ export class ChatbotSendDto {
   @Type(() => ChatMessageDto)
   conversationHistory?: ChatMessageDto[];
 
-  @ApiProperty({ description: 'LLM configuration' })
+  @ApiPropertyOptional({ description: 'LLM configuration (if omitted, backend uses its own GEMINI_API_KEY from env)' })
+  @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => LLMConfigDto)
-  llmConfig: LLMConfigDto;
+  llmConfig?: LLMConfigDto;
 }
 
 export class ChatbotSendResponseDto {
