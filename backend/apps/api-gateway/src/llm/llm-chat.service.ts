@@ -144,6 +144,13 @@ export class LLMChatService {
           })),
         },
       ];
+      // Explicit AUTO mode = the model decides whether to call a function based
+      // on the system prompt. The chatbot system prompt mandates MCP usage on
+      // domain questions, so AUTO honors that instruction. Use ANY for forced
+      // tool use (not desired here because greetings/meta would call tools too).
+      config.toolConfig = {
+        functionCallingConfig: { mode: 'AUTO' },
+      };
     }
 
     if (request.config.temperature !== undefined) {

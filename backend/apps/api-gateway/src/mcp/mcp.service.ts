@@ -30,7 +30,14 @@ export class McpService {
    * Execute MCP query based on tool name
    */
   async executeQuery(request: McpRequestDto, organizationId: string): Promise<McpResponseDto> {
-    this.logger.log(`Executing MCP tool: ${request.tool}`);
+    const startedAt = Date.now();
+    const paramsSummary = (() => {
+      try {
+        const s = JSON.stringify(request.parameters || {});
+        return s.length > 120 ? s.slice(0, 117) + '...' : s;
+      } catch { return '{}'; }
+    })();
+    this.logger.log(`[MCP] -> tool=${request.tool} params=${paramsSummary}`);
 
     try {
       let result: any;
@@ -171,13 +178,20 @@ export class McpService {
           throw new BadRequestException(`Unknown MCP tool: ${request.tool}`);
       }
 
+      const duration = Date.now() - startedAt;
+      const sizeBytes = (() => {
+        try { return JSON.stringify(result).length; } catch { return -1; }
+      })();
+      this.logger.log(`[MCP] <- tool=${request.tool} ok duration=${duration}ms size=${sizeBytes}B`);
+
       return {
         result,
         tool: request.tool,
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      this.logger.error(`Error executing MCP tool ${request.tool}:`, error);
+      const duration = Date.now() - startedAt;
+      this.logger.error(`[MCP] <- tool=${request.tool} FAIL duration=${duration}ms error=${error?.message || error}`);
       throw error;
     }
   }
