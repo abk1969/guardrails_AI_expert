@@ -234,7 +234,12 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
 
     // Backend is preferred whenever it is reachable. The backend can use its own
     // GEMINI_API_KEY env when the user has not configured a personal LLM.
-    const useBackendApi = backendStatus.isServerless || backendAvailable === true;
+    // Optimistic: backendAvailable === null (still checking on mount) -> try the
+    // backend anyway. If it is truly down, the fetch will throw and the catch
+    // block below renders the parsed network error card. Refusing to even try
+    // when state is null is a UX dead-end (user sees the keyword fallback for
+    // every first message).
+    const useBackendApi = backendStatus.isServerless || backendAvailable !== false;
     if (useBackendApi) {
       // Backend/serverless mode: send via API
       try {
