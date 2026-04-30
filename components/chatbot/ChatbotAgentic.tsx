@@ -239,6 +239,16 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
     // block below renders the parsed network error card. Refusing to even try
     // when state is null is a UX dead-end (user sees the keyword fallback for
     // every first message).
+    //
+    // Safety net: if backendAvailable was previously flipped to false by a stale
+    // singleton state, force a fresh probe and update the state. This prevents
+    // the chatbot from being stuck offline after one transient failure.
+    if (backendAvailable === false && !backendStatus.isServerless) {
+      // eslint-disable-next-line no-console
+      console.log('[Chatbot] backendAvailable=false on send, forcing fresh probe');
+      const fresh = await backendStatus.forceCheck();
+      setBackendAvailable(fresh);
+    }
     const useBackendApi = backendStatus.isServerless || backendAvailable !== false;
     if (useBackendApi) {
       // Backend/serverless mode: send via API
@@ -304,17 +314,20 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
           setSessionId(response.sessionId);
         }
       } catch (error: any) {
-        // API call failed - try to render a friendly error card if the error
-        // message looks parsable, otherwise fall back to the keyword fallback.
+        // API call failed - ALWAYS render the parsed error card. The parser
+        // returns a meaningful title/detail/cta even for kind=unknown, which
+        // is far more useful than the legacy keyword fallback that ignored the
+        // actual error. Log to console for runtime debugging.
         const errMsg = error?.message || String(error);
+        // eslint-disable-next-line no-console
+        console.error('[Chatbot] Backend POST failed:', error);
         const parsed = parseChatbotError(errMsg);
-        const isParsable = parsed.kind !== 'unknown';
         const assistantMessage: AgenticMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: isParsable ? `${parsed.title} — ${parsed.detail}` : generateFallbackResponse(messageText),
+          content: `${parsed.title} — ${parsed.detail}`,
           timestamp: new Date(),
-          ...(isParsable ? { errorPayload: parsed } : {}),
+          errorPayload: parsed,
         };
         const finalConv = { ...updatedConv, messages: [...updatedMessages, assistantMessage] };
         setCurrentConversation(finalConv);

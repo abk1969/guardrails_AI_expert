@@ -81,11 +81,29 @@ const PATTERNS: Array<{ rx: RegExp; build: (raw: string) => ParsedChatbotError }
     }),
   },
   {
-    rx: /fetch failed|ECONNREFUSED|network|ENOTFOUND|connection refused/i,
+    rx: /fetch failed|ECONNREFUSED|network|ENOTFOUND|connection refused|Failed to fetch/i,
     build: () => ({
       kind: 'network',
       title: 'Backend injoignable',
       detail: "Impossible de contacter le serveur backend. Vérifie qu'il est lancé (npm run start:dev dans /backend) et que le port 3001 est ouvert.",
+      cta: { label: 'Réessayer', action: 'retry' },
+    }),
+  },
+  {
+    rx: /500|502|503|504|Internal Server Error|Bad Gateway|Service Unavailable|Gateway Timeout|Chatbot API error:\s*5/i,
+    build: raw => ({
+      kind: 'unknown',
+      title: 'Erreur serveur',
+      detail: `Le backend a renvoyé une erreur serveur. Réessaye dans quelques instants ou consulte les logs backend pour le diagnostic. Détail : ${raw.slice(0, 200)}`,
+      cta: { label: 'Réessayer', action: 'retry' },
+    }),
+  },
+  {
+    rx: /Chatbot API error:\s*\d{3}/i,
+    build: raw => ({
+      kind: 'unknown',
+      title: 'Réponse backend invalide',
+      detail: `Le backend a renvoyé un statut HTTP inattendu. Détail : ${raw.slice(0, 200)}`,
       cta: { label: 'Réessayer', action: 'retry' },
     }),
   },
@@ -101,8 +119,8 @@ export function parseChatbotError(raw: string | null | undefined): ParsedChatbot
   }
   return {
     kind: 'unknown',
-    title: 'Erreur',
-    detail: text.length > 300 ? text.slice(0, 300) + '…' : text,
+    title: 'Erreur inattendue',
+    detail: `Une erreur inconnue est survenue. Réessaye ou ouvre la Configuration LLM pour basculer sur un autre fournisseur. Détail : ${text.length > 300 ? text.slice(0, 300) + '…' : text}`,
     cta: { label: 'Réessayer', action: 'retry' },
   };
 }
