@@ -10,6 +10,7 @@ import { useLLMConfig } from '../../contexts/LLMConfigContext';
 import { backendStatus } from '../../services/backendStatus';
 import type { AgenticMessage, AgenticConversation, ReasoningStep } from '../../types/chatbot';
 import ReasoningPanel from './ReasoningPanel';
+import RichAnswer from './RichAnswer';
 import './ChatbotModern.css';
 
 type ChatMode = 'normal' | 'expert' | 'concise';
@@ -404,7 +405,9 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
   const renderMessage = (message: AgenticMessage) => (
     <div key={message.id} className={`message-modern ${message.role}`}>
       <div className="message-content-modern">
-        <div className="message-text-modern">{message.content}</div>
+        <div className="message-text-modern">
+          {message.role === 'assistant' ? <RichAnswer content={message.content} /> : message.content}
+        </div>
         <div className="message-actions-modern">
           <button onClick={() => copyToClipboard(message.content)} title="Copier">
             <Copy size={14} />
