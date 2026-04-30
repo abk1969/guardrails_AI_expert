@@ -2,7 +2,6 @@ import { Controller, Post, Body, HttpCode, HttpStatus, Logger } from '@nestjs/co
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GeminiService } from './gemini.service';
 import { GeneratePromptsDto } from './dto/generate-prompts.dto';
-import { ChatDto } from './dto/chat.dto';
 
 @ApiTags('gemini')
 @Controller('gemini')
@@ -55,35 +54,4 @@ export class GeminiController {
     }
   }
 
-  @Post('chat')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Chat with Gemini AI',
-    description: 'Send a message to Gemini AI and receive a response with optional context',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Chat response received',
-    schema: {
-      type: 'object',
-      properties: {
-        response: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal server error',
-  })
-  async chat(@Body() dto: ChatDto) {
-    this.logger.log('Received chat request');
-
-    try {
-      const response = await this.geminiService.chat(dto);
-      return { response };
-    } catch (error) {
-      this.logger.error('Error in chat controller', error);
-      throw error;
-    }
-  }
 }

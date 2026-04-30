@@ -2,7 +2,6 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI, Type } from '@google/genai';
 import { GeneratePromptsDto, GuardrailCategory, PromptComplexity } from './dto/generate-prompts.dto';
-import { ChatDto } from './dto/chat.dto';
 
 interface TestPrompt {
   id: string;
@@ -83,38 +82,6 @@ export class GeminiService {
       // Fallback to mock generation
       this.logger.warn('Falling back to mock prompt generation');
       return this.generateMockPrompts(dto);
-    }
-  }
-
-  /**
-   * Chat with Gemini AI
-   */
-  async chat(dto: ChatDto): Promise<string> {
-    this.logger.log(`Processing chat message: ${dto.message.substring(0, 50)}...`);
-
-    try {
-      const systemContext = dto.context
-        ? `\n\nContext: ${JSON.stringify(dto.context, null, 2)}`
-        : '';
-
-      const fullMessage = `${dto.message}${systemContext}`;
-
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: fullMessage,
-      });
-
-      const responseText = response.text;
-      this.logger.log('Chat response generated successfully');
-
-      return responseText;
-
-    } catch (error) {
-      this.logger.error('Error in chat with Gemini', error);
-      throw new HttpException(
-        'Failed to process chat request',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
     }
   }
 

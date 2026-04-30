@@ -524,7 +524,7 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
       {backendStatus.isServerless && (
         <div className="offline-banner" style={{ background: 'rgba(34, 211, 238, 0.1)', borderColor: 'rgba(34, 211, 238, 0.3)' }}>
           <Sparkles size={14} />
-          <span>Mode serverless — Réponses via API Gemini. Configurez GEMINI_API_KEY dans Vercel pour activer l'IA.</span>
+          <span>Mode serverless Vercel — Gemini direct, sans MCP ni ReAct. Pour réponses sourcées via les 32 outils MCP (172 PSSI, 31 COMPASS, 22 DSGAI, 1579 risks), lance le backend NestJS local.</span>
         </div>
       )}
 
