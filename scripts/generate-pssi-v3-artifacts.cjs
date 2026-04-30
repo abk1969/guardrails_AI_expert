@@ -24,6 +24,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const INPUT_JSON = path.join(REPO_ROOT, 'data_ai_risk', 'extracted', 'pssi-ia-v3.json');
@@ -128,15 +129,18 @@ function buildChaptersTs(data, enrichments) {
 
 function buildTs(data, enrichments) {
   const enrichedCount = Object.keys(enrichments).filter((k) => !k.startsWith('_')).length;
+  const contentHash = crypto.createHash('sha256').update(JSON.stringify(enrichments) + JSON.stringify(data.rules)).digest('hex').slice(0, 8);
+  const versionTag = `${data.meta.version}+${contentHash}`;
   return [
     '// AUTO-GENERATED from data_ai_risk/PSSI_IA_v3_CONSOLIDE.pdf',
     `// Source : scripts/generate-pssi-v3-artifacts.cjs (do not edit manually)`,
     `// Extracted at : ${data.meta.extractedAt}`,
     `// Total rules : ${data.meta.totalRules}`,
     `// Enriched rules : ${enrichedCount} / ${data.meta.totalRules}`,
+    `// Content hash : ${contentHash}`,
     "import { AIPolicyChapter, AIPolicyRuleStatus } from '../types/policy';",
     '',
-    `export const PSSI_IA_V3_VERSION = '${data.meta.version}';`,
+    `export const PSSI_IA_V3_VERSION = '${versionTag}';`,
     `export const PSSI_IA_V3_TOTAL_RULES = ${data.meta.totalRules};`,
     `export const PSSI_IA_V3_ENRICHED_COUNT = ${enrichedCount};`,
     '',
