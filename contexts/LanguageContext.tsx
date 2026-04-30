@@ -126,8 +126,8 @@ const translations: Record<string, Record<Language, string>> = {
 
     // AI Policy Module
     'policy.title': { fr: 'Politique de Sécurité de l\'IA (PSSI-IA)', en: 'AI Security Policy (ISSP-AI)' },
-    'policy.subtitle': { fr: 'Gérez, adaptez et suivez la mise en œuvre de votre politique de sécurité pour l\'intelligence artificielle, basée sur le modèle CLUSIF.', en: 'Manage, adapt and track the implementation of your AI security policy, based on the CLUSIF model.' },
-    'policy.source': { fr: 'Source: CLUSIF - Modèle de PSSI IA - Février 2025', en: 'Source: CLUSIF - AI ISSP Model - February 2025' },
+    'policy.subtitle': { fr: 'Gérez, adaptez et suivez la mise en œuvre de votre politique de sécurité pour l\'intelligence artificielle — 172 SIA consolidés (PSSI IA v3, AI Act + RGPD + DORA + NIS2 + ISO 42001 + OWASP AISVS).', en: 'Manage, adapt and track the implementation of your AI security policy — 172 consolidated SIAs (PSSI IA v3, AI Act + GDPR + DORA + NIS2 + ISO 42001 + OWASP AISVS).' },
+    'policy.source': { fr: 'PSSI IA v3 consolidée — 172 exigences sur 16 chapitres (AI Act, RGPD, DORA, NIS2, ISO 42001, ISO 27001, OWASP AISVS, OWASP LLM Top 10, MITRE ATLAS, NIST AI RMF, ANSSI, CLUSIF)', en: 'PSSI IA v3 consolidated — 172 requirements across 16 chapters (AI Act, GDPR, DORA, NIS2, ISO 42001, ISO 27001, OWASP AISVS, OWASP LLM Top 10, MITRE ATLAS, NIST AI RMF, ANSSI, CLUSIF)' },
     'policy.chapter': { fr: 'Chapitre', en: 'Chapter' },
     'policy.section': { fr: 'Section', en: 'Section' },
     'policy.rule': { fr: 'Règle', en: 'Rule' },
