@@ -16,6 +16,8 @@ import {
   Upload,
   Download,
   FileText,
+  FileSpreadsheet,
+  FileJson,
   ExternalLink,
   ClipboardCheck,
   BarChart3,
@@ -23,6 +25,8 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import { exportPolicyToExcel, exportPolicyToCsv } from '../services/pssiExportService';
+import { PSSI_IA_V3_VERSION, PSSI_IA_V3_TOTAL_RULES } from '../data/aiPolicyContentNew';
 
 const AIPolicyViewComplete: React.FC = () => {
   const { policyData, importPolicyData } = useAIPolicy();
@@ -139,8 +143,24 @@ const AIPolicyViewComplete: React.FC = () => {
     )}`;
     const link = document.createElement('a');
     link.href = jsonString;
-    link.download = `ai_security_policy_clusif_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `pssi_ia_v${PSSI_IA_V3_VERSION}_${PSSI_IA_V3_TOTAL_RULES}_SIA_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
+  };
+
+  const handleExportExcel = () => {
+    exportPolicyToExcel(policyData, {
+      version: PSSI_IA_V3_VERSION,
+      exportedAt: new Date().toISOString(),
+      totalRules: PSSI_IA_V3_TOTAL_RULES,
+    });
+  };
+
+  const handleExportCsv = () => {
+    exportPolicyToCsv(policyData, {
+      version: PSSI_IA_V3_VERSION,
+      exportedAt: new Date().toISOString(),
+      totalRules: PSSI_IA_V3_TOTAL_RULES,
+    });
   };
 
   const handleImportClick = () => {
@@ -283,9 +303,17 @@ const AIPolicyViewComplete: React.FC = () => {
                   <Upload size={16} className="mr-2" />
                   {t('policy.import')}
                 </Button>
-                <Button onClick={handleExport} variant="secondary">
-                  <Download size={16} className="mr-2" />
-                  {t('policy.export')}
+                <Button onClick={handleExportExcel} variant="primary" title="Export Excel multi-feuilles : Synthèse + Détail + Scénarios + Statistiques + Référentiels">
+                  <FileSpreadsheet size={16} className="mr-2" />
+                  Excel
+                </Button>
+                <Button onClick={handleExportCsv} variant="secondary" title="Export CSV plat (UTF-8 BOM, séparateur ; pour Excel FR)">
+                  <FileText size={16} className="mr-2" />
+                  CSV
+                </Button>
+                <Button onClick={handleExport} variant="secondary" title="Export JSON brut (sauvegarde / réimport)">
+                  <FileJson size={16} className="mr-2" />
+                  JSON
                 </Button>
               </div>
             </div>
