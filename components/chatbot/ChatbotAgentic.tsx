@@ -56,9 +56,16 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
     reset: resetWs,
   } = useAgenticChatWebSocket(sessionId);
 
-  // Check backend availability once on mount (no polling — centralized in backendStatus)
+  // Force a fresh backend check each time the chatbot mounts. This avoids the
+  // "stuck offline" state where the singleton's failure counter (e.g. from a
+  // previous restart cycle) prevents recovery until a hard page reload.
   useEffect(() => {
-    isBackendAvailable().then(setBackendAvailable);
+    backendStatus.forceCheck().then(setBackendAvailable);
+  }, []);
+
+  const retryBackend = useCallback(() => {
+    setBackendAvailable(null);
+    backendStatus.forceCheck().then(setBackendAvailable);
   }, []);
 
   // Load conversations from localStorage
@@ -480,6 +487,13 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
         <div className="offline-banner">
           <WifiOff size={14} />
           <span>Mode hors-ligne - Réponses limitées. Lancez le backend pour le raisonnement agentique.</span>
+          <button
+            type="button"
+            onClick={retryBackend}
+            style={{ marginLeft: 'auto', background: 'rgba(34, 211, 238, 0.2)', border: '1px solid rgba(34, 211, 238, 0.4)', color: '#67e8f9', borderRadius: 4, padding: '2px 8px', fontSize: 11, cursor: 'pointer' }}
+          >
+            Réessayer
+          </button>
         </div>
       )}
       {backendStatus.isServerless && (
