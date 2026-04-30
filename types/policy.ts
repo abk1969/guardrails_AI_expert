@@ -42,6 +42,17 @@ export interface AIPolicyRule {
   implementationGuide?: string;
   testingGuide?: string;
   riskScenarios?: RiskScenario[];
+  // --- PSSI IA v3 consolidated fields ----------------------------------
+  // Optional so the legacy 22-rule dataset stays backward-compatible.
+  // Sources: data_ai_risk/PSSI_IA_v3_CONSOLIDE.pdf (parsed by
+  // scripts/parse-pssi-ia-v3-pdf.cjs).
+  sourcesReferentials?: string; // Référentiels sources
+  testableControl?: string;     // Contrôle testable / preuve
+  tier?: string;                // Tier applicable (AI Act × AISVS)
+  raci?: string;                // Rôle RACI
+  reviewFrequency?: string;     // Fréquence de revue
+  chapterNumber?: string;       // e.g. '7' for chapter "Exigences de sécurité par phase du cycle de vie"
+  chapterTitle?: string;
 }
 
 export type AIPolicyContentItem =

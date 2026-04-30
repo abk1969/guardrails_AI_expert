@@ -150,6 +150,23 @@ export class McpService {
           result = this.staticDataService.getDsgaiStatistics();
           break;
 
+        // PSSI IA v3 tools (4)
+        case 'search_pssi_sia':
+          result = this.staticDataService.searchPssiSia(request.parameters);
+          break;
+
+        case 'get_pssi_sia_by_id':
+          result = this.staticDataService.getPssiSiaById(request.parameters);
+          break;
+
+        case 'list_pssi_chapters':
+          result = this.staticDataService.listPssiChapters();
+          break;
+
+        case 'get_pssi_statistics':
+          result = this.staticDataService.getPssiStatistics();
+          break;
+
         default:
           throw new BadRequestException(`Unknown MCP tool: ${request.tool}`);
       }
