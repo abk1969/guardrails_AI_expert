@@ -3,9 +3,10 @@
 // Extracted at : 2026-04-23T21:55:18.121Z
 // Total rules : 172
 // Enriched rules : 172 / 172
+// Content hash : 4adc886e
 import { AIPolicyChapter, AIPolicyRuleStatus } from '../types/policy';
 
-export const PSSI_IA_V3_VERSION = '3.0';
+export const PSSI_IA_V3_VERSION = '3.0.1+4adc886e';
 export const PSSI_IA_V3_TOTAL_RULES = 172;
 export const PSSI_IA_V3_ENRICHED_COUNT = 172;
 
