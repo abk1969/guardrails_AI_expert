@@ -221,7 +221,9 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
       enhancedMessage = `[MODE CONCIS] ${messageText}\n\nRéponds de manière brève et directe.`;
     }
 
-    const useBackendApi = backendStatus.isServerless || (backendAvailable && llmConfigured && llmConfig);
+    // Backend is preferred whenever it is reachable. The backend can use its own
+    // GEMINI_API_KEY env when the user has not configured a personal LLM.
+    const useBackendApi = backendStatus.isServerless || backendAvailable === true;
     if (useBackendApi) {
       // Backend/serverless mode: send via API
       try {
@@ -487,11 +489,11 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
         </div>
       )}
 
-      {/* LLM not configured banner (not needed in serverless — config is server-side) */}
+      {/* LLM not configured but backend is up — backend's GEMINI_API_KEY is used as default */}
       {backendAvailable && !llmConfigured && !backendStatus.isServerless && (
-        <div className="offline-banner">
-          <Settings size={14} />
-          <span>LLM non configuré - Allez dans Paramètres &gt; Configuration LLM.</span>
+        <div className="offline-banner" style={{ background: 'rgba(34, 211, 238, 0.1)', borderColor: 'rgba(34, 211, 238, 0.3)' }}>
+          <Sparkles size={14} />
+          <span>LLM serveur (Gemini par défaut) — Pour utiliser ton propre fournisseur, va dans Paramètres &gt; Configuration LLM.</span>
         </div>
       )}
 
