@@ -88,6 +88,29 @@ interface DsgaiItem {
   };
 }
 
+interface PssiRule {
+  id: string;
+  chapterNumber: string;
+  chapterTitle: string;
+  ruleText: string;
+  sourcesReferentials: string;
+  testableControl: string;
+  tier: string;
+  raci: string;
+  reviewFrequency: string;
+  associatedThreat?: string;
+  associatedRisk?: string;
+  implementationGuide?: string;
+  testingGuide?: string;
+  riskScenarios?: any[];
+}
+
+interface PssiData {
+  meta: { version: string; source: string; extractedAt: string; totalRules: number; totalChapters: number };
+  chapters: { number: string; title: string; ruleIds: string[] }[];
+  rules: PssiRule[];
+}
+
 @Injectable()
 export class McpStaticDataService {
   private readonly logger = new Logger(McpStaticDataService.name);
@@ -97,13 +120,33 @@ export class McpStaticDataService {
   private riskDatabase: RiskDatabase;
   private moduleExplanations: ModuleExplanation[] = [];
   private dsgaiItems: DsgaiItem[] = [];
+  private pssiData: PssiData | null = null;
 
   constructor() {
     this.loadStaticData();
   }
 
+  private resolveStaticDir(): string {
+    const candidates = [
+      path.join(__dirname, 'static-data'),
+      path.resolve(__dirname, '..', '..', '..', '..', '..', '..', 'apps', 'api-gateway', 'src', 'mcp', 'static-data'),
+      path.resolve(process.cwd(), 'apps', 'api-gateway', 'src', 'mcp', 'static-data'),
+      path.resolve(process.cwd(), 'backend', 'apps', 'api-gateway', 'src', 'mcp', 'static-data'),
+    ];
+    for (const c of candidates) {
+      try {
+        if (fs.existsSync(path.join(c, 'pssi-ia-v3.json'))) {
+          this.logger.log(`Static-data dir resolved : ${c}`);
+          return c;
+        }
+      } catch { /* try next */ }
+    }
+    this.logger.warn(`Static-data dir not found in any candidate ; defaulting to ${candidates[0]}`);
+    return candidates[0];
+  }
+
   private loadStaticData(): void {
-    const staticDir = path.join(__dirname, 'static-data');
+    const staticDir = this.resolveStaticDir();
 
     try {
       this.compassScenarios = JSON.parse(
@@ -148,6 +191,15 @@ export class McpStaticDataService {
       this.logger.log(`Loaded ${this.dsgaiItems.length} DSGAI items (OWASP GenAI Data Security 2026)`);
     } catch (e) {
       this.logger.warn('Failed to load owasp-data-security-2026.json', e.message);
+    }
+
+    try {
+      this.pssiData = JSON.parse(
+        fs.readFileSync(path.join(staticDir, 'pssi-ia-v3.json'), 'utf-8'),
+      );
+      this.logger.log(`Loaded ${this.pssiData.rules.length} PSSI IA v3 rules (${this.pssiData.chapters.length} chapters)`);
+    } catch (e) {
+      this.logger.warn('Failed to load pssi-ia-v3.json', e.message);
     }
   }
 
@@ -559,6 +611,104 @@ export class McpStaticDataService {
       publicationDate: '2026-03',
       byPriority,
       topRisks,
+    };
+  }
+
+  // ============================================================
+  // PSSI IA v3 — Politique de Sécurité des SIA, consolidée (4 tools)
+  // ============================================================
+
+  searchPssiSia(params: any) {
+    const { query, chapterNumber, referentialKeyword, tier, limit } = params || {};
+    let results = [...(this.pssiData?.rules || [])];
+
+    if (query) {
+      const q = query.toLowerCase();
+      results = results.filter(
+        (r) =>
+          r.ruleText.toLowerCase().includes(q) ||
+          r.testableControl.toLowerCase().includes(q) ||
+          r.raci.toLowerCase().includes(q) ||
+          r.sourcesReferentials.toLowerCase().includes(q) ||
+          r.id.toLowerCase().includes(q),
+      );
+    }
+
+    if (chapterNumber) {
+      results = results.filter((r) => r.chapterNumber === String(chapterNumber));
+    }
+
+    if (referentialKeyword) {
+      const k = referentialKeyword.toLowerCase();
+      results = results.filter((r) => r.sourcesReferentials.toLowerCase().includes(k));
+    }
+
+    if (tier) {
+      const t = tier.toLowerCase();
+      results = results.filter((r) => r.tier.toLowerCase().includes(t));
+    }
+
+    const cap = typeof limit === 'number' && limit > 0 ? limit : 50;
+    return {
+      count: results.length,
+      totalRules: this.pssiData?.rules.length || 0,
+      rules: results.slice(0, cap),
+    };
+  }
+
+  getPssiSiaById(params: any) {
+    const { id } = params || {};
+    if (!id) return { found: false, id: null };
+    const needle = String(id).toUpperCase().trim();
+    const rule = this.pssiData?.rules.find((r) => r.id.toUpperCase() === needle);
+    if (!rule) return { found: false, id };
+    return { found: true, rule };
+  }
+
+  listPssiChapters() {
+    return {
+      version: this.pssiData?.meta.version || null,
+      totalChapters: this.pssiData?.chapters.length || 0,
+      totalRules: this.pssiData?.rules.length || 0,
+      chapters: (this.pssiData?.chapters || []).map((c) => ({
+        number: c.number,
+        title: c.title,
+        rulesCount: c.ruleIds.length,
+        firstRuleId: c.ruleIds[0] || null,
+        lastRuleId: c.ruleIds[c.ruleIds.length - 1] || null,
+      })),
+    };
+  }
+
+  getPssiStatistics() {
+    const rules = this.pssiData?.rules || [];
+    const byChapter: Record<string, number> = {};
+    const byTier: Record<string, number> = {};
+    const referentialCounts: Record<string, number> = {};
+    const KNOWN_REFS = ['AI Act', 'ISO 42001', 'ISO 27001', 'ISO 27090', 'ISO 27701', 'OWASP AISVS', 'OWASP LLM', 'OWASP Agentic', 'MITRE ATLAS', 'NIST AI RMF', 'CLUSIF', 'RGPD', 'DORA', 'NIS2', 'CESIN', 'ANSSI'];
+
+    for (const r of rules) {
+      byChapter[r.chapterNumber] = (byChapter[r.chapterNumber] || 0) + 1;
+      const t = r.tier || 'Non précisé';
+      byTier[t] = (byTier[t] || 0) + 1;
+      for (const ref of KNOWN_REFS) {
+        if (r.sourcesReferentials.includes(ref)) {
+          referentialCounts[ref] = (referentialCounts[ref] || 0) + 1;
+        }
+      }
+    }
+
+    const topReferentials = Object.entries(referentialCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+
+    return {
+      totalRules: rules.length,
+      version: this.pssiData?.meta.version || null,
+      source: this.pssiData?.meta.source || null,
+      byChapter,
+      byTier,
+      topReferentials,
     };
   }
 }

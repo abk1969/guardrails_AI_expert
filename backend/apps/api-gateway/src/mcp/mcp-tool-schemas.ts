@@ -10,7 +10,7 @@ export interface McpToolSchema {
 
 /**
  * Unified MCP tool schemas compatible with Anthropic/Gemini/OpenAI tool calling.
- * 12 database tools + 13 static data tools + 3 DSGAI tools = 28 total.
+ * 12 database tools + 13 static data tools + 3 DSGAI tools + 4 PSSI IA v3 tools = 32 total.
  */
 export const MCP_TOOL_SCHEMAS: McpToolSchema[] = [
   // ============================================================
@@ -314,6 +314,52 @@ export const MCP_TOOL_SCHEMAS: McpToolSchema[] = [
   {
     name: 'get_dsgai_statistics',
     description: 'Statistiques OWASP GenAI Data Security 2026 : total de risques, distribution par priorité (critical/high/medium/low), top 10 des risques par priorité.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+
+  // ============================================================
+  // PSSI IA v3 — Politique de Sécurité des SIA, version consolidée (4)
+  // Source : data_ai_risk/PSSI_IA_v3_CONSOLIDE.pdf (172 exigences SIA-001 à SIA-172)
+  // ============================================================
+  {
+    name: 'search_pssi_sia',
+    description: "Rechercher dans les 172 exigences PSSI IA v3 (SIA-001 à SIA-172). Couvre gouvernance, tiering, cycle de vie (7 phases), données, supply chain, agentique, code assisté, HITL, GPAI publics, incidents, conformité, formation, souveraineté, sanctions, amélioration continue. Aligné AI Act, ISO 42001/27001/27090, OWASP AISVS/LLM/Agentic, MITRE ATLAS, NIST AI RMF, CLUSIF.",
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Texte de recherche libre dans ruleText, testableControl, raci, référentiels' },
+        chapterNumber: { type: 'string', description: "Numéro de chapitre PSSI (ex: '7' pour 'Exigences de sécurité par phase du cycle de vie')" },
+        referentialKeyword: { type: 'string', description: "Mot-clé de référentiel (ex: 'ISO 42001', 'OWASP AISVS', 'MITRE ATLAS', 'AI Act', 'NIST AI RMF', 'CLUSIF')" },
+        tier: { type: 'string', description: "Filtre tier applicable (ex: 'Tous tiers', 'L2', 'L3', 'haut risque')" },
+        limit: { type: 'number', description: 'Nombre maximum de résultats (défaut: 50)' },
+      },
+    },
+  },
+  {
+    name: 'get_pssi_sia_by_id',
+    description: "Obtenir une exigence PSSI IA v3 par son identifiant exact (ex: SIA-001, SIA-172). Retourne ruleText, sourcesReferentials, testableControl, tier, raci, reviewFrequency, chapitre, et — si renseignés — associatedThreat, associatedRisk, implementationGuide, testingGuide, riskScenarios.",
+    parameters: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: "Identifiant de l'exigence (ex: SIA-001) — case-insensitive" },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'list_pssi_chapters',
+    description: "Lister les chapitres de la PSSI IA v3 avec leurs titres et le nombre d'exigences SIA par chapitre.",
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_pssi_statistics',
+    description: "Statistiques PSSI IA v3 : total d'exigences, distribution par chapitre, distribution par tier applicable, référentiels les plus cités.",
     parameters: {
       type: 'object',
       properties: {},
