@@ -11,6 +11,8 @@ import { backendStatus } from '../../services/backendStatus';
 import type { AgenticMessage, AgenticConversation, ReasoningStep } from '../../types/chatbot';
 import ReasoningPanel from './ReasoningPanel';
 import RichAnswer from './RichAnswer';
+import ErrorCard from './ErrorCard';
+import { parseChatbotError } from '../../services/chatbotErrorParser';
 import './ChatbotModern.css';
 
 type ChatMode = 'normal' | 'expert' | 'concise';
@@ -130,15 +132,17 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answer]);
 
-  // Handle WebSocket error: create error message
+  // Handle WebSocket error: create friendly error message via parser
   useEffect(() => {
     if (wsError && sessionId) {
+      const parsed = parseChatbotError(wsError);
       const errorMessage: AgenticMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Erreur: ${wsError}`,
+        content: `${parsed.title} — ${parsed.detail}`,
         timestamp: new Date(),
         reasoningSteps: [...reasoningSteps],
+        errorPayload: parsed,
       };
 
       setCurrentConversation(prev => {
@@ -294,14 +298,18 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
           // Full backend mode: set sessionId for WebSocket streaming
           setSessionId(response.sessionId);
         }
-      } catch (error) {
-        // API call failed, fall back to offline response
-        const fallback = generateFallbackResponse(messageText);
+      } catch (error: any) {
+        // API call failed - try to render a friendly error card if the error
+        // message looks parsable, otherwise fall back to the keyword fallback.
+        const errMsg = error?.message || String(error);
+        const parsed = parseChatbotError(errMsg);
+        const isParsable = parsed.kind !== 'unknown';
         const assistantMessage: AgenticMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: fallback,
+          content: isParsable ? `${parsed.title} — ${parsed.detail}` : generateFallbackResponse(messageText),
           timestamp: new Date(),
+          ...(isParsable ? { errorPayload: parsed } : {}),
         };
         const finalConv = { ...updatedConv, messages: [...updatedMessages, assistantMessage] };
         setCurrentConversation(finalConv);
@@ -415,7 +423,19 @@ const ChatbotAgentic: React.FC<ChatbotAgenticProps> = ({ onClose }) => {
     <div key={message.id} className={`message-modern ${message.role}`}>
       <div className="message-content-modern">
         <div className="message-text-modern">
-          {message.role === 'assistant' ? <RichAnswer content={message.content} /> : message.content}
+          {message.role === 'assistant' ? (
+            message.errorPayload ? (
+              <ErrorCard
+                error={message.errorPayload as any}
+                onAction={(action) => {
+                  if (action === 'open-llm-settings') setActiveTab('settings');
+                  else if (action === 'retry') handleRegenerate(message.id);
+                }}
+              />
+            ) : (
+              <RichAnswer content={message.content} />
+            )
+          ) : message.content}
         </div>
         <div className="message-actions-modern">
           <button onClick={() => copyToClipboard(message.content)} title="Copier">
