@@ -77,9 +77,15 @@ export function useAgenticChatWebSocket(
       return;
     }
 
-    // Skip WebSocket connection if backend is unavailable or serverless (no Socket.IO)
-    if (!backendStatus.isAvailable() || backendStatus.isServerless) {
-      log('Backend unavailable or serverless mode, skipping WebSocket connection');
+    // Skip WebSocket connection only in serverless mode or when backend is
+    // EXPLICITLY known to be down. We do NOT skip when isAvailable() is still
+    // null (initial check in flight) - the chatbot already received a sessionId
+    // from a successful POST, so the backend is reachable; trying to connect
+    // the WebSocket is the right call. The previous strict check
+    // (!isAvailable()) caused the WS to skip on null state, leaving the user
+    // with a sessionId but no streaming response - hanging forever.
+    if (backendStatus.isServerless || backendStatus.isGivenUp()) {
+      log('Backend serverless or given-up, skipping WebSocket connection');
       setIsConnected(false);
       setIsProcessing(false);
       return;
