@@ -1,3 +1,13 @@
+// @ts-nocheck
+//
+// Archived legacy content (22 SIA rules, CLUSIF PSSI v1/v2, 2026-02).
+// Replaced in production by data/pssiIaV3.generated.ts (172 SIA, v3 consolidée).
+// Kept verbatim for historical reference. Do not wire back into the UI.
+// Pre-existing type mismatches (extra RiskScenario.mappings keys such as
+// `owaspLlm2`, `mitreAtlas2`, `cwe`, `iso27001`, `aiAct`, `gdpr`, `hipaa`…)
+// are suppressed via @ts-nocheck — fixing them is out of scope for the v3
+// migration and would modify archival content.
+
 import { AIPolicyChapter, AIPolicyRuleStatus } from '../types';
 
 /**

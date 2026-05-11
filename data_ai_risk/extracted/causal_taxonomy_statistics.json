@@ -1,261 +1,168 @@
 [
   {
-    "__EMPTY": "Causal Factors statistics",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "Causal Factors statistics"
   },
   {
-    "__EMPTY": "This page is not mobile-friendly; please access on a computer if you can.",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "This page is not mobile-friendly; please access on a computer if you can."
   },
   {
-    "__EMPTY": "Description of sheet",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "Description of sheet"
   },
   {
-    "__EMPTY": "See how risks are classified by the Causal Factors Taxonomy. The Causal Taxonomy of AI Risks, adapted from Yampolskiy (2016), classifies risks by its causal factors (1) entity (human, AI), (2) intentionality (intentional, unintentional), and (3) timing (pre-deployment, post-deployment).",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "See how risks are classified by the Causal Factors Taxonomy. The Causal Taxonomy of AI Risks, adapted from Yampolskiy (2016), classifies risks by its causal factors (1) entity (human, AI), (2) intentionality (intentional, unintentional), and (3) timing (pre-deployment, post-deployment)."
   },
   {
-    "__EMPTY": "How to use",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "How to use"
   },
   {
-    "__EMPTY": "This sheet shows the total number and percentage of papers and risks which relate to each of our causal factors (e.g., entity, intention and timing), and how these overlap; for instance, the percentage of all risks coded as 'human, intentional and post-deployment'. For more see detail please see our report.",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "This sheet shows the total number and percentage of papers and risks which relate to each of our causal factors (e.g., entity, intention and timing), and how these overlap; for instance, the percentage of all risks coded as 'human, intentional and post-deployment'. For more see detail please see our report."
   },
   {
-    "__EMPTY": "Table 1. The proportion of risks in the AI risk database by entity, intent and timing ",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "Table 1. The proportion of risks in the AI risk database by entity, intent and timing "
   },
   {
     "__EMPTY": "Category",
     "__EMPTY_1": "Level",
     "__EMPTY_2": "Description",
-    "__EMPTY_3": "Proportion of risks in AI risk database",
-    "Updated: March 2025": ""
+    "__EMPTY_3": "Proportion of risks in AI risk database"
   },
   {
     "__EMPTY": "Entity",
     "__EMPTY_1": "Human",
     "__EMPTY_2": "The risk is caused by a decision or action made by humans",
-    "__EMPTY_3": "39%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.37
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "AI",
     "__EMPTY_2": "The risk is caused by a decision or action made by an AI system",
-    "__EMPTY_3": "41%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.42
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Other",
     "__EMPTY_2": "The risk is caused by some other reason or is ambiguous",
-    "__EMPTY_3": "20%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.21
   },
   {
     "__EMPTY": "Intent",
     "__EMPTY_1": "Intentional",
     "__EMPTY_2": "The risk occurs due to an expected outcome from pursuing a goal",
-    "__EMPTY_3": "34%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.34
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Unintentional",
     "__EMPTY_2": "The risk occurs due to an unexpected outcome from pursuing a goal",
-    "__EMPTY_3": "35%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.35
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Other",
     "__EMPTY_2": "The risk is presented as occurring without clearly specifying the intentionality",
-    "__EMPTY_3": "31%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.31
   },
   {
     "__EMPTY": "Timing",
     "__EMPTY_1": "Pre-deployment",
     "__EMPTY_2": "The risk occurs before the AI is deployed",
-    "__EMPTY_3": "13%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.12
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Post-deployment",
     "__EMPTY_2": "The risk occurs after the AI model has been trained and deployed",
-    "__EMPTY_3": "62%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.61
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Other",
     "__EMPTY_2": "The risk is presented without a clearly specified time of occurrence",
-    "__EMPTY_3": "25%",
-    "Updated: March 2025": ""
+    "__EMPTY_3": 0.27
   },
   {
-    "__EMPTY": "Table 2. The overlap between these categories, for instance, the percentage of all risks which were coded as human, intentional and post-deployment.",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "Table 2. The overlap between these categories, for instance, the percentage of all risks which were coded as human, intentional and post-deployment."
   },
   {
-    "__EMPTY": "",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "Intent",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY_2": "Intent"
   },
   {
     "__EMPTY": "Timing",
     "__EMPTY_1": "Entity",
     "__EMPTY_2": "Intentional",
     "__EMPTY_3": "Unintentional",
-    "Updated: March 2025": "Other"
+    "Updated: 03 December 2025": "Other"
   },
   {
     "__EMPTY": "Pre-deployment",
     "__EMPTY_1": "Human",
-    "__EMPTY_2": "2%",
-    "__EMPTY_3": "4%",
-    "Updated: March 2025": "1%"
+    "__EMPTY_2": 0.02,
+    "__EMPTY_3": 0.03,
+    "Updated: 03 December 2025": 0.01
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "AI",
-    "__EMPTY_2": "1%",
-    "__EMPTY_3": "2%",
-    "Updated: March 2025": "1%"
+    "__EMPTY_2": 0.01,
+    "__EMPTY_3": 0.02,
+    "Updated: 03 December 2025": 0.01
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Other",
-    "__EMPTY_2": "-",
-    "__EMPTY_3": "1%",
-    "Updated: March 2025": "1%"
+    "__EMPTY_2": "- ",
+    "__EMPTY_3": 0.01,
+    "Updated: 03 December 2025": 0.01
   },
   {
     "__EMPTY": "Post-deployment",
     "__EMPTY_1": "Human",
-    "__EMPTY_2": "18%",
-    "__EMPTY_3": "5%",
-    "Updated: March 2025": "3%"
+    "__EMPTY_2": 0.18,
+    "__EMPTY_3": 0.04,
+    "Updated: 03 December 2025": 0.03
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "AI",
-    "__EMPTY_2": "5%",
-    "__EMPTY_3": "15%",
-    "Updated: March 2025": "9%"
+    "__EMPTY_2": 0.05,
+    "__EMPTY_3": 0.14,
+    "Updated: 03 December 2025": 0.09
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Other",
-    "__EMPTY_2": "2%",
-    "__EMPTY_3": "2%",
-    "Updated: March 2025": "4%"
+    "__EMPTY_2": 0.02,
+    "__EMPTY_3": 0.02,
+    "Updated: 03 December 2025": 0.04
   },
   {
     "__EMPTY": "Other",
     "__EMPTY_1": "Human",
-    "__EMPTY_2": "3%",
-    "__EMPTY_3": "2%",
-    "Updated: March 2025": "2%"
+    "__EMPTY_2": 0.03,
+    "__EMPTY_3": 0.02,
+    "Updated: 03 December 2025": 0.02
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "AI",
-    "__EMPTY_2": "3%",
-    "__EMPTY_3": "4%",
-    "Updated: March 2025": "2%"
+    "__EMPTY_2": 0.03,
+    "__EMPTY_3": 0.04,
+    "Updated: 03 December 2025": 0.03
   },
   {
-    "__EMPTY": "",
     "__EMPTY_1": "Other",
-    "__EMPTY_2": "0%",
-    "__EMPTY_3": "2%",
-    "Updated: March 2025": "7%"
+    "__EMPTY_2": "-",
+    "__EMPTY_3": 0.02,
+    "Updated: 03 December 2025": 0.08
   },
   {
-    "__EMPTY": "More information",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "More information"
   },
   {
-    "__EMPTY": "🌐 https://airisk.mit.edu/",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "🌐 https://airisk.mit.edu/"
   },
   {
-    "__EMPTY": "In Table 2, values <1% are not shown",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "In Table 2, values <1% are not shown"
   },
   {
-    "__EMPTY": "Feedback/Contact us",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "Feedback/Contact us"
   },
   {
-    "__EMPTY": "💬 Use this form to offer feedback, and suggest resources or risks to add",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "💬 Use this form to offer feedback, and suggest resources or risks to add"
   },
   {
-    "__EMPTY": "📧 Email: pslat[at]mit.edu",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "📧 Email: pslat[at]mit.edu"
   },
   {
-    "__EMPTY": "📄 Cite as: Slattery, P., Saeri, A. K., Grundy, E. A. C., Graham, J., Noetel, M., Uuk, R., Dao, J., Pour, S., Casper, S., & Thompson, N. (2024). A systematic evidence review and common frame of reference for the risks from artificial intelligence. https://doi.org/10.48550/arXiv.2408.12622",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
-  },
-  {
-    "__EMPTY": "This work is licensed under CC BY 4.0",
-    "__EMPTY_1": "",
-    "__EMPTY_2": "",
-    "__EMPTY_3": "",
-    "Updated: March 2025": ""
+    "__EMPTY": "This work is licensed under CC BY 4.0"
   }
 ]
