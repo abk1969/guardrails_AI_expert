@@ -198,10 +198,12 @@ Après déploiement, vous obtiendrez :
 
 ### Frontend
 ```
-https://ai-risk-manager.vercel.app
+https://ai-risk-platform-v2.vercel.app
 ou
-https://guardrails-ai-expert-xxx.vercel.app
+https://ai-risk-platform-v2-xxx.vercel.app
 ```
+
+> **Note (2026-05-11)** : projet renommé `guardrails-ai-expert` → `ai-risk-platform-v2` suite à incident de sécurité (URL piratée).
 
 ### Backend (si déployé)
 ```

@@ -40,14 +40,16 @@ Cliquer sur "Deploy" et attendre 2-3 minutes.
 Après le déploiement, vous obtiendrez une URL comme :
 
 ```
-https://guardrails-ai-expert.vercel.app
+https://ai-risk-platform-v2.vercel.app
 ```
 
 Ou
 
 ```
-https://guardrails-ai-expert-xxx.vercel.app
+https://ai-risk-platform-v2-xxx.vercel.app
 ```
+
+> **Note (2026-05-11)** : projet renommé `guardrails-ai-expert` → `ai-risk-platform-v2` suite à incident de sécurité. Toujours utiliser la nouvelle URL.
 
 ---
 
