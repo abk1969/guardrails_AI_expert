@@ -117,10 +117,13 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-      - name: Run gitleaks (secret scan)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # NOTE : gitleaks/gitleaks-action@v2 was removed because it requires
+      # a paid GITLEAKS_LICENSE for private repositories (and this repo
+      # is private). GitHub's native secret scanning (free for private
+      # repos with Advanced Security) is already enabled at the repo
+      # level and will flag any secret pattern committed. To re-add a
+      # workflow-level scan, use trufflesecurity/trufflehog@main which
+      # is free for private repos.
 
       - name: npm audit (root, high+ only)
         run: npm audit --audit-level=high
