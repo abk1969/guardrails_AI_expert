@@ -63,10 +63,9 @@ export default defineConfig(({ mode }) => {
         },
       },
       plugins: [
-        react({
-          // Optimize React refresh
-          fastRefresh: true,
-        }),
+        // @vitejs/plugin-react has Fast Refresh always-on since v4,
+        // there is no longer a `fastRefresh` option to set.
+        react(),
       ],
       build: {
         // Optimize build performance

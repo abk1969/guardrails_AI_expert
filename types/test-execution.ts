@@ -6,6 +6,7 @@ export enum GuardrailCategory {
   LINGUISTIC_QUALITY = "Qualité Linguistique",
   CONTENT_VALIDATION = "Validation de Contenu",
   LOGICAL_VALIDATION = "Validation Logique",
+  HARMFUL_CONTENT = "Contenu Nuisible",
 }
 
 export enum AttackFamily {
@@ -14,7 +15,9 @@ export enum AttackFamily {
   RAG_ATTACKS = "Manipulation de Contexte (RAG)",
   SENSITIVE_LEAK = "Fuite d'Informations Sensibles",
   EVASION = "Attaques par Évasion",
-  CUSTOM_PROMPTS = "Prompts Personnalisés"
+  CUSTOM_PROMPTS = "Prompts Personnalisés",
+  JAILBREAK = "Jailbreak",
+  HARMFUL_CONTENT = "Contenu Nuisible Direct",
 }
 
 export interface Guardrail {
