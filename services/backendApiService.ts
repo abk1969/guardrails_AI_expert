@@ -1,5 +1,5 @@
 import io, { Socket } from 'socket.io-client';
-import { TestConfiguration, TestResult, TestRunStatus } from '../types';
+import { TestConfiguration, TestResult, TestStatus } from '../types';
 import { backendStatus } from './backendStatus';
 
 /**
@@ -46,7 +46,7 @@ class BackendApiService {
    */
   async createTestRun(config: TestConfiguration): Promise<{
     testRunId: string;
-    status: TestRunStatus;
+    status: TestStatus;
   }> {
     if (!backendStatus.isAvailable()) throw new Error('Backend non disponible');
     const response = await fetch(`${this.baseURL}/api/v1/tests/run`, {

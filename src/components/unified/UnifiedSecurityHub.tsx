@@ -21,7 +21,7 @@ import type {
   ToolOperationalStatus,
   ActivitySeverity,
   SecurityActivity,
-} from '@/types';
+} from '../../../types/garak';
 
 // ---------------------------------------------------------------------------
 // Helpers

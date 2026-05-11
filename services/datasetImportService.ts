@@ -62,7 +62,7 @@ export class DatasetImportService {
     return mockPrompts.slice(0, Math.min(limit, mockPrompts.length)).map((text, index) => ({
       id: `mock-beavertails-${crypto.randomUUID()}`,
       text,
-      category: 'Sécurité et Confidentialité',
+      category: GuardrailCategory.SECURITY_PRIVACY,
       complexity: (index % 3 === 0 ? 'Simple' : index % 3 === 1 ? 'Moyen' : 'Sophistiqué') as PromptComplexity,
       attackFamily: AttackFamily.JAILBREAK,
       guide: 'Mock prompt - BeaverTails dataset (frontend mode)',
@@ -90,7 +90,7 @@ export class DatasetImportService {
     return mockPrompts.slice(0, Math.min(limit, mockPrompts.length)).map((text, index) => ({
       id: `mock-harmbench-${crypto.randomUUID()}`,
       text,
-      category: 'Contenu Nuisible',
+      category: GuardrailCategory.HARMFUL_CONTENT,
       complexity: 'Sophistiqué' as PromptComplexity,
       attackFamily: AttackFamily.HARMFUL_CONTENT,
       guide: 'Mock prompt harmful - HarmBench dataset (frontend mode)',
@@ -116,7 +116,7 @@ export class DatasetImportService {
     return mockPrompts.slice(0, Math.min(limit, mockPrompts.length)).map((text, index) => ({
       id: `mock-pliny-${crypto.randomUUID()}`,
       text,
-      category: 'Sécurité et Confidentialité',
+      category: GuardrailCategory.SECURITY_PRIVACY,
       complexity: 'Sophistiqué' as PromptComplexity,
       attackFamily: AttackFamily.JAILBREAK,
       guide: 'Mock jailbreak curé - Pliny dataset (frontend mode)',
