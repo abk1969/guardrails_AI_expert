@@ -1,73 +1,84 @@
 {
-  "fileName": "AI Risk Repository V3_26_03_2025.xlsx",
-  "extractedAt": "2025-10-26T09:42:17.491Z",
+  "fileName": "Copy of The AI Risk Repository V4_03_12_2025.xlsx",
+  "extractedAt": "2026-03-02T22:32:10.817Z",
   "totalSheets": 11,
   "sheets": [
     {
       "index": 0,
       "name": "Contents",
-      "rows": 54,
-      "columns": 2
+      "rows": 33,
+      "columns": 1,
+      "outputFile": "contents.json"
     },
     {
       "index": 1,
-      "name": "Causal Taxonomy of AI Risks v3",
-      "rows": 29,
-      "columns": 3
+      "name": "Causal Taxonomy of AI Risks v1",
+      "rows": 22,
+      "columns": 1,
+      "outputFile": "causal_taxonomy_of_ai_risks_v3.json"
     },
     {
       "index": 2,
-      "name": "Domain Taxonomy of AI Risks v3",
-      "rows": 44,
-      "columns": 5
+      "name": "Domain Taxonomy of AI Risks v1",
+      "rows": 38,
+      "columns": 1,
+      "outputFile": "domain_taxonomy_of_ai_risks_v3.json"
     },
     {
       "index": 3,
-      "name": "AI Risk Database v3",
-      "rows": 2245,
-      "columns": 19
+      "name": "AI Risk Database v4",
+      "rows": 2576,
+      "columns": 3,
+      "outputFile": "ai_risk_database_v3.json"
     },
     {
       "index": 4,
       "name": "AI Risk Database explainer",
-      "rows": 26,
-      "columns": 16
+      "rows": 22,
+      "columns": 1,
+      "outputFile": "ai_risk_database_explainer.json"
     },
     {
       "index": 5,
       "name": "Causal Taxonomy statistics",
-      "rows": 44,
-      "columns": 5
+      "rows": 36,
+      "columns": 1,
+      "outputFile": "causal_taxonomy_statistics.json"
     },
     {
       "index": 6,
       "name": "Domain Taxonomy statistics",
-      "rows": 52,
-      "columns": 4
+      "rows": 46,
+      "columns": 1,
+      "outputFile": "domain_taxonomy_statistics.json"
     },
     {
       "index": 7,
       "name": "Causal x Domain Taxonomy compar",
-      "rows": 52,
-      "columns": 11
+      "rows": 46,
+      "columns": 1,
+      "outputFile": "causal_x_domain_taxonomy_compar.json"
     },
     {
       "index": 8,
       "name": "Included resources",
-      "rows": 85,
-      "columns": 12
+      "rows": 89,
+      "columns": 1,
+      "outputFile": "included_resources.json"
     },
     {
       "index": 9,
       "name": "Resources being considered",
-      "rows": 74,
-      "columns": 8
+      "rows": 149,
+      "columns": 1,
+      "outputFile": "resources_being_considered.json"
     },
     {
       "index": 10,
       "name": "Change Log",
-      "rows": 20,
-      "columns": 3
+      "rows": 15,
+      "columns": 1,
+      "outputFile": "change_log.json"
     }
   ]
 }
