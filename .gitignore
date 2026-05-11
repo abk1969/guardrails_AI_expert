@@ -39,3 +39,27 @@ dist-ssr
 # Embedded Promptfoo (separate git repo)
 guardrail/solution_promptfoo/promptfoo/
 .vercel
+
+# Claude Code internal state
+.claude/scheduled_tasks.lock
+.checkpoints/
+
+# IDE state (Kiro)
+.kiro/
+
+# Test artifacts (Playwright screenshots, etc.)
+.test-screenshots/
+
+# Heavy reference docs (public PDFs from OWASP/ANSSI/Clusif — fetched on demand, not versioned)
+data_ai_risk/*.pdf
+data_ai_risk/*.xlsx
+data_ai_risk/PSSI_IA_v3_raw.txt
+data_ai_risk/PSSI_IA_v3_table.txt
+
+# Backend env files (besides root .env already excluded)
+backend/.env
+backend/.env.neon
+backend/.env.local
+
+# Vercel local override
+.vercel/
