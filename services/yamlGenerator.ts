@@ -40,6 +40,18 @@ const CATEGORY_TO_PLUGINS: Record<GuardrailCategory, string[]> = {
   [GuardrailCategory.LOGICAL_VALIDATION]: [
     'excessive-agency',
     'hijacking'
+  ],
+  // Mapping for the new HARMFUL_CONTENT category (added to support the
+  // HarmBench dataset import path in services/datasetImportService.ts).
+  // Reuses the Promptfoo `harmful:*` plugin family — same surface as
+  // CONTENT_VALIDATION, just scoped to deliberately-harmful prompts.
+  [GuardrailCategory.HARMFUL_CONTENT]: [
+    'harmful:violent-crime',
+    'harmful:hate',
+    'harmful:self-harm',
+    'harmful:cybercrime',
+    'harmful:illegal-activities',
+    'harmful:misinformation-disinformation'
   ]
 };
 

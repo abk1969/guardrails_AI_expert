@@ -224,6 +224,14 @@ export const REMEDIATION_SUGGESTIONS: Record<GuardrailCategory, string[]> = {
         "Utilisez des validateurs de syntaxe (linters) pour tout le code ou les données structurées générés.",
         "Intégrez des outils d'analyse statique pour détecter les vulnérabilités logiques dans le code généré avant de le présenter.",
         "Entraînez le modèle à identifier les contradictions logiques et les raisonnements fallacieux dans les prompts."
+    ],
+    // Remediation suggestions for the HARMFUL_CONTENT category (added
+    // alongside the enum extension for the HarmBench dataset import).
+    [GuardrailCategory.HARMFUL_CONTENT]: [
+        "Activez un modérateur de contenu pré-prompt (input filter) qui bloque les requêtes manifestement harmful avant l'inférence.",
+        "Activez un modérateur post-réponse qui détecte la génération de contenu violent, haineux, d'auto-mutilation, ou d'activité illégale.",
+        "Tenez à jour une liste de patterns harmful (jailbreaks publics, DAN, etc.) et refusez sans ambiguïté.",
+        "Loggez et alertez sur toute tentative répétée d'éliciter du contenu harmful pour détection d'abus."
     ]
 };
 
@@ -1065,7 +1073,12 @@ export const INITIAL_AI_THIRD_PARTY_QUESTIONS: AIThirdPartyQuestion[] = [
 
 
 // AI Policy Constants
-export const AI_POLICY_STATUS_OPTIONS: AIPolicyRuleStatus[] = ['Non implémentée', 'En cours', 'Implémentée', 'Non applicable'];
+export const AI_POLICY_STATUS_OPTIONS: AIPolicyRuleStatus[] = [
+    AIPolicyRuleStatus.NOT_IMPLEMENTED,
+    AIPolicyRuleStatus.IN_PROGRESS,
+    AIPolicyRuleStatus.IMPLEMENTED,
+    AIPolicyRuleStatus.NOT_APPLICABLE
+];
 
 export const AI_POLICY_STATUS_COLORS: Record<AIPolicyRuleStatus, string> = {
     'Implémentée': 'bg-green-500/30 text-green-200 border-green-500',
