@@ -46,8 +46,10 @@ Cliquer sur "Deploy" et attendre ~2 minutes.
 ### URL de Production
 
 Vercel fournira une URL comme :
-- `https://ai-risk-manager.vercel.app`
-- `https://guardrails-ai-expert-xxx.vercel.app`
+- `https://ai-risk-platform-v2.vercel.app` (URL canonique production)
+- `https://ai-risk-platform-v2-xxx.vercel.app` (URL unique de chaque deployment)
+
+> **Note (2026-05-11)** : projet renommé `guardrails-ai-expert` → `ai-risk-platform-v2` suite à incident de sécurité. Anciennes URLs `guardrails-ai-expert.vercel.app` désactivées.
 
 ---
 
