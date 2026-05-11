@@ -5,18 +5,36 @@ FROM node:20-alpine AS development
 
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies first (layer caching optimization)
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
-# Copy source code
-COPY . .
+# Copy only necessary files for Vite (optimize build context)
+COPY index.html ./
+COPY index.tsx ./
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY public/ ./public/
+
+# Copy source directories
+COPY src/ ./src/
+COPY components/ ./components/
+COPY contexts/ ./contexts/
+COPY hooks/ ./hooks/
+COPY utils/ ./utils/
+COPY types/ ./types/
+COPY constants/ ./constants/
+COPY services/ ./services/
+COPY data/ ./data/
 
 # Expose Vite dev server port
 EXPOSE 3000
 
-# Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+# Copy Docker-specific Vite config
+COPY vite.config.docker.ts ./
+
+# Start development server with Docker config
+CMD ["npm", "run", "dev", "--", "--config", "vite.config.docker.ts", "--host", "0.0.0.0", "--port", "3000"]
 
 # ========================================
 # Stage 2: Build

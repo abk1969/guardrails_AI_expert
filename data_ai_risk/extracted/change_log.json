@@ -1,77 +1,53 @@
 [
   {
-    "__EMPTY": "Change Log ",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "Change Log "
   },
   {
-    "__EMPTY": "This page is not mobile-friendly; please access on a computer if you can.",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "This page is not mobile-friendly; please access on a computer if you can."
   },
   {
-    "__EMPTY": "Description of sheet",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "Description of sheet"
   },
   {
-    "__EMPTY": "This sheet provides a record of updates made to the AI Risk Repository. ",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "This sheet provides a record of updates made to the AI Risk Repository. "
   },
   {
     "__EMPTY": "Date ",
-    "__EMPTY_1": "Description ",
-    "Updated: 26 March 2025": ""
+    "__EMPTY_1": "Description "
   },
   {
-    "__EMPTY": "14 August 2024",
-    "__EMPTY_1": "Initial release of the AI Risk Repository ",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": 45518,
+    "__EMPTY_1": "Initial release of the AI Risk Repository "
   },
   {
-    "__EMPTY": "8 January 2025",
-    "__EMPTY_1": "Version 2 repository update: Added 13 frameworks, updated statistics for the taxonomies, updated included resources list, added 284 risk categories and subcategories. ",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": 45665,
+    "__EMPTY_1": "Version 2 repository update: Added 13 frameworks, updated statistics for the taxonomies, updated included resources list, added 284 risk categories and subcategories. "
   },
   {
-    "__EMPTY": "17 March 2025",
-    "__EMPTY_1": "Added 9 frameworks to the doc database as part of the V3 update. ",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": 45733,
+    "__EMPTY_1": "Added 9 frameworks to the doc database as part of the V3 update. "
   },
   {
-    "__EMPTY": "26 March 2025",
-    "__EMPTY_1": "Added 9 new papers to the risk database, updated causal and domain statistics. ",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": 45742,
+    "__EMPTY_1": "Added 9 new papers to the risk database, updated causal and domain statistics. "
   },
   {
-    "__EMPTY": "More information",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": 45994,
+    "__EMPTY_1": "Version 4 update: Added 9 new frameworks to the risk database, added ~100 new risks, updated causal and domain statistics. "
   },
   {
-    "__EMPTY": "🌐 https://airisk.mit.edu/",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "More information"
   },
   {
-    "__EMPTY": "Feedback/Contact us",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "🌐 https://airisk.mit.edu/"
   },
   {
-    "__EMPTY": "💬 Use this form to offer feedback, and suggest resources or risks to add",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "Feedback/Contact us"
   },
   {
-    "__EMPTY": "📧 Email: pslat[at]mit.edu",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "💬 Use this form to offer feedback, and suggest resources or risks to add"
   },
   {
-    "__EMPTY": "📄 Cite as: Slattery, P., Saeri, A. K., Grundy, E. A. C., Graham, J., Noetel, M., Uuk, R., Dao, J., Pour, S., Casper, S., & Thompson, N. (2024). A systematic evidence review and common frame of reference for the risks from artificial intelligence. http://doi.org/10.13140/RG.2.2.28850.00968",
-    "__EMPTY_1": "",
-    "Updated: 26 March 2025": ""
+    "__EMPTY": "📧 Email: pslat[at]mit.edu"
   }
 ]
